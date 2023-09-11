@@ -1,0 +1,21 @@
+class Program is
+    this(n: Integer) is
+        var f : Fibonacci
+        var nth : f.getNthNumber(n)
+        Console.print(nth)
+    end
+end
+
+class Fibonacci is
+    method getNthNumber(n: Integer) : Integer is
+        var a : Integer(1)
+        var b : Integer(0)
+        var i : Integer(0)
+        while i.Less(n) loop
+            var t : Integer(a.Plus(b))
+            a := b
+            b := t
+        end
+        return a
+    end
+end

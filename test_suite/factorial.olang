@@ -1,0 +1,17 @@
+class Program is
+    this(n: Integer) is
+        var f : Factorial
+        var fct : f.getFactorial(n)
+        Console.print(fct)
+    end
+end
+
+class Factorial is
+    method getFactorial(n: Integer) : Integer is
+        if n.LessEqual(1) then
+           return 1 
+        else
+            return n * getFactorial(n - 1)
+        end
+    end
+end

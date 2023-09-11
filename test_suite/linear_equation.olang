@@ -1,0 +1,20 @@
+class Program is
+    this(a: Integer, b: Integer) is
+        var es : LinearEquationSolver
+        es.solve(a, b)
+    end
+end
+
+class LinearEquationSolver is
+    method solve(a: Integer, b: Integer) is
+        if a.Equal(0).And(b.equal(0)) then
+            Console.print(true)
+        else
+            if a.equal(0) then 
+                Console.print(false)
+            else
+                Console.print(b.Div(Real(b)))
+            end
+        end
+    end
+end

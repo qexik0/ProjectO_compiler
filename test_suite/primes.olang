@@ -1,0 +1,35 @@
+class Program is
+    this(n: Integer) is
+        var pg : PrimeGenerator
+        var i : Integer(2)
+        while i.LessEqual(n) loop
+            if pg.isPrime(i) then
+                Console.println(i)
+            end
+        end
+    end
+end
+
+class PrimeGenerator is
+    method isPrime(n: Integer) : Boolean is
+        var i : Integer(2)
+        var g : sqrt(n).add(1).toInteger
+        while i.Less(g) loop
+            if n.Rem(i).Equal(0) then
+                return false
+            end
+        end
+        return true
+    end
+
+    method sqrt(n: Integer) : Real is
+        var x : n.toReal
+        var gr : Integer(1000)
+        var i : Integer(0)
+        var half : Real(0.5)
+        while i.Less(gr) loop
+            x := Real(half.mult(x.Plus(n.Div(x))))
+        end
+        return x
+    end
+end

@@ -1,0 +1,30 @@
+class Program is
+
+    var x: Shape
+    x.print
+
+    x := Circle
+    x.print
+
+    x := Rectangle
+    x.print
+
+end
+
+class Shape is
+    method print is
+        Console.print(1)
+    end
+end
+
+class Circle extends Shape is
+    method print is
+        Console.print(2)
+    end
+end
+
+class Rectangle extends Shape is
+    method print is
+        Console.print(3)
+    end
+end
