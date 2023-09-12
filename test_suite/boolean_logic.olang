@@ -3,9 +3,9 @@ class Program is
         Console.println(a.Or(b))
         Console.println(a.And(b))
         Console.println(a.Xor(b))
-        Console.println(a.Not())
+        Console.println(a.Not)
 
-        Console.println(a.And(b).Not())
-        Console.println(a.Or(b).Not())
+        Console.println(a.And(b).Not)
+        Console.println(a.Or(b).Not)
     end
 end
