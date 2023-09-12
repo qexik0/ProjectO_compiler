@@ -1,0 +1,22 @@
+// compare two numbers
+
+class Program is
+    this(a: Integer, b: Integer) is
+        var cmp : PrimeGenerator
+        Console.println(cmp.comp(a, b))
+    end
+end
+
+class Compare is
+    method comp(a: Integer, b: Integer) : Integer is
+        if a.Less(b) then
+           return -1
+        else
+            if a.Greater(b) then
+                return 1
+            else
+                return 0
+            end
+        end
+    end
+end
