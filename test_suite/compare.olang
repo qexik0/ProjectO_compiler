@@ -2,7 +2,7 @@
 
 class Program is
     this(a: Integer, b: Integer) is
-        var cmp : PrimeGenerator
+        var cmp : Compare
         Console.println(cmp.comp(a, b))
     end
 end
