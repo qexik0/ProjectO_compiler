@@ -1,0 +1,155 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "OLang",
+	"patterns": [
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#defaultTypes"
+		},
+		{
+			"include": "#defaultFuncs"
+		},
+		{
+			"include": "#defaultVar"
+		},
+		{
+			"name": "meta.class",
+			"begin": "\\b(class)\\s+(\\w+)\\s+(is)",
+			"beginCaptures": {
+				"1": {
+					"name": "keyword.control.olang"
+				},
+				"2": {
+					"name": "entity.name.class"
+				},
+				"3": {
+					"name": "keyword.control"
+				}
+			},
+			"end": "\\b(end)\\b",
+			"endCaptures": {
+				"1": {
+					"name": "keyword.control.olang"
+				}
+			},
+			"patterns": [{
+				"include": "#methods"
+			},
+			{
+				"include": "#keywords"
+			},
+			{
+				"include": "#defaultTypes"
+			},{
+				"include": "#defaultFuncs"
+			},
+			{
+				"include": "#defaultVar"
+			}
+			]
+		}
+	],
+	"repository": {
+		"keywords": {
+			"patterns": [{
+				"name": "keyword.control.olang",
+				"match": "\\b(while|loop|end|if|else|then|return|var|is)\\b"
+			}]
+		},
+		"parameters": {
+			"match": "(\\w+)\\s*:\\s*(\\w+)",
+			"captures": {
+				"1": {
+					"name": "variable.parameter"
+				},
+				"2": {
+					"name": "entity.name.class"
+				}
+			}
+		},
+		"numerics": {
+			"match": "-?\\d+[\\.?\\d+]*",
+			"captures": {
+				"0": {
+					"name": "constant.numeric"
+				}
+			}
+		},
+		"methods": {
+			"name": "meta.function",
+			"begin": "\\b(method)\\b",
+			"beginCaptures": {
+				"1": {
+					"name": "keyword.control.olang"
+				}
+			},
+			"end": "\\b(end)\\b",
+			"endCaptures": {
+				"1": {
+					"name": "keyword.control.olang"
+				}
+			},
+			"patterns": [
+				{
+					"include": "#parameters"
+				},
+				{
+					"match": "(?<=method\\s+)(\\w+)",
+					"captures": {
+						"1": {
+							"name": "entity.name.function"
+						}
+					}
+				},
+				{
+					"include": "#keywords"
+				},
+				{
+					"include": "#numerics"
+				},
+				{
+					"match": "\\b(this)\\b",
+					"captures": {
+						"1": {
+							"name": "variable.language"
+						}
+					}
+				},
+				{
+					"include": "#defaultTypes"
+				},{
+					"include": "#defaultFuncs"
+				},
+				{
+					"include": "#defaultVar"
+				}]
+			},
+			"defaultTypes": {
+				"match": "\\b(Integer|Real|AnyVal|AnyRef|Array)\\b",
+				"captures": {
+					"1": {
+						"name": "support.type"
+					}
+				}
+			},
+			"defaultFuncs": {
+				"match": "\\b(Or|And|Xor|Not|Less|LessEqual|Greater|GreaterEqual|Equal|Plus|Minus|Mult|Div|Rem)\\b",
+				"captures": {
+					"1": {
+						"name": "support.function"
+					}
+				}
+			},
+			"defaultVar": {
+				"match": "\\b(this|Console)\\b",
+				"captures": {
+					"1": {
+						"name": "variable.language"
+					}
+				}
+			}
+	},
+	"scopeName": "source.olang"
+}

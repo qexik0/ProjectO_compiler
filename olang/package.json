@@ -1,0 +1,25 @@
+{
+  "name": "olang",
+  "displayName": "OLang",
+  "description": "Syntax highlighting for Project O language",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.82.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "olang",
+      "aliases": ["OLang", "olang"],
+      "extensions": [".olang"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "olang",
+      "scopeName": "source.olang",
+      "path": "./syntaxes/olang.tmLanguage.json"
+    }]
+  }
+}
