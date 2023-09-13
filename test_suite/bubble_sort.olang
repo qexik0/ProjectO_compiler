@@ -1,0 +1,31 @@
+class Program is
+    this(numbers: Array[Integer]) is
+        var n : numbers.Length
+        var swapped : true
+
+        while swapped loop
+            swapped := false
+            var i : Integer(0)
+            
+            while i.Less(n.Minus(1)) loop
+                if numbers.get(i).Greater(numbers.get(i.Plus(1))) then
+                    var temp : numbers.get(1)
+                    numbers.set(i, numbers.get(i.Plus(1)))
+                    numbers[i.Plus(1)] := temp
+                    swapped := true
+                end
+                i := i.Plus(1)
+            end
+
+            if swapped.Not then
+                break
+            end
+        end
+
+        var i : Integer(0)
+        while i.Less(n) loop
+            Console.println(numbers.get(i))
+            i := i.Plus(1)
+        end
+    end
+end

@@ -1,0 +1,71 @@
+class Program is
+    this(numbers: Array[Integer]) is
+        var n : numbers.Length
+
+        var sorter : Sorter
+        Sorter.mergeSort(numbers, 0, n.Minus(1))
+
+        var i : Integer(0)
+        while i.Less(n) loop
+            Console.println(numbers.get(i))
+            i := i.Plus(1)
+        end
+    end
+end
+
+class Sorter is
+    method mergeSort(numbers : Array[Integer], left : Integer, right : Integer) is
+        if left.Less(right) then
+            var middle : left.Plus(right.Minus(left).Divide(2))
+            mergeSort(numbers, left, middle)
+            mergeSort(numbers, middle.Plus(1), right)
+            merge(numbers, left, middle, right)
+        end
+    end
+
+    method merge(numbers : Array[Integer], left : Integer, mid : Integer, right : Integer) is
+        var n1 : mid.Minus(left).Plus(1)
+        var n2 : right.Minus(mid)
+
+        var leftArray : Array[Integer](n1)
+        var rightArray : Array[Integer](n2)
+
+        var i : Integer(0)
+        while i.Less(n1) loop
+            leftArray.set(i, numbers.get(left.Plus(i)))
+            i := i.Plus(1)
+        end
+
+        var i : Integer(0)
+        while i.Less(n2) loop
+            rightArray.set(i, numbers.get(mid.Plus(i.Plus(1))))
+            i := i.Plus(1)
+        end
+
+        var i : Integer(0)
+        var j : Integer(0)
+        var k : Integer(left)
+        while i.Less(n1).And(j.Less(n2)) loop
+            if leftArray.get(i).LessEqual(rightArray.get(j)) then
+                numbers.set(k, leftArray.get(i))
+                i := i.Plus(1)
+            else
+                numbers.set(k, rightArray.get(j))
+                j := j.Plus(1)
+            end
+            k := k.Plus(1)
+        end
+
+        while i.Less(n1) loop
+            numbers.set(k, leftArray.get(i))
+            i := i.Plus(1)
+            k := k.Plus(1)
+        end
+
+        while j.Less(n2) loop
+            numbers.set(k, rightArray.get(j))
+            j := j.Plus(1)
+            k := k.Plus(1)
+        end
+    end
+end

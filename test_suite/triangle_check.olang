@@ -1,10 +1,11 @@
-// 
-
 class Program is
     this(a: Real, b: Real, c: Real) is
-        Console.println(checkTriangle(a, b, c))
+        var triangleChecker : TriangleChecker
+        Console.println(triangleChecker.checkTriangle(a, b, c))
     end
+end
 
+class TriangleChecker is
     method checkTriangle(a: Real, b: Real, c: Real) : Boolean is
         if a.Plus(b).Greater(c).And(b.Plus(c).Greater(a)).And(c.Plus(a).Greater(b)) then
             return true
