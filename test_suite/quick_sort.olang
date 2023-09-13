@@ -1,0 +1,46 @@
+class Program is
+    this(numbers: Array[Integer]) is
+        var n : numbers.Length
+
+        var sorter : Sorter
+        Sorter.quickSort(numbers, 0, n.Minus(1))
+
+        var i : Integer(0)
+        while i.Less(n) loop
+            Console.println(numbers.get(i))
+            i := i.Plus(1)
+        end
+    end
+end
+
+class Sorter is
+    method quickSort(numbers: Array[Integer], low: Integer, high: Integer) is
+        if low.Less(high) then
+            var pivotIndex : partition(numbers, low, high)
+            quickSort(numbers, low, pivotIndex.Minus(1))
+            quickSort(numbers, pivotIndex.Plus(1), high)
+        end
+    end
+
+    method partition(numbers: Array[Integer], low: Integer, high: Integer) : Integer is
+        var pivot : numbers.get(high)
+        var i : low.Minus(1)
+
+        var j : low
+        while j.Less(high) loop
+            if numbers.get(j).Less(pivot) then
+                i := i.Plus(1)
+                var tmp : numbers.get(i)
+                numbers.set(i, numbers.get(j))
+                numbers.set(j, tmp)
+            end
+            j := j.Plus(1)
+        end
+
+        var tmp : numbers.get(i.Plus(1))
+        numbers.set(i.Plus(1), numbers.get(high))
+        numbers.set(high, tmp)
+
+        return i.Plus(1)
+    end
+end

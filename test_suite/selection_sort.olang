@@ -1,0 +1,31 @@
+class Program is
+    this(numbers: Array[Integer]) is
+        var n : numbers.Length
+
+        var i : Integer(0)
+        while i.Less(n.Minus(1)) loop
+            var minIndex : i;
+            var j : i.Plus(1)
+
+            while j.Less(n) loop
+                if numbers.get(j).Less(numbers.get(minIndex)) then
+                    minIndex := j
+                end
+
+                j := j.Plus(1)
+            end
+
+            var temp : numbers.get(i)
+            numbers.set(i, numbers.get(minIndex))
+            numbers.set(minIndex, temp)
+
+            i := i.Plus(1)
+        end
+
+        var i : Integer(0)
+        while i.Less(n) loop
+            Console.println(numbers.get(i))
+            i := i.Plus(1)
+        end
+    end
+end

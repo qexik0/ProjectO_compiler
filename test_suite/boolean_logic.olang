@@ -1,5 +1,5 @@
 class Program is
-    this(a: Integer, b: Integer) is
+    this(a: Boolean, b: Boolean) is
         Console.println(a.Or(b))
         Console.println(a.And(b))
         Console.println(a.Xor(b))
