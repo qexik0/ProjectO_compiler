@@ -1,0 +1,13 @@
+entity.name.function.olang
+entity.name.type.olang
+keyword.control.olang
+keyword.operator.olang
+meta.class.olang
+meta.constructor.olang
+meta.expression.olang
+meta.function.olang
+meta.ifstatement.olang
+meta.whileloop.olang
+variable.language.olang
+variable.other.olang
+variable.parameter.olang
