@@ -14,4 +14,6 @@ class Factorial is
             return n * getFactorial(n - 1)
         end
     end
+
+    
 end

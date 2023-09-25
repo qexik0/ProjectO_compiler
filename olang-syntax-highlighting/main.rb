@@ -37,7 +37,9 @@ grammar[:classDeclaration] = PatternRange.new(
         :methodMeta,
         :classDeclName,
         :variableDecl,
-        :constructorMeta
+        :constructorMeta,
+        :lineComment,
+        :blockComment
     ]
 )
 
@@ -131,7 +133,9 @@ grammar[:body] = [
     :assignment,
     :whileMeta,
     :ifMeta,
-    :returnStatement
+    :returnStatement,
+    :lineComment,
+    :blockComment
 ]
 
 grammar[:returnStatement] = Pattern.new(
