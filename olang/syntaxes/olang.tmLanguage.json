@@ -7,6 +7,12 @@
   ],
   "patterns": [
     {
+      "include": "#lineComment"
+    },
+    {
+      "include": "#blockComment"
+    },
+    {
       "include": "#classDeclaration"
     }
   ],
@@ -24,6 +30,15 @@
           "name": "meta.expression.olang"
         }
       }
+    },
+    "blockComment": {
+      "begin": "(?:\\/\\*)",
+      "end": "(?:\\*\\/)",
+      "beginCaptures": {
+      },
+      "endCaptures": {
+      },
+      "name": "comment.block.olang"
     },
     "body": {
       "patterns": [
@@ -223,6 +238,15 @@
           "include": "#body"
         }
       ]
+    },
+    "lineComment": {
+      "begin": "(?:\\/\\/)",
+      "end": "$",
+      "beginCaptures": {
+      },
+      "endCaptures": {
+      },
+      "name": "comment.line.double-slash.olang"
     },
     "methodDecl": {
       "match": "(?:(?<=\\b(?:method)(?:\\s+))((?:\\w+))(?:(?:\\s+)?)(?:(?:\\((?:(?:\\s+)?)(?:\\b((?:\\w+))(?:(?:\\s+)?):(?:(?:\\s+)?)(?:\\b((?:\\w+))(?:(?:\\s+)?)(?:(?:\\[(?:(?:\\s+)?)((?:\\w+))(?:(?:\\s+)?)\\])?))(?:(?:\\s+)?))((?:,(?:(?:\\s+)?)(?:\\w+)(?:(?:\\s+)?):(?:(?:\\s+)?)(?:\\b(?:\\w+)(?:(?:\\s+)?)(?:(?:\\[(?:(?:\\s+)?)(?:\\w+)(?:(?:\\s+)?)\\])?))(?:(?:\\s+)?))*)\\))?)(?:(?:\\s+)?)(?:(?::(?:(?:\\s+)?)(?:\\b((?:\\w+))(?:(?:\\s+)?)(?:(?:\\[(?:(?:\\s+)?)((?:\\w+))(?:(?:\\s+)?)\\])?)))?)(?:\\s+)(is))",

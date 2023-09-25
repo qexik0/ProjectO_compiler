@@ -9,6 +9,26 @@ grammar = Grammar.new(
     version: "0.0.1"
 )
 
+grammar[:lineComment] = PatternRange.new(
+    tag_as: "comment.line.double-slash",
+    start_pattern: Pattern.new(
+        match: /\/\//
+    ),
+    end_pattern: Pattern.new(
+        match: /$/
+    )
+)
+
+grammar[:blockComment] = PatternRange.new(
+    tag_as: "comment.block",
+    start_pattern: Pattern.new(
+        match: /\/\*/
+    ),
+    end_pattern: Pattern.new(
+        match: /\*\//
+    )
+)
+
 grammar[:classDeclaration] = PatternRange.new(
     start_pattern: @word_boundary.then(match: /class/, tag_as: "keyword.control").then(@word_boundary),
     end_pattern: @word_boundary.then(match: /end/, tag_as: "keyword.control").then(@word_boundary),
@@ -138,6 +158,8 @@ grammar[:ifExpr] = Pattern.new(
 )
 
 grammar[:$initial_context] = [
+    :lineComment,
+    :blockComment,
     :classDeclaration
 ]
 

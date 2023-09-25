@@ -1,3 +1,5 @@
+comment.block.olang
+comment.line.double-slash.olang
 entity.name.function.olang
 entity.name.type.olang
 keyword.control.olang
