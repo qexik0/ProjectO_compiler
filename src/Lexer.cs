@@ -8,7 +8,7 @@ public class Lexer
     private readonly Dictionary<string, TokenType> _keywords;
     public Lexer()
     {
-        _tokenizer = new Regex(@"(-?\d+(\.\d+)?([eE]-?\d+)?(?![a-zA-Z])|[_a-zA-Z][_a-zA-Z0-9]*|class|extends|is|end|var|:=|method|\(|\)|,|this|:|while|loop|if|then|else|\[|\]|return|\.|true|false|//|/\*|\*/|\n|[^\s]+)");
+        _tokenizer = new Regex(@"(-?\d+(\.\d+)?([eE]-?\d+)?(?![a-zA-Z])|[_a-zA-Z][_a-zA-Z0-9]*|:=|\(|\)|,|:|\[|\]|\.|//|/\*|\*/|\n|[^\s]+)");
         _keywords = new();
         _keywords["class"] = TokenType.Class;
         _keywords["extends"] = TokenType.Extends;
@@ -42,8 +42,6 @@ public class Lexer
         int ln = 1, index = 0;
         bool lineComment = false;
         bool blockComment = false;
-        //string commentRemover = @"//.*?$|/\*(?:[^*]|(?:\*+[^*/]))*\*+/";
-        //var processed = Regex.Replace(source, commentRemover, "", RegexOptions.Multiline | RegexOptions.Singleline);
         foreach (Match match in _tokenizer.Matches(source))
         {
             int cn = match.Index - index + 1;
