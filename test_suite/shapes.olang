@@ -1,13 +1,13 @@
 class Program is
 
-    var x: Shape
-    x.print
+    var x : Shape()
+    x.print()
 
-    x := Circle
-    x.print
+    x := Circle()
+    x.print()
 
-    x := Rectangle
-    x.print
+    x := Rectangle()
+    x.print()
 
 end
 

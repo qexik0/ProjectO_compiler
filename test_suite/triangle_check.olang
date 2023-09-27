@@ -1,6 +1,6 @@
 class Program is
     this(a: Real, b: Real, c: Real) is
-        var triangleChecker : TriangleChecker
+        var triangleChecker : TriangleChecker()
         Console.println(triangleChecker.checkTriangle(a, b, c))
     end
 end

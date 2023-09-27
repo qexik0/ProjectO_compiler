@@ -1,8 +1,8 @@
 class Program is
     this(numbers: Array[Integer]) is
-        var n : numbers.Length
+        var n : numbers.Length()
 
-        var sorter : Sorter
+        var sorter : Sorter()
         Sorter.mergeSort(numbers, 0, n.Minus(1))
 
         var i : Integer(0)

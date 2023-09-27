@@ -1,6 +1,6 @@
 class Program is
     this(a: Integer, b: Integer) is
-        var es : LinearEquationSolver
+        var es : LinearEquationSolver()
         es.solve(a, b)
     end
 end

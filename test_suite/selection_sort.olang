@@ -1,6 +1,6 @@
 class Program is
     this(numbers: Array[Integer]) is
-        var n : numbers.Length
+        var n : numbers.Length()
 
         var i : Integer(0)
         while i.Less(n.Minus(1)) loop
