@@ -22,7 +22,7 @@ public class CLIFrontent
             report.WriteLine("Tokens:");
             foreach (var token in tokens)
             {
-                report.WriteLine($"{token.Value} - {token.Type}");
+                report.WriteLine($"{token.Value} - {token.Type} at {token.LineNumber}:{token.ColumnNumber}");
             }
         }, inputFile, outputFile);
         rootCommand.Add(lexicalReport);

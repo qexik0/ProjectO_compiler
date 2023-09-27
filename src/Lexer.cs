@@ -8,7 +8,7 @@ public class Lexer
     private readonly Dictionary<string, TokenType> _keywords;
     public Lexer()
     {
-        _tokenizer = new Regex(@"(-?\d+(\.\d+)?([eE]-?\d+)?(?![a-zA-Z])|[_a-zA-Z][_a-zA-Z0-9]*|class|extends|is|end|var|:=|method|\(|\)|,|this|:|while|loop|if|then|else|\[|\]|return|\.|true|false|[^\s]+)");
+        _tokenizer = new Regex(@"(-?\d+(\.\d+)?([eE]-?\d+)?(?![a-zA-Z])|[_a-zA-Z][_a-zA-Z0-9]*|class|extends|is|end|var|:=|method|\(|\)|,|this|:|while|loop|if|then|else|\[|\]|return|\.|true|false|//|/\*|\*/|\n|[^\s]+)");
         _keywords = new();
         _keywords["class"] = TokenType.Class;
         _keywords["extends"] = TokenType.Extends;
@@ -39,29 +39,68 @@ public class Lexer
     {
         List<Token> res = new();
         string source = input.ReadToEnd();
-        string commentRemover = @"//.*?$|/\*(?:[^*]|(?:\*+[^*/]))*\*+/";
-        var processed = Regex.Replace(source, commentRemover, "", RegexOptions.Multiline | RegexOptions.Singleline);
-        foreach (Match match in _tokenizer.Matches(processed))
+        int ln = 1, index = 0;
+        bool lineComment = false;
+        bool blockComment = false;
+        //string commentRemover = @"//.*?$|/\*(?:[^*]|(?:\*+[^*/]))*\*+/";
+        //var processed = Regex.Replace(source, commentRemover, "", RegexOptions.Multiline | RegexOptions.Singleline);
+        foreach (Match match in _tokenizer.Matches(source))
         {
+            int cn = match.Index - index + 1;
+
+            if (match.Value == "\n")
+            {
+                ln++;
+                index = match.Index + 1;
+                lineComment = false;
+                continue;
+            }
+
+            if (blockComment && match.Value == "*/")
+            {
+                blockComment = false;
+                continue;
+            }
+            else if (match.Value == "*/")
+            {
+                res.Add(new Token() {Type = TokenType.Undefined, Value = match.Value, LineNumber = ln, ColumnNumber = cn});
+                continue;
+            }
+            else if (match.Value == "/*")
+            {
+                blockComment = true;
+                continue;
+            }
+
+            if (match.Value == "//")
+            {
+                lineComment = true;
+            }
+            
+            if (lineComment || blockComment)
+            {
+                continue;
+            }
+
             if (_keywords.ContainsKey(match.Value))
             {
-                res.Add(new Token() {Type = _keywords[match.Value], Value = match.Value});
+                res.Add(new Token() {Type = _keywords[match.Value], Value = match.Value, LineNumber = ln, ColumnNumber = cn});
             }
             else if (int.TryParse(match.Value, out int _))
             {
-                res.Add(new Token() {Type = TokenType.IntegerLiteral, Value = match.Value});
+                res.Add(new Token() {Type = TokenType.IntegerLiteral, Value = match.Value, LineNumber = ln, ColumnNumber = cn});
             }
             else if (double.TryParse(match.Value, out double _))
             {
-                res.Add(new Token() {Type = TokenType.RealLiteral, Value = match.Value});
+                res.Add(new Token() {Type = TokenType.RealLiteral, Value = match.Value, LineNumber = ln, ColumnNumber = cn});
             }
             else if (char.IsLetter(match.Value[0]) && match.Value.All(x => char.IsAsciiLetterOrDigit(x) || x == '_'))
             {  
-                res.Add(new Token() {Type = TokenType.Identifier, Value = match.Value});
+                res.Add(new Token() {Type = TokenType.Identifier, Value = match.Value, LineNumber = ln, ColumnNumber = cn});
             }
             else
             {
-                res.Add(new Token() {Type = TokenType.Undefined, Value = match.Value});
+                res.Add(new Token() {Type = TokenType.Undefined, Value = match.Value, LineNumber = ln, ColumnNumber = cn});
             }
         }
         return res;
