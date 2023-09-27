@@ -1,6 +1,6 @@
 class Program is
     this(n: Integer) is
-        var pg : PrimeGenerator
+        var pg : PrimeGenerator()
         var i : Integer(2)
         while i.LessEqual(n) loop
             if pg.isPrime(i) then
@@ -23,7 +23,7 @@ class PrimeGenerator is
     end
 
     method sqrt(n: Integer) : Real is
-        var x : n.toReal
+        var x : n.toReal()
         var gr : Integer(1000)
         var i : Integer(0)
         var half : Real(0.5)

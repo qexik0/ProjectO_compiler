@@ -1,6 +1,6 @@
 class Program is
     this(n: Integer) is
-        var f : Factorial
+        var f : Factorial()
         var fct : f.getFactorial(n)
         Console.print(fct)
     end

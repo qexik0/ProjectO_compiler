@@ -2,7 +2,7 @@
 
 class Program is
     this(a: Integer, b: Integer) is
-        var cmp : Compare
+        var cmp : Compare()
         Console.println(cmp.comp(a, b))
     end
 end

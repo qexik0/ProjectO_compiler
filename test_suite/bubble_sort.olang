@@ -1,6 +1,6 @@
 class Program is
     this(numbers: Array[Integer]) is
-        var n : numbers.Length
+        var n : numbers.Length()
         var swapped : true
 
         while swapped loop
@@ -17,7 +17,7 @@ class Program is
                 i := i.Plus(1)
             end
 
-            if swapped.Not then
+            if swapped.Not() then
                 break
             end
         end

@@ -1,6 +1,6 @@
 class Program is
     this(n: Integer) is
-        var f : Fibonacci
+        var f : Fibonacci()
         var nth : f.getNthNumber(n)
         Console.print(nth)
     end
