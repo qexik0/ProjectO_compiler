@@ -56,8 +56,8 @@ grammar[:classDeclName] = Pattern.new(
 )
 
 grammar[:variableDecl] = Pattern.new(
-    match: @word_boundary.then(match: /var/, tag_as: "keyword.control").then(@spaces)
-        .then(match: /\w+/, tag_as: "variable.other").then(@spaces).then(/:/).then(match: /.*/, tag_as: "meta.expression")
+    match: @word_boundary.then(match: /var/, tag_as: "keyword.control").maybe(@spaces)
+        .then(match: /\w+/, tag_as: "variable.other").maybe(@spaces).then(/:/).then(match: /.*/, tag_as: "meta.expression")
 )
 
 grammar[:parameterDecl] = Pattern.new(

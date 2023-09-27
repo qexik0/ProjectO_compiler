@@ -364,7 +364,7 @@
       }
     },
     "variableDecl": {
-      "match": "(?:\\b(var)(?:\\s+)(\\w+)(?:\\s+):(.*))",
+      "match": "(?:\\b(var)(?:(?:\\s+)?)(\\w+)(?:(?:\\s+)?):(.*))",
       "captures": {
         "1": {
           "name": "keyword.control.olang"
