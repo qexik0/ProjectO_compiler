@@ -2,7 +2,7 @@
 
 public class ClassDeclaration : AstNode
 {
-    public required string ClassName { get; set; }
-    public string? BaseClassName { get; set; }
+    public required ClassName Name { get; set; }
+    public ClassName? BaseClassName { get; set; }
     public List<MemberDeclaration> Members { get; } = new List<MemberDeclaration>();
 }
