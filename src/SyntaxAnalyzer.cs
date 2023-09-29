@@ -13,11 +13,25 @@ public class SyntaxAnalyzer
         _index = 0;
     }
 
+    public AstNode? RunAnalyzer()
+    {
+        try
+        {
+            return ParseProgram();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Syntax Analyzing failed with the following error:\n{e.Message}");
+        }
+
+        return null;
+    }
+
     /// <summary>
     /// Method that starts to parse program
     /// </summary>
     /// <returns>Program root node</returns>
-    public Program ParseProgram()
+    private Program ParseProgram()
     {
         // Create root node
         var program = new Program();
@@ -74,7 +88,7 @@ public class SyntaxAnalyzer
             genericClassname = ParseClassName();
             ConsumeToken(TokenType.RightSquareBracket);
         }
-        
+
         var className = new ClassName() { ClassIdentifier = identifier, GenericClassName = genericClassname };
         return className;
     }
@@ -110,7 +124,7 @@ public class SyntaxAnalyzer
                 // parse constructor
                 TokenType.This => ParseConstructorDeclaration(),
                 _ => throw new Exception(
-                    $"Syntax error: Expected constructor, variable declaration, or method but found {nextToken.Type}")
+                    $"Syntax error at {nextToken.LineNumber}:{nextToken.ColumnNumber} : Expected constructor, variable declaration, or method but found {nextToken.Type}")
             };
             list.Add(new MemberDeclaration() { Member = res });
 
@@ -273,7 +287,7 @@ public class SyntaxAnalyzer
             TokenType.If => ParseIfStatement(),
             TokenType.Return => ParseReturnStatement(),
             _ => throw new Exception(
-                $"Syntax error: Expected assignment, while loop, is statement, or return statement, but found {nextToken.Type}")
+                $"Syntax error at {nextToken.LineNumber}:{nextToken.ColumnNumber} : Expected assignment, while loop, is statement, or return statement, but found {nextToken.Type}")
         };
 
         var statement = new Statement() { StatementNode = node };
@@ -313,6 +327,51 @@ public class SyntaxAnalyzer
     }
 
     /// <summary>
+    /// Method that parses if statement
+    /// </summary>
+    /// <returns>IfStatement node</returns>
+    private IfStatement ParseIfStatement()
+    {
+        ConsumeToken(TokenType.If);
+        var expression = ParseExpression();
+        ConsumeToken(TokenType.Then);
+        var body = ParseBody();
+        Body? elseBody = null;
+        if (MaybeConsumeToken(TokenType.Else))
+        {
+            elseBody = ParseBody();
+        }
+
+        ConsumeToken(TokenType.End);
+
+        var ifStatement = new IfStatement() { IfConditionExpression = expression, IfBody = body, ElseBody = elseBody };
+
+        return ifStatement;
+    }
+
+    /// <summary>
+    /// Method that parses return statement
+    /// </summary>
+    /// <returns>ReturnStatement node with Expression if there is one</returns>
+    private ReturnStatement ParseReturnStatement()
+    {
+        ConsumeToken(TokenType.Return);
+        Expression? expression = null;
+        if (!CheckForStatement() && !CheckForVariableDeclaration() && PeekToken().Type != TokenType.End)
+        {
+            expression = ParseExpression();
+        }
+
+        if (CheckForStatement() || CheckForVariableDeclaration())
+        {
+            ReportWarning($"Unreachable code at {PeekToken().LineNumber}:{PeekToken().ColumnNumber}.");
+        }
+
+        var returnStatement = new ReturnStatement() { ReturnExpression = expression };
+        return returnStatement;
+    }
+
+    /// <summary>
     /// Method that parses primary of expression
     /// </summary>
     /// <returns>Primary node</returns>
@@ -328,7 +387,7 @@ public class SyntaxAnalyzer
             TokenType.This => ParseThis(),
             TokenType.Identifier => ParseClassName(),
             _ => throw new Exception(
-                $"Syntax error: Expected literal, `this`, or identifier, but found {nextToken.Type}")
+                $"Syntax error at {nextToken.LineNumber}:{nextToken.ColumnNumber} : Expected literal, `this`, or identifier, but found {nextToken.Type}")
         };
 
         var primary = new Primary() { Node = node };
@@ -360,7 +419,80 @@ public class SyntaxAnalyzer
     }
 
     /// <summary>
-    /// Method that checks if token with given type can be consumed and consume it
+    /// Method that parses integer literal
+    /// </summary>
+    /// <returns>IntegerLiteral node</returns>
+    private IntegerLiteral ParseIntegerLiteral()
+    {
+        var token = ConsumeToken(TokenType.IntegerLiteral);
+        var value = int.Parse(token.Value);
+        var integerLiteral = new IntegerLiteral() { Value = value };
+        return integerLiteral;
+    }
+
+    /// <summary>
+    /// Method that parses real literal
+    /// </summary>
+    /// <returns>RealLiteral node</returns>
+    private RealLiteral ParseRealLiteral()
+    {
+        var token = ConsumeToken(TokenType.RealLiteral);
+        var value = double.Parse(token.Value);
+        var realLiteral = new RealLiteral() { Value = value };
+        return realLiteral;
+    }
+
+    /// <summary>
+    /// Method that parses boolean literal
+    /// </summary>
+    /// <returns>BooleanLiteral node</returns>
+    private BooleanLiteral ParseBooleanLiteral()
+    {
+        var token = PeekToken().Type == TokenType.False ? ConsumeToken(TokenType.False) : ConsumeToken(TokenType.True);
+        var value = bool.Parse(token.Value);
+        var booleanLiteral = new BooleanLiteral() { Value = value };
+        return booleanLiteral;
+    }
+
+    /// <summary>
+    /// Method that parses `this` keyword
+    /// </summary>
+    /// <returns>This node</returns>
+    private This ParseThis()
+    {
+        ConsumeToken(TokenType.This);
+        return new This();
+    }
+
+    /// <summary>
+    /// Helper method to check if there is a statement in front of current token 
+    /// </summary>
+    /// <returns>bool value if there is a statement</returns>
+    private bool CheckForStatement()
+    {
+        var res = PeekToken().Type switch
+        {
+            TokenType.Identifier => PeekToken(1).Type == TokenType.Assignment,
+            TokenType.While => true,
+            TokenType.If => true,
+            TokenType.Return => true,
+            _ => false
+        };
+
+        return res;
+    }
+
+    /// <summary>
+    /// Helper method to check is there is a variable declaration in front of current token 
+    /// </summary>
+    /// <returns>bool value if there is a variable declaration</returns>
+    private bool CheckForVariableDeclaration()
+    {
+        return PeekToken().Type == TokenType.Var;
+    }
+
+    /// <summary>
+    /// Helper method that checks if token with given type can be consumed and consume it
     /// </summary>
     /// <param name="type">TokenType for consume</param>
     /// <returns>bool value if token was consumed or not</returns>
@@ -372,7 +504,7 @@ public class SyntaxAnalyzer
     }
 
     /// <summary>
-    /// Method that consumes next token with given type if possible, otherwise throws exception
+    /// Helper method that consumes next token with given type if possible, otherwise throws exception
     /// </summary>
     /// <param name="type">TokenType for consume</param>
     /// <returns>Consumed Token</returns>
@@ -387,24 +519,35 @@ public class SyntaxAnalyzer
 
         if (_index >= _tokens.Count)
         {
-            throw new Exception($"Syntax error: Expected {type} but found end of file");
+            throw new Exception(
+                $"Syntax error at {_tokens.Last().LineNumber}:{_tokens.Last().ColumnNumber} : Expected {type} but found end of file");
         }
 
-        throw new Exception($"Syntax error: Expected {type} but found {_tokens[_index].Type}");
+        throw new Exception(
+            $"Syntax error at {_tokens[_index].LineNumber}:{_tokens[_index].ColumnNumber} : Expected {type} but found {_tokens[_index].Type}");
     }
 
     /// <summary>
-    /// Method to peek the next token not consuming it
+    /// Helper method to peek the next token not consuming it
     /// </summary>
     /// <returns>The next token</returns>
     /// <exception cref="Exception">Throws and exception if there is no next token</exception>
-    private Token PeekToken()
+    private Token PeekToken(int offset = 0)
     {
         if (_index < _tokens.Count)
         {
-            return _tokens[_index];
+            return _tokens[_index + offset];
         }
 
         throw new Exception("Syntax error: Expected token but found end of file");
+    }
+
+    /// <summary>
+    /// Helper method to report warnings
+    /// </summary>
+    /// <param name="message">Message to display as warning</param>
+    private void ReportWarning(string message)
+    {
+        Console.WriteLine($"Warning: {message}");
     }
 }

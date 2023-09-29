@@ -1,6 +1,6 @@
 ﻿namespace OCompiler.nodes;
 
-public class This
+public class This : AstNode
 {
     
 }
