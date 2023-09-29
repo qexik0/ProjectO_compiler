@@ -13,7 +13,7 @@ public class SyntaxAnalyzer
         _index = 0;
     }
 
-    public AstNode? RunAnalyzer()
+    public AstNode RunAnalyzer()
     {
         try
         {
@@ -23,7 +23,7 @@ public class SyntaxAnalyzer
         {
             Console.WriteLine($"Syntax Analyzing failed with the following error:\n{e.Message}");
         }
-
+        Environment.Exit(-1);
         return null;
     }
 
@@ -210,7 +210,7 @@ public class SyntaxAnalyzer
         }
 
         var parameters = new Parameters();
-        while (PeekToken().Type != TokenType.RightParanthesis)
+        while (!MaybeConsumeToken(TokenType.RightParanthesis))
         {
             var parameterDeclaration = ParseParameterDeclaration();
             parameters.ParameterDeclarations.Add(parameterDeclaration);
@@ -260,6 +260,7 @@ public class SyntaxAnalyzer
     private Expression ParseExpression()
     {
         var primary = ParsePrimary();
+        // TODO: what if the expression is `Fibonacci()` as in `var f : Fibonacci()`? Now we has an error here 
         var expression = new Expression() { EntityPrimary = primary };
 
         while (MaybeConsumeToken(TokenType.Dot))
