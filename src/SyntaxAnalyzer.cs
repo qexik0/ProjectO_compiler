@@ -288,7 +288,7 @@ public class SyntaxAnalyzer
             TokenType.If => ParseIfStatement(),
             TokenType.Return => ParseReturnStatement(),
             _ => throw new Exception(
-                $"Syntax error at {nextToken.LineNumber}:{nextToken.ColumnNumber} : Expected assignment, while loop, is statement, or return statement, but found {nextToken.Type}")
+                $"Syntax error at {nextToken.LineNumber}:{nextToken.ColumnNumber} : Expected assignment, while loop, if statement, or return statement, but found {nextToken.Type}")
         };
 
         var statement = new Statement() { StatementNode = node };
