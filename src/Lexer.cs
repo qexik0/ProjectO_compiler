@@ -2,13 +2,15 @@ using System.Text.RegularExpressions;
 
 namespace OCompiler;
 
-public class Lexer
+public partial class Lexer
 {
-    private readonly Regex _tokenizer;
     private readonly Dictionary<string, TokenType> _keywords;
+
+    [GeneratedRegex(@"(-?\d+(\.\d+)?([eE]-?\d+)?(?![a-zA-Z])|[_a-zA-Z][_a-zA-Z0-9]*|:=|\(|\)|,|:|\[|\]|\.|//|/\*|\*/|\n|[^\s]+)", RegexOptions.CultureInvariant)]
+    public static partial Regex _tokenizer();
+
     public Lexer()
     {
-        _tokenizer = new Regex(@"(-?\d+(\.\d+)?([eE]-?\d+)?(?![a-zA-Z])|[_a-zA-Z][_a-zA-Z0-9]*|:=|\(|\)|,|:|\[|\]|\.|//|/\*|\*/|\n|[^\s]+)");
         _keywords = new();
         _keywords["class"] = TokenType.Class;
         _keywords["extends"] = TokenType.Extends;
@@ -42,7 +44,7 @@ public class Lexer
         int ln = 1, index = 0;
         bool lineComment = false;
         bool blockComment = false;
-        foreach (Match match in _tokenizer.Matches(source))
+        foreach (Match match in _tokenizer().Matches(source))
         {
             int cn = match.Index - index + 1;
 
