@@ -67,7 +67,15 @@ public class SyntaxAnalyzer
     private ClassName ParseClassName()
     {
         var identifier = ParseIdentifier();
-        var className = new ClassName() { ClassIdentifier = identifier };
+        ClassName? genericClassname = null;
+
+        if (MaybeConsumeToken(TokenType.LeftSquareBracket))
+        {
+            genericClassname = ParseClassName();
+            ConsumeToken(TokenType.RightSquareBracket);
+        }
+        
+        var className = new ClassName() { ClassIdentifier = identifier, GenericClassName = genericClassname };
         return className;
     }
 
@@ -104,7 +112,7 @@ public class SyntaxAnalyzer
                 _ => throw new Exception(
                     $"Syntax error: Expected constructor, variable declaration, or method but found {nextToken.Type}")
             };
-            list.Add(new MemberDeclaration() {Member = res});
+            list.Add(new MemberDeclaration() { Member = res });
 
             nextToken = PeekToken();
         }
@@ -112,19 +120,243 @@ public class SyntaxAnalyzer
         return list;
     }
 
+    /// <summary>
+    /// Method that parses variable declaration
+    /// </summary>
+    /// <returns>VariableDeclaration node</returns>
     private VariableDeclaration ParseVariableDeclaration()
     {
-        throw new Exception();
+        ConsumeToken(TokenType.Var);
+        var identifier = ParseIdentifier();
+        ConsumeToken(TokenType.Colon);
+        var expression = ParseExpression();
+
+        var variableDeclaration = new VariableDeclaration()
+            { VariableIdentifier = identifier, VariableExpression = expression };
+
+        return variableDeclaration;
     }
 
+    /// <summary>
+    /// Method that parses method declaration  
+    /// </summary>
+    /// <returns>MethodDeclaration node</returns>
     private MethodDeclaration ParseMethodDeclaration()
     {
-        throw new Exception();
+        ConsumeToken(TokenType.Method);
+        var identifier = ParseIdentifier();
+        var parameters = ParseParameters();
+
+        Identifier? returnType = null;
+        if (MaybeConsumeToken(TokenType.Colon))
+        {
+            returnType = ParseIdentifier();
+        }
+
+        var body = ParseBody();
+        ConsumeToken(TokenType.End);
+
+        var methodDeclaration = new MethodDeclaration()
+        {
+            MethodBody = body, MethodIdentifier = identifier, MethodParameters = parameters,
+            ReturnTypeIdentifier = returnType
+        };
+
+        return methodDeclaration;
     }
 
+    /// <summary>
+    /// Method that parses constructor declaration
+    /// </summary>
+    /// <returns>ConstructorDeclaration node</returns>
     private ConstructorDeclaration ParseConstructorDeclaration()
     {
-        throw new Exception();
+        ConsumeToken(TokenType.This);
+        var parameters = ParseParameters();
+        ConsumeToken(TokenType.Is);
+        var body = ParseBody();
+        ConsumeToken(TokenType.End);
+
+        var constructorDeclaration = new ConstructorDeclaration()
+            { ConstructorBody = body, ConstructorParameters = parameters };
+
+        return constructorDeclaration;
+    }
+
+    /// <summary>
+    /// Method that parses parameters
+    /// </summary>
+    /// <returns>null if there are no parameters, Parameters otherwise</returns>
+    private Parameters? ParseParameters()
+    {
+        ConsumeToken(TokenType.LeftParanthesis);
+        if (MaybeConsumeToken(TokenType.RightParanthesis))
+        {
+            return null;
+        }
+
+        var parameters = new Parameters();
+        while (PeekToken().Type != TokenType.RightParanthesis)
+        {
+            var parameterDeclaration = ParseParameterDeclaration();
+            parameters.ParameterDeclarations.Add(parameterDeclaration);
+        }
+
+        return parameters;
+    }
+
+    /// <summary>
+    /// Method that parses body
+    /// </summary>
+    /// <returns>Body with list of statements or declarations</returns>
+    private Body ParseBody()
+    {
+        var body = new Body();
+
+        while (PeekToken().Type != TokenType.End)
+        {
+            AstNode node = PeekToken().Type == TokenType.Var ? ParseVariableDeclaration() : ParseStatement();
+
+            body.StatementsOrDeclarations.Add(node);
+        }
+
+        return body;
+    }
+
+    /// <summary>
+    /// Method that parses parameter declaration
+    /// </summary>
+    /// <returns>ParameterDeclaration node with class name and identifier</returns>
+    private ParameterDeclaration ParseParameterDeclaration()
+    {
+        var identifier = ParseIdentifier();
+        ConsumeToken(TokenType.Colon);
+        var className = ParseClassName();
+
+        var parameterDeclaration = new ParameterDeclaration()
+            { ParameterClassName = className, ParameterIdentifier = identifier };
+
+        return parameterDeclaration;
+    }
+
+    /// <summary>
+    /// Method that parses expression
+    /// </summary>
+    /// <returns>Expression node</returns>
+    private Expression ParseExpression()
+    {
+        var primary = ParsePrimary();
+        var expression = new Expression() { EntityPrimary = primary };
+
+        while (MaybeConsumeToken(TokenType.Dot))
+        {
+            var identifier = ParseIdentifier();
+            var arguments = ParseArguments();
+            expression.Calls.Add((identifier, arguments));
+        }
+
+        return expression;
+    }
+
+    /// <summary>
+    /// Method that parses Statement
+    /// </summary>
+    /// <returns>Statement node</returns>
+    /// <exception cref="Exception">Throws an exception if there was no correct statement found</exception>
+    private Statement ParseStatement()
+    {
+        var nextToken = PeekToken();
+        AstNode node = nextToken.Type switch
+        {
+            TokenType.Identifier => ParseAssignment(),
+            TokenType.While => ParseWhileLoop(),
+            TokenType.If => ParseIfStatement(),
+            TokenType.Return => ParseReturnStatement(),
+            _ => throw new Exception(
+                $"Syntax error: Expected assignment, while loop, is statement, or return statement, but found {nextToken.Type}")
+        };
+
+        var statement = new Statement() { StatementNode = node };
+        return statement;
+    }
+
+    /// <summary>
+    /// Method that parses assignment expression
+    /// </summary>
+    /// <returns>Assignment node</returns>
+    private Assignment ParseAssignment()
+    {
+        var identifier = ParseIdentifier();
+        ConsumeToken(TokenType.Assignment);
+        var expression = ParseExpression();
+
+        var assignment = new Assignment() { AssignmentIdentifier = identifier, AssignmentExpression = expression };
+
+        return assignment;
+    }
+
+    /// <summary>
+    /// Method that parses while loop
+    /// </summary>
+    /// <returns>WhileLoop node</returns>
+    private WhileLoop ParseWhileLoop()
+    {
+        ConsumeToken(TokenType.While);
+        var expression = ParseExpression();
+        ConsumeToken(TokenType.Loop);
+        var body = ParseBody();
+        ConsumeToken(TokenType.End);
+
+        var whileLoop = new WhileLoop() { WhileConditionExpression = expression, WileBody = body };
+
+        return whileLoop;
+    }
+
+    /// <summary>
+    /// Method that parses primary of expression
+    /// </summary>
+    /// <returns>Primary node</returns>
+    /// <exception cref="Exception">Throws an exception if there was no correct primary found</exception>
+    private Primary ParsePrimary()
+    {
+        var nextToken = PeekToken();
+        AstNode node = nextToken.Type switch
+        {
+            TokenType.IntegerLiteral => ParseIntegerLiteral(),
+            TokenType.RealLiteral => ParseRealLiteral(),
+            TokenType.False or TokenType.True => ParseBooleanLiteral(),
+            TokenType.This => ParseThis(),
+            TokenType.Identifier => ParseClassName(),
+            _ => throw new Exception(
+                $"Syntax error: Expected literal, `this`, or identifier, but found {nextToken.Type}")
+        };
+
+        var primary = new Primary() { Node = node };
+
+        return primary;
+    }
+
+    /// <summary>
+    /// Method that parses arguments
+    /// </summary>
+    /// <returns>null is there are no arguments, Arguments otherwise</returns>
+    private Arguments? ParseArguments()
+    {
+        ConsumeToken(TokenType.LeftParanthesis);
+        if (MaybeConsumeToken(TokenType.RightParanthesis))
+        {
+            return null;
+        }
+
+        var arguments = new Arguments();
+
+        while (!MaybeConsumeToken(TokenType.RightParanthesis))
+        {
+            var expression = ParseExpression();
+            arguments.Expressions.Add(expression);
+        }
+
+        return arguments;
     }
 
     /// <summary>
