@@ -7,14 +7,15 @@ public class CLIFrontent
     public static void Main(string[] args)
     {
         var rootCommand = new RootCommand("Project O language compiler");
-        var inputFile = new Option<FileInfo>(name: "--input",description: "Input source file");
-        var outputFile = new Option<string>(name: "--output", description: "Output path for the lecical report");
+        var inputFile = new Option<FileInfo>(name: "--input", description: "Input source file");
+        var outputFile = new Option<string>(name: "--output", description: "Output path for the report");
         var lexicalReport = new Command("lexer-report", "Produce a lexical analysis report")
         {
             inputFile,
             outputFile
         };
-        lexicalReport.SetHandler((input, output) => {
+        lexicalReport.SetHandler((input, output) =>
+        {
             var lexer = new Lexer();
             using var source = new StreamReader(input.FullName);
             var tokens = lexer.Tokenize(source);
@@ -25,6 +26,17 @@ public class CLIFrontent
                 report.WriteLine($"{token.Value} - {token.Type} at {token.LineNumber}:{token.ColumnNumber}");
             }
         }, inputFile, outputFile);
+        var syntaxReport = new Command("syntax-report", "Produce a syntax analysis") { inputFile };
+        syntaxReport.SetHandler((input) =>
+        {
+            using var source = new StreamReader(input.FullName);
+            var lexer = new Lexer();
+            var tokens = lexer.Tokenize(source);
+            var syntaxAnalyzer = new SyntaxAnalyzer(tokens);
+            syntaxAnalyzer.RunAnalyzer();
+        }, inputFile);
+        
+        rootCommand.Add(syntaxReport);
         rootCommand.Add(lexicalReport);
         rootCommand.Invoke(args);
     }
