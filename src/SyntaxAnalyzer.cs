@@ -15,19 +15,8 @@ public class SyntaxAnalyzer
 
     public AstNode RunAnalyzer()
     {
-        try
-        {
-            var root = ParseProgram();
-            Console.WriteLine("Syntax analyzing finished successfully!");
-            return root;
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine($"Syntax Analyzing failed with the following error:\n{e.Message}");
-        }
-
-        Environment.Exit(-1);
-        return null;
+        var root = ParseProgram();
+        return root;
     }
 
     /// <summary>
@@ -284,7 +273,15 @@ public class SyntaxAnalyzer
         while (MaybeConsumeToken(TokenType.Dot))
         {
             var identifier = ParseIdentifier();
-            var arguments = ParseArguments();
+            Arguments? arguments;
+            try
+            {
+                arguments = ParseArguments();
+            }
+            catch (Exception)
+            {
+                arguments = null;
+            }
             expression.Calls.Add((identifier, arguments));
         }
 
