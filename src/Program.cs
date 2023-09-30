@@ -1,4 +1,5 @@
 ﻿using System.CommandLine;
+using System.Globalization;
 
 namespace OCompiler;
 
@@ -6,6 +7,9 @@ public class CLIFrontent
 {
     public static void Main(string[] args)
     {
+        CultureInfo ci = new CultureInfo("en-US");
+        Thread.CurrentThread.CurrentCulture = ci;
+        Thread.CurrentThread.CurrentUICulture = ci;
         var rootCommand = new RootCommand("Project O language compiler");
         var inputFile = new Option<FileInfo>(name: "--input", description: "Input source file");
         var outputFile = new Option<string>(name: "--output", description: "Output path for the report");
