@@ -59,11 +59,10 @@ public class CLIFrontent
             }
             catch (Exception ex)
             {
-                report.WriteLine("Syntax error");
-                report.WriteLine(ex.Message);
+                report.WriteLine($"Syntax Analyzing failed with the following error:\n{ex.Message}");
                 return;
             }
-            report.WriteLine("Syntax analyzer returned successfully.");
+            report.WriteLine("Syntax analyzing finished successfully!");
             /*PrintAST(program);
 
             void PrintAST(nodes.AstNode cur, int depth = 0)
