@@ -17,12 +17,15 @@ public class SyntaxAnalyzer
     {
         try
         {
-            return ParseProgram();
+            var root = ParseProgram();
+            Console.WriteLine("Syntax analyzing finished successfully!");
+            return root;
         }
         catch (Exception e)
         {
             Console.WriteLine($"Syntax Analyzing failed with the following error:\n{e.Message}");
         }
+
         Environment.Exit(-1);
         return null;
     }
@@ -161,11 +164,13 @@ public class SyntaxAnalyzer
         var identifier = ParseIdentifier();
         var parameters = ParseParameters();
 
-        Identifier? returnType = null;
+        ClassName? returnType = null;
         if (MaybeConsumeToken(TokenType.Colon))
         {
-            returnType = ParseIdentifier();
+            returnType = ParseClassName();
         }
+
+        ConsumeToken(TokenType.Is);
 
         var body = ParseBody();
         ConsumeToken(TokenType.End);
@@ -259,9 +264,17 @@ public class SyntaxAnalyzer
     /// <returns>Expression node</returns>
     private Expression ParseExpression()
     {
-        var primary = ParsePrimary();
-        // TODO: what if the expression is `Fibonacci()` as in `var f : Fibonacci()`? Now we has an error here 
-        var expression = new Expression() { EntityPrimary = primary };
+        Expression expression;
+        if (PeekToken(1).Type == TokenType.LeftParanthesis)
+        {
+            var constructorCall = ParseConstructorCall();
+            expression = new Expression() { PrimaryOrConstructorCall = constructorCall };
+        }
+        else
+        {
+            var primary = ParsePrimary();
+            expression = new Expression() { PrimaryOrConstructorCall = primary };
+        }
 
         while (MaybeConsumeToken(TokenType.Dot))
         {
@@ -274,6 +287,20 @@ public class SyntaxAnalyzer
     }
 
     /// <summary>
+    /// Method that parses constructor call
+    /// </summary>
+    /// <returns>ConstructorCall node</returns>
+    private ConstructorCall ParseConstructorCall()
+    {
+        var className = ParseClassName();
+        var arguments = ParseArguments();
+
+        var constructorCall = new ConstructorCall()
+            { ConstructorClassName = className, ConstructorArguments = arguments };
+        return constructorCall;
+    }
+
+    /// <summary>
     /// Method that parses Statement
     /// </summary>
     /// <returns>Statement node</returns>
@@ -283,7 +310,7 @@ public class SyntaxAnalyzer
         var nextToken = PeekToken();
         AstNode node = nextToken.Type switch
         {
-            TokenType.Identifier => ParseAssignment(),
+            TokenType.Identifier => PeekToken(1).Type == TokenType.Assignment ? ParseAssignment() : ParseExpression(),
             TokenType.While => ParseWhileLoop(),
             TokenType.If => ParseIfStatement(),
             TokenType.Return => ParseReturnStatement(),
