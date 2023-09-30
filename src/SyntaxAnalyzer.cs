@@ -215,9 +215,12 @@ public class SyntaxAnalyzer
         }
 
         var parameters = new Parameters();
+        var parameterDeclaration = ParseParameterDeclaration();
+        parameters.ParameterDeclarations.Add(parameterDeclaration);
         while (!MaybeConsumeToken(TokenType.RightParanthesis))
         {
-            var parameterDeclaration = ParseParameterDeclaration();
+            ConsumeToken(TokenType.Comma);
+            parameterDeclaration = ParseParameterDeclaration();
             parameters.ParameterDeclarations.Add(parameterDeclaration);
         }
 
@@ -232,7 +235,7 @@ public class SyntaxAnalyzer
     {
         var body = new Body();
 
-        while (PeekToken().Type != TokenType.End)
+        while (PeekToken().Type != TokenType.End && PeekToken().Type != TokenType.Else)
         {
             AstNode node = PeekToken().Type == TokenType.Var ? ParseVariableDeclaration() : ParseStatement();
 
@@ -437,9 +440,12 @@ public class SyntaxAnalyzer
 
         var arguments = new Arguments();
 
+        var expression = ParseExpression();
+        arguments.Expressions.Add(expression);
         while (!MaybeConsumeToken(TokenType.RightParanthesis))
         {
-            var expression = ParseExpression();
+            ConsumeToken(TokenType.Comma);
+            expression = ParseExpression();
             arguments.Expressions.Add(expression);
         }
 
