@@ -268,13 +268,15 @@ public class SyntaxAnalyzer
     private Expression ParseExpression()
     {
         Expression expression;
-        if (PeekToken(1).Type == TokenType.LeftParanthesis)
+        var cur = _index;
+        try
         {
             var constructorCall = ParseConstructorCall();
             expression = new Expression() { PrimaryOrConstructorCall = constructorCall };
         }
-        else
+        catch (Exception)
         {
+            _index = cur;
             var primary = ParsePrimary();
             expression = new Expression() { PrimaryOrConstructorCall = primary };
         }
