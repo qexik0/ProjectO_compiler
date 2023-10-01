@@ -2,7 +2,7 @@ class Program is
     this(numbers: Array[Integer]) is
         var n : numbers.Length()
         var i : Integer(1)
-        while i.Less(n) then
+        while i.Less(n) loop
             var key : number.get(i)
             var j : i.Minus(1)
 

@@ -11,7 +11,7 @@ class Program is
                 if numbers.get(i).Greater(numbers.get(i.Plus(1))) then
                     var temp : numbers.get(1)
                     numbers.set(i, numbers.get(i.Plus(1)))
-                    numbers[i.Plus(1)] := temp
+                    numbers.set(i.Plus(1), temp)
                     swapped := true
                 end
                 i := i.Plus(1)

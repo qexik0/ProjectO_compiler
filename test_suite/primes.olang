@@ -13,7 +13,7 @@ end
 class PrimeGenerator is
     method isPrime(n: Integer) : Boolean is
         var i : Integer(2)
-        var g : sqrt(n).add(1).toInteger
+        var g : sqrt(n).add(1).toInteger()
         while i.Less(g) loop
             if n.Rem(i).Equal(0) then
                 return false

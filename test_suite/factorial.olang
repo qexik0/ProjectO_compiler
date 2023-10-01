@@ -11,9 +11,7 @@ class Factorial is
         if n.LessEqual(1) then
            return 1 
         else
-            return n * getFactorial(n - 1)
+            return n.Mult(getFactorial(n.Minus(1)))
         end
     end
-
-    
 end
