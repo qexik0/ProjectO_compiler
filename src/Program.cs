@@ -1,5 +1,6 @@
 ﻿using System.CommandLine;
 using System.Globalization;
+using System.Text;
 
 namespace OCompiler;
 
@@ -62,13 +63,30 @@ public class CLIFrontent
                 report.WriteLine($"Syntax Analyzing failed with the following error:\n{ex.Message}");
                 return;
             }
-            report.WriteLine("Syntax analyzing finished successfully!");
-            /*PrintAST(program);
+            report.WriteLine("Syntax analyzing finished successfully! The AST:");
+            report.WriteLine(PrettifySExpression(program.ToString()));
 
-            void PrintAST(nodes.AstNode cur, int depth = 0)
+            string PrettifySExpression(string input)
             {
-                
-            }*/
+                StringBuilder sb = new();
+                int indent = 0;
+                foreach (var c in input)
+                {
+                    if (c == '(')
+                    {
+                        ++indent;
+                        sb.AppendLine();
+                        sb.Append(' ', indent * 2);
+                    }
+                    else if (c == ')')
+                    {
+                        --indent;
+                    }
+                    sb.Append(c);
+                }
+                sb.Remove(0, Environment.NewLine.Length);
+                return sb.ToString();
+            }
         }, inputFile, outputFile);
         rootCommand.Add(lexicalReport);
         rootCommand.Add(syntaxReport);

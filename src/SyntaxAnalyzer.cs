@@ -351,7 +351,7 @@ public class SyntaxAnalyzer
         var body = ParseBody();
         ConsumeToken(TokenType.End);
 
-        var whileLoop = new WhileLoop() { WhileConditionExpression = expression, WileBody = body };
+        var whileLoop = new WhileLoop() { WhileConditionExpression = expression, WhileBody = body };
 
         return whileLoop;
     }
@@ -390,11 +390,6 @@ public class SyntaxAnalyzer
         if (!CheckForStatement() && !CheckForVariableDeclaration() && PeekToken().Type != TokenType.End)
         {
             expression = ParseExpression();
-        }
-
-        if (CheckForStatement() || CheckForVariableDeclaration())
-        {
-            ReportWarning($"Unreachable code at {PeekToken().LineNumber}:{PeekToken().ColumnNumber}.");
         }
 
         var returnStatement = new ReturnStatement() { ReturnExpression = expression };
@@ -573,14 +568,5 @@ public class SyntaxAnalyzer
         }
 
         throw new Exception("Syntax error: Expected token but found end of file");
-    }
-
-    /// <summary>
-    /// Helper method to report warnings
-    /// </summary>
-    /// <param name="message">Message to display as warning</param>
-    private void ReportWarning(string message)
-    {
-        Console.WriteLine($"Warning: {message}");
     }
 }

@@ -4,4 +4,9 @@ public class VariableDeclaration : AstNode
 {
     public required Identifier VariableIdentifier { get; set; }
     public required Expression VariableExpression { get; set; }
+
+    public override string ToString()
+    {
+        return $"(VariableDeclaration{VariableIdentifier}{VariableExpression})";
+    }
 }
