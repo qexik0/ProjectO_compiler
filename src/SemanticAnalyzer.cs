@@ -141,17 +141,17 @@ public class SemanticAnalyzer
         var currentClass = _classes[declaration.Name.ClassIdentifier.Name];
         foreach (var (key, method) in currentClass.Methods)
         {
-            AnalyzeBody(method.MethodBody!, currentClass, method.Parameters, method.ReturnType,
+            AnalyzeBody(method.MethodBody!, currentClass, method.Name, method.Parameters, method.ReturnType,
                 method.ReturnType != "Void");
         }
 
         foreach (var (key, constructor) in currentClass.Constructors)
         {
-            AnalyzeBody(constructor.ConstructorBody!, currentClass, constructor.Parameters, "Void", false);
+            AnalyzeBody(constructor.ConstructorBody!, currentClass, constructor.Name, constructor.Parameters, "Void", false);
         }
     }
 
-    private bool AnalyzeBody(Body body, CurrentClass currentClass, Dictionary<string, Variable> outerVariables,
+    private bool AnalyzeBody(Body body, CurrentClass currentClass, string curMethod, Dictionary<string, Variable> outerVariables,
         string returnType, bool shouldReturn)
     {
         var newVariables = new Dictionary<string, Variable>();
@@ -205,7 +205,7 @@ public class SemanticAnalyzer
                                     $"Condition in WhileLoop should have type Boolean, but got {conditionType}");
                             }
 
-                            hasReturn = AnalyzeBody(whileLoop.WhileBody, currentClass, newDict, returnType, false);
+                            hasReturn = AnalyzeBody(whileLoop.WhileBody, currentClass, curMethod, newDict, returnType, false);
                             break;
                         case IfStatement ifStatement:
                             var ifConditionType =
@@ -216,8 +216,8 @@ public class SemanticAnalyzer
                                     $"Condition in WhileLoop should have type Boolean, but got {ifConditionType}");
                             }
 
-                            var ret1 = AnalyzeBody(ifStatement.IfBody, currentClass, newDict, returnType, false);
-                            var ret2 = AnalyzeBody(ifStatement.ElseBody, currentClass, newDict, returnType, false);
+                            var ret1 = AnalyzeBody(ifStatement.IfBody, currentClass, curMethod, newDict, returnType, false);
+                            var ret2 = AnalyzeBody(ifStatement.ElseBody, currentClass, curMethod, newDict, returnType, false);
                             hasReturn = ret1 && ret2;
                             break;
                         case ReturnStatement returnStatement:
@@ -240,11 +240,10 @@ public class SemanticAnalyzer
 
         if (shouldReturn && !hasReturn)
         {
-            // TODO: explain where
-            ReportNonFatal($"Missing return statement");
+            ReportNonFatal($"Missing return statement in {curMethod}");
         }
 
-        return true;
+        return hasReturn;
     }
 
     private Dictionary<string, Variable> MergeDicts(Dictionary<string, Variable> d1, Dictionary<string, Variable> d2)
