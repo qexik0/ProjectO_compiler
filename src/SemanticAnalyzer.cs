@@ -8,13 +8,14 @@ public class SemanticAnalyzer
 {
     private Program _root;
     private List<Token> _tokens;
-    private Dictionary<string, CurrentClass> classes;
+    private Dictionary<string, CurrentClass> _classes;
 
     public SemanticAnalyzer(Program root, List<Token> tokens)
     {
         _root = root;
         _tokens = tokens;
-        classes = CollectClasses(_root);
+        _classes = CollectClasses(_root);
+        AddBasicClasses();
     }
 
     public void AnalyzeProgram()
@@ -139,16 +140,16 @@ public class SemanticAnalyzer
 
     private void AnalyzeClass(ClassDeclaration declaration)
     {
-        var currentClass = classes[declaration.Name.ClassIdentifier.Name];
+        var currentClass = _classes[declaration.Name.ClassIdentifier.Name];
         foreach (var (key, method) in currentClass.Methods)
         {
-            AnalyzeBody(method.MethodBody, currentClass, new Dictionary<string, Variable>(), method.ReturnType,
+            AnalyzeBody(method.MethodBody!, currentClass, new Dictionary<string, Variable>(), method.ReturnType,
                 method.ReturnType != "Void");
         }
 
         foreach (var (key, constructor) in currentClass.Constructors)
         {
-            AnalyzeBody(constructor.ConstructorBody, currentClass, new Dictionary<string, Variable>(), "Void", false);
+            AnalyzeBody(constructor.ConstructorBody!, currentClass, new Dictionary<string, Variable>(), "Void", false);
         }
     }
 
@@ -291,13 +292,13 @@ public class SemanticAnalyzer
 
         foreach (var (identifier, arguments) in expression.Calls)
         {
-            if (!classes.ContainsKey(currentType))
+            if (!_classes.ContainsKey(currentType))
             {
                 ReportFatal($"There is no such Type {currentType}");
                 throw new Exception();
             }
 
-            var curClass = classes[currentType];
+            var curClass = _classes[currentType];
             string name;
             if (arguments == null)
             {
@@ -350,6 +351,311 @@ public class SemanticAnalyzer
     {
         // TODO(qexik): implement reporting
     }
+
+    private void AddBasicClasses()
+    {
+        AddInteger();
+        AddReal();
+        AddBoolean();
+        AddArray();
+        AddList();
+    }
+
+    private void AddInteger()
+    {
+        // create Integer
+        var integer = new CurrentClass { Name = "Integer" };
+        // adding methods
+        integer.Methods.Add("toReal()", new Method { Name = "toReal()", ReturnType = "Real" });
+        integer.Methods.Add("toBoolean()", new Method { Name = "toBoolean()", ReturnType = "Boolean" });
+
+        var unaryMinusMethod = new Method { Name = "UnaryMinus()", ReturnType = "Integer" };
+        integer.Methods.Add("UnaryMinus()", unaryMinusMethod);
+
+        var unaryPlusMethod = new Method { Name = "UnaryPlus()", ReturnType = "Integer" };
+        integer.Methods.Add("UnaryPlus()", unaryPlusMethod);
+
+        // Binary operations with Integer
+        var plusMethod = new Method { Name = "Plus(Integer,)", ReturnType = "Integer" };
+        plusMethod.Parameters.Add("p", new Variable { Name = "p", Type = "Integer" });
+        integer.Methods.Add("Plus(Integer,)", plusMethod);
+
+        var minusMethodInt = new Method { Name = "Minus(Integer,)", ReturnType = "Integer" };
+        minusMethodInt.Parameters.Add("p", new Variable { Name = "p", Type = "Integer" });
+        integer.Methods.Add("Minus(Integer,)", minusMethodInt);
+
+        var multMethodInt = new Method { Name = "Mult(Integer,)", ReturnType = "Integer" };
+        multMethodInt.Parameters.Add("p", new Variable { Name = "p", Type = "Integer" });
+        integer.Methods.Add("Mult(Integer,)", multMethodInt);
+
+        var divMethodInt = new Method { Name = "Div(Integer,)", ReturnType = "Integer" };
+        divMethodInt.Parameters.Add("p", new Variable { Name = "p", Type = "Integer" });
+        integer.Methods.Add("Div(Integer,)", divMethodInt);
+
+        var remMethod = new Method { Name = "Rem(Integer,)", ReturnType = "Integer" };
+        remMethod.Parameters.Add("p", new Variable { Name = "p", Type = "Integer" });
+        integer.Methods.Add("Rem(Integer,)", remMethod);
+
+        // Comparisons with Integer
+        var lessMethodInt = new Method { Name = "Less(Integer,)", ReturnType = "Boolean" };
+        lessMethodInt.Parameters.Add("p", new Variable { Name = "p", Type = "Integer" });
+        integer.Methods.Add("Less(Integer,)", lessMethodInt);
+
+        var lessEqualMethodInt = new Method { Name = "LessEqual(Integer,)", ReturnType = "Boolean" };
+        lessEqualMethodInt.Parameters.Add("p", new Variable { Name = "p", Type = "Integer" });
+        integer.Methods.Add("LessEqual(Integer,)", lessEqualMethodInt);
+
+        var greaterMethodInt = new Method { Name = "Greater(Integer,)", ReturnType = "Boolean" };
+        greaterMethodInt.Parameters.Add("p", new Variable { Name = "p", Type = "Integer" });
+        integer.Methods.Add("Greater(Integer,)", greaterMethodInt);
+
+        var greaterEqualMethodInt = new Method { Name = "GreaterEqual(Integer,)", ReturnType = "Boolean" };
+        greaterEqualMethodInt.Parameters.Add("p", new Variable { Name = "p", Type = "Integer" });
+        integer.Methods.Add("GreaterEqual(Integer,)", greaterEqualMethodInt);
+
+        var equalMethodInt = new Method { Name = "Equal(Integer,)", ReturnType = "Boolean" };
+        equalMethodInt.Parameters.Add("p", new Variable { Name = "p", Type = "Integer" });
+        integer.Methods.Add("Equal(Integer,)", equalMethodInt);
+
+        // Binary operations with Real
+        var plusMethodReal = new Method { Name = "Plus(Real,)", ReturnType = "Real" };
+        plusMethodReal.Parameters.Add("p", new Variable { Name = "p", Type = "Real" });
+        integer.Methods.Add("Plus(Real,)", plusMethodReal);
+
+        var minusMethodReal = new Method { Name = "Minus(Real,)", ReturnType = "Real" };
+        minusMethodReal.Parameters.Add("p", new Variable { Name = "p", Type = "Real" });
+        integer.Methods.Add("Minus(Real,)", minusMethodReal);
+
+        var multMethodReal = new Method { Name = "Mult(Real,)", ReturnType = "Real" };
+        multMethodReal.Parameters.Add("p", new Variable { Name = "p", Type = "Real" });
+        integer.Methods.Add("Mult(Real,)", multMethodReal);
+
+        var divMethodReal = new Method { Name = "Div(Real,)", ReturnType = "Real" };
+        divMethodReal.Parameters.Add("p", new Variable { Name = "p", Type = "Real" });
+        integer.Methods.Add("Div(Real,)", divMethodReal);
+
+        // Comparisons with Real
+        var lessMethodReal = new Method { Name = "Less(Real,)", ReturnType = "Boolean" };
+        lessMethodReal.Parameters.Add("p", new Variable { Name = "p", Type = "Real" });
+        integer.Methods.Add("Less(Real,)", lessMethodReal);
+
+        var lessEqualMethodReal = new Method { Name = "LessEqual(Real,)", ReturnType = "Boolean" };
+        lessEqualMethodReal.Parameters.Add("p", new Variable { Name = "p", Type = "Real" });
+        integer.Methods.Add("LessEqual(Real,)", lessEqualMethodReal);
+
+        var greaterMethodReal = new Method { Name = "Greater(Real,)", ReturnType = "Boolean" };
+        greaterMethodReal.Parameters.Add("p", new Variable { Name = "p", Type = "Real" });
+        integer.Methods.Add("Greater(Real,)", greaterMethodReal);
+
+        var greaterEqualMethodReal = new Method { Name = "GreaterEqual(Real,)", ReturnType = "Boolean" };
+        greaterEqualMethodReal.Parameters.Add("p", new Variable { Name = "p", Type = "Real" });
+        integer.Methods.Add("GreaterEqual(Real,)", greaterEqualMethodReal);
+
+        var equalMethodReal = new Method { Name = "Equal(Real,)", ReturnType = "Boolean" };
+        equalMethodReal.Parameters.Add("p", new Variable { Name = "p", Type = "Real" });
+        integer.Methods.Add("Equal(Real,)", equalMethodReal);
+
+        // adding constructors
+        integer.Constructors.Add("Integer(Integer,)", new Constructor { Name = "Integer(Integer,)", Type = "Integer" });
+        integer.Constructors.Add("Integer(Real,)", new Constructor { Name = "Integer(Real,)", Type = "Integer" });
+        // adding variables
+        integer.Variables.Add("Min", new Variable { Name = "Min", Type = "Integer" });
+        integer.Variables.Add("Max", new Variable { Name = "Max", Type = "Integer" });
+
+        _classes.Add("Integer", integer);
+    }
+
+    private void AddReal()
+    {
+        // create Real class
+        var real = new CurrentClass { Name = "Real" };
+
+        // adding methods to Real
+        real.Methods.Add("toInteger()", new Method { Name = "toInteger()", ReturnType = "Integer" });
+        real.Methods.Add("toBoolean()", new Method { Name = "toBoolean()", ReturnType = "Boolean" });
+
+        var unaryMinusRealMethod = new Method { Name = "UnaryMinus()", ReturnType = "Real" };
+        real.Methods.Add("UnaryMinus()", unaryMinusRealMethod);
+
+        var unaryPlusRealMethod = new Method { Name = "UnaryPlus()", ReturnType = "Real" };
+        real.Methods.Add("UnaryPlus()", unaryPlusRealMethod);
+
+        // Operations with Integer
+        var plusMethodInt = new Method { Name = "Plus(Integer,)", ReturnType = "Integer" };
+        plusMethodInt.Parameters.Add("p", new Variable { Name = "p", Type = "Integer" });
+        real.Methods.Add("Plus(Integer,)", plusMethodInt);
+
+        var minusMethodInt = new Method { Name = "Minus(Integer,)", ReturnType = "Integer" };
+        minusMethodInt.Parameters.Add("p", new Variable { Name = "p", Type = "Integer" });
+        real.Methods.Add("Minus(Integer,)", minusMethodInt);
+
+        var multMethodInt = new Method { Name = "Mult(Integer,)", ReturnType = "Integer" };
+        multMethodInt.Parameters.Add("p", new Variable { Name = "p", Type = "Integer" });
+        real.Methods.Add("Mult(Integer,)", multMethodInt);
+
+        var divMethodInt = new Method { Name = "Div(Integer,)", ReturnType = "Integer" };
+        divMethodInt.Parameters.Add("p", new Variable { Name = "p", Type = "Integer" });
+        real.Methods.Add("Div(Integer,)", divMethodInt);
+
+        // Operations with Real
+        var plusMethodReal = new Method { Name = "Plus(Real,)", ReturnType = "Real" };
+        plusMethodReal.Parameters.Add("p", new Variable { Name = "p", Type = "Real" });
+        real.Methods.Add("Plus(Real,)", plusMethodReal);
+
+        var minusMethodReal = new Method { Name = "Minus(Real,)", ReturnType = "Real" };
+        minusMethodReal.Parameters.Add("p", new Variable { Name = "p", Type = "Real" });
+        real.Methods.Add("Minus(Real,)", minusMethodReal);
+
+        var multMethodReal = new Method { Name = "Mult(Real,)", ReturnType = "Real" };
+        multMethodReal.Parameters.Add("p", new Variable { Name = "p", Type = "Real" });
+        real.Methods.Add("Mult(Real,)", multMethodReal);
+
+        var divMethodReal = new Method { Name = "Div(Real,)", ReturnType = "Real" };
+        divMethodReal.Parameters.Add("p", new Variable { Name = "p", Type = "Real" });
+        real.Methods.Add("Div(Real,)", divMethodReal);
+
+        var remMethod = new Method { Name = "Rem(Real,)", ReturnType = "Real" };
+        remMethod.Parameters.Add("p",
+            new Variable { Name = "p", Type = "Integer" });
+        real.Methods.Add("Rem(Real,)", remMethod);
+
+        // Comparisons with Integer
+        var lessMethodInt = new Method { Name = "Less(Integer,)", ReturnType = "Boolean" };
+        lessMethodInt.Parameters.Add("p", new Variable { Name = "p", Type = "Integer" });
+        real.Methods.Add("Less(Integer,)", lessMethodInt);
+
+        var lessEqualMethodInt = new Method { Name = "LessEqual(Integer,)", ReturnType = "Boolean" };
+        lessEqualMethodInt.Parameters.Add("p", new Variable { Name = "p", Type = "Integer" });
+        real.Methods.Add("LessEqual(Integer,)", lessEqualMethodInt);
+
+        var greaterMethodInt = new Method { Name = "Greater(Integer,)", ReturnType = "Boolean" };
+        greaterMethodInt.Parameters.Add("p", new Variable { Name = "p", Type = "Integer" });
+        real.Methods.Add("Greater(Integer,)", greaterMethodInt);
+
+        var greaterEqualMethodInt = new Method { Name = "GreaterEqual(Integer,)", ReturnType = "Boolean" };
+        greaterEqualMethodInt.Parameters.Add("p", new Variable { Name = "p", Type = "Integer" });
+        real.Methods.Add("GreaterEqual(Integer,)", greaterEqualMethodInt);
+
+        var equalMethodInt = new Method { Name = "Equal(Integer,)", ReturnType = "Boolean" };
+        equalMethodInt.Parameters.Add("p", new Variable { Name = "p", Type = "Integer" });
+        real.Methods.Add("Equal(Integer,)", equalMethodInt);
+
+        // Comparisons with Real
+        var lessMethodReal = new Method { Name = "Less(Real,)", ReturnType = "Boolean" };
+        lessMethodReal.Parameters.Add("p", new Variable { Name = "p", Type = "Real" });
+        real.Methods.Add("Less(Real,)", lessMethodReal);
+
+        var lessEqualMethodReal = new Method { Name = "LessEqual(Real,)", ReturnType = "Boolean" };
+        lessEqualMethodReal.Parameters.Add("p", new Variable { Name = "p", Type = "Real" });
+        real.Methods.Add("LessEqual(Real,)", lessEqualMethodReal);
+
+        var greaterMethodReal = new Method { Name = "Greater(Real,)", ReturnType = "Boolean" };
+        greaterMethodReal.Parameters.Add("p", new Variable { Name = "p", Type = "Real" });
+        real.Methods.Add("Greater(Real,)", greaterMethodReal);
+
+        var greaterEqualMethodReal = new Method { Name = "GreaterEqual(Real,)", ReturnType = "Boolean" };
+        greaterEqualMethodReal.Parameters.Add("p", new Variable { Name = "p", Type = "Real" });
+        real.Methods.Add("GreaterEqual(Real,)", greaterEqualMethodReal);
+
+        var equalMethodReal = new Method { Name = "Equal(Real,)", ReturnType = "Boolean" };
+        equalMethodReal.Parameters.Add("p", new Variable { Name = "p", Type = "Real" });
+        real.Methods.Add("Equal(Real,)", equalMethodReal);
+
+        // adding constructors to Real
+        real.Constructors.Add("Real()", new Constructor { Name = "Real()" });
+        real.Constructors.Add("Real(Integer,)", new Constructor { Name = "Real(Integer,)", Type = "Real" });
+        real.Constructors.Add("Real(Real,)", new Constructor { Name = "Real(Real,)", Type = "Real" });
+
+        // adding variables to Real
+        real.Variables.Add("Min", new Variable { Name = "Min", Type = "Real" });
+        real.Variables.Add("Max", new Variable { Name = "Max", Type = "Real" });
+        real.Variables.Add("Epsilon", new Variable { Name = "Epsilon", Type = "Real" });
+
+        _classes.Add("Real", real);
+    }
+
+    private void AddBoolean()
+    {
+        // create Boolean class
+        var boolean = new CurrentClass { Name = "Boolean" };
+
+        // adding methods to Boolean
+        boolean.Methods.Add("toInteger()", new Method { Name = "toInteger()", ReturnType = "Integer" });
+
+        var orMethod = new Method { Name = "Or(Boolean,)", ReturnType = "Boolean" };
+        orMethod.Parameters.Add("p", new Variable { Name = "p", Type = "Boolean" });
+        boolean.Methods.Add("Or(Boolean,)", orMethod);
+
+        var andMethod = new Method { Name = "And(Boolean,)", ReturnType = "Boolean" };
+        andMethod.Parameters.Add("p", new Variable { Name = "p", Type = "Boolean" });
+        boolean.Methods.Add("And(Boolean,)", andMethod);
+
+        var xorMethod = new Method { Name = "Xor(Boolean,)", ReturnType = "Boolean" };
+        xorMethod.Parameters.Add("p", new Variable { Name = "p", Type = "Boolean" });
+        boolean.Methods.Add("Xor(Boolean,)", xorMethod);
+
+        var notMethod = new Method { Name = "Not()", ReturnType = "Boolean" };
+        boolean.Methods.Add("Not()", notMethod);
+
+        // adding constructors to Boolean
+        boolean.Constructors.Add("Boolean()", new Constructor { Name = "Boolean()" });
+        boolean.Constructors.Add("Boolean(Boolean,)", new Constructor { Name = "Boolean(Boolean,)", Type = "Boolean" });
+
+        _classes.Add("Boolean", boolean);
+    }
+
+    private void AddArray()
+    {
+        // create Array class
+        var array = new CurrentClass { Name = "Array", Generic = "T" };
+
+        // adding methods to Array
+        array.Methods.Add("toList()", new Method { Name = "toList()", ReturnType = "List" });
+        array.Methods.Add("Length()", new Method { Name = "Length()", ReturnType = "Integer" });
+
+        var getMethod = new Method { Name = "Get(Integer,)", ReturnType = "T" };
+        getMethod.Parameters.Add("i", new Variable { Name = "i", Type = "Integer" });
+        array.Methods.Add("Get(Integer,)", getMethod);
+
+        var setMethod = new Method { Name = "Set(Integer,T,)", ReturnType = "Void" };
+        setMethod.Parameters.Add("i", new Variable { Name = "i", Type = "Integer" });
+        setMethod.Parameters.Add("v", new Variable { Name = "v", Type = "T" });
+        array.Methods.Add("Set(Integer,T,)", setMethod);
+
+        // adding constructors to Array
+        array.Constructors.Add("Array()", new Constructor { Name = "Array()" });
+        array.Constructors.Add("Array(Integer,)", new Constructor { Name = "Array(Integer,)", Type = "Array" });
+
+        _classes.Add("Array", array);
+    }
+
+    private void AddList()
+    {
+        // create List class
+        var list = new CurrentClass { Name = "List", Generic = "T" };
+
+        // adding methods to List
+        var appendMethod = new Method { Name = "Append(T,)", ReturnType = "List" };
+        appendMethod.Parameters.Add("v", new Variable { Name = "v", Type = "T" });
+        list.Methods.Add("Append(T,)", appendMethod);
+
+        var headMethod = new Method { Name = "Head()", ReturnType = "T" };
+        list.Methods.Add("Head()", headMethod);
+
+        var tailMethod = new Method { Name = "Tail()", ReturnType = "T" };
+        list.Methods.Add("Tail()", tailMethod);
+
+        // adding constructors to List
+        list.Constructors.Add("List()", new Constructor { Name = "List()" });
+        // The empty parameter constructor is the same as the default, so it may not need to be added again.
+        list.Constructors.Add("List(T,)", new Constructor { Name = "List(T,)", Type = "List" });
+        var constructorWithCount = new Constructor { Name = "List(T,Integer,)", Type = "List" };
+        constructorWithCount.Parameters.Add("p", new Variable { Name = "p", Type = "T" });
+        constructorWithCount.Parameters.Add("count", new Variable { Name = "count", Type = "Integer" });
+        list.Constructors.Add("List(T,Integer,)", constructorWithCount);
+        
+        _classes.Add("List", list);
+    }
 }
 
 class CurrentClass : IEquatable<CurrentClass>
@@ -396,7 +702,7 @@ class Method : IEquatable<Method>
 {
     public string Name { get; init; }
     public string ReturnType { get; init; }
-    public Body MethodBody { get; init; }
+    public Body? MethodBody { get; init; }
     public Dictionary<string, Variable> Parameters { get; } = new();
 
     // TODO: fix
@@ -415,7 +721,7 @@ class Constructor : IEquatable<Constructor>
 {
     public string Name { get; init; }
     public string Type { get; init; }
-    public Body ConstructorBody { get; init; }
+    public Body? ConstructorBody { get; init; }
     public Dictionary<string, Variable> Parameters { get; } = new();
 
     // TODO: fix
