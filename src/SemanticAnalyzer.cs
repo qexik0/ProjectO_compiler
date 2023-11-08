@@ -208,10 +208,12 @@ public class SemanticAnalyzer
 
             if (!curClass.Methods.ContainsKey(name))
             {
-                ReportNonFatal($"There is no such method: {name}");
+                ReportFatal($"There is no such method: {name}");
             }
 
             var method = curClass.Methods[name];
+            
+            
         }
 
         return currentType;
@@ -231,6 +233,11 @@ public class SemanticAnalyzer
         var brackets = new StringBuilder(genericCount).Insert(0, "]", genericCount).ToString();
         type.Append(brackets);
         return type.ToString();
+    }
+
+    private void ReportFatal(string text)
+    {
+        // TODO(qexik): implement reporting
     }
 
     private void ReportNonFatal(string text)
