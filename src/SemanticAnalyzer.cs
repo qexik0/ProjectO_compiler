@@ -142,38 +142,125 @@ public class SemanticAnalyzer
         var currentClass = classes[declaration.Name.ClassIdentifier.Name];
         foreach (var (key, method) in currentClass.Methods)
         {
-            AnalyzeBody(method.MethodBody, currentClass, method.ReturnType);
+            AnalyzeBody(method.MethodBody, currentClass, new Dictionary<string, Variable>(), method.ReturnType,
+                method.ReturnType != "Void");
         }
 
         foreach (var (key, constructor) in currentClass.Constructors)
         {
-            AnalyzeBody(constructor.ConstructorBody, currentClass, "Void");
+            AnalyzeBody(constructor.ConstructorBody, currentClass, new Dictionary<string, Variable>(), "Void", false);
         }
     }
 
-    private void AnalyzeBody(Body body, CurrentClass currentClass, string returnType)
+    private void AnalyzeBody(Body body, CurrentClass currentClass, Dictionary<string, Variable> outerVariables,
+        string returnType, bool shouldReturn)
     {
-        var newVariables = new List<Variable>();
-        var newTypes = new List<Variable>();
+        var newVariables = new Dictionary<string, Variable>();
+        var hasReturn = false;
 
         foreach (var node in body.StatementsOrDeclarations)
         {
+            var newDict = MergeDicts(newVariables, outerVariables);
             switch (node)
             {
                 case VariableDeclaration variableDeclaration:
-                    newVariables.Add(new Variable
+                    newVariables.Add(variableDeclaration.VariableIdentifier.Name, new Variable
                     {
                         Name = variableDeclaration.VariableIdentifier.Name,
-                        Type = EvalExpression(variableDeclaration.VariableExpression, currentClass)
+                        Type = EvalExpression(variableDeclaration.VariableExpression, currentClass, newDict)
                     });
+                    break;
+                case Statement statement:
+                    switch (statement.StatementNode)
+                    {
+                        case Assignment assignment:
+                            if (!newVariables.ContainsKey(assignment.AssignmentIdentifier.Name) &&
+                                !outerVariables.ContainsKey(assignment.AssignmentIdentifier.Name) &&
+                                !currentClass.Variables.ContainsKey(assignment.AssignmentIdentifier.Name))
+                            {
+                                ReportFatal($"Undeclared Variable: {assignment.AssignmentIdentifier.Name}");
+                                throw new Exception();
+                            }
+
+                            var varType =
+                                newVariables.TryGetValue(assignment.AssignmentIdentifier.Name, out var variable)
+                                    ? variable.Type
+                                    : outerVariables.TryGetValue(assignment.AssignmentIdentifier.Name,
+                                        out var outVariable)
+                                        ? outVariable.Type
+                                        : currentClass.Variables[assignment.AssignmentIdentifier.Name].Type;
+                            var exprType = EvalExpression(assignment.AssignmentExpression, currentClass, newDict);
+                            if (varType != exprType)
+                            {
+                                ReportNonFatal(
+                                    $"Cannot assign type {exprType} to Variable {assignment.AssignmentIdentifier.Name} of type {varType}");
+                            }
+
+                            break;
+                        case WhileLoop whileLoop:
+                            var conditionType =
+                                EvalExpression(whileLoop.WhileConditionExpression, currentClass, newDict);
+                            if (conditionType != "Boolean")
+                            {
+                                ReportNonFatal(
+                                    $"Condition in WhileLoop should have type Boolean, but got {conditionType}");
+                            }
+
+                            AnalyzeBody(whileLoop.WhileBody, currentClass, newDict, returnType, false);
+                            break;
+                        case IfStatement ifStatement:
+                            var ifConditionType =
+                                EvalExpression(ifStatement.IfConditionExpression, currentClass, newDict);
+                            if (ifConditionType != "Boolean")
+                            {
+                                ReportNonFatal(
+                                    $"Condition in WhileLoop should have type Boolean, but got {ifConditionType}");
+                            }
+
+                            AnalyzeBody(ifStatement.IfBody, currentClass, newDict, returnType, false);
+                            AnalyzeBody(ifStatement.ElseBody, currentClass, newDict, returnType, false);
+                            break;
+                        case ReturnStatement returnStatement:
+                            hasReturn = true;
+                            var type = returnStatement.ReturnExpression == null
+                                ? "Void"
+                                : EvalExpression(returnStatement.ReturnExpression, currentClass, newDict);
+                            if (type != returnType)
+                            {
+                                ReportNonFatal($"The method should return type {returnType}, but tries to return {type}");
+                            }
+                            break;
+                    }
                     break;
             }
         }
+
+        if (shouldReturn && !hasReturn)
+        {
+            // TODO: explain where
+            ReportNonFatal($"Missing return statement");
+        }
     }
 
-    private string EvalExpression(Expression expression, CurrentClass currentClass)
+    private Dictionary<string, Variable> MergeDicts(Dictionary<string, Variable> d1, Dictionary<string, Variable> d2)
     {
-        // expression.PrimaryOrConstructorCall.
+        var dict = new Dictionary<string, Variable>();
+        foreach (var (key, value) in d1)
+        {
+            dict.Add(key, value);
+        }
+
+        foreach (var (key, value) in d2)
+        {
+            dict.Add(key, value);
+        }
+
+        return dict;
+    }
+
+    private string EvalExpression(Expression expression, CurrentClass currentClass,
+        Dictionary<string, Variable> curVariables)
+    {
         var currentType = "";
         currentType = expression.PrimaryOrConstructorCall switch
         {
@@ -190,8 +277,22 @@ public class SemanticAnalyzer
             _ => currentType
         };
 
+        if (curVariables.TryGetValue(currentType, out var variable))
+        {
+            currentType = variable.Type;
+        }
+        else if (currentClass.Variables.TryGetValue(currentType, out var classVariable))
+        {
+            currentType = classVariable.Type;
+        }
+
         foreach (var (identifier, arguments) in expression.Calls)
         {
+            if (!classes.ContainsKey(currentType))
+            {
+                ReportFatal($"There is no such Type {currentType}");
+                throw new Exception();
+            }
             var curClass = classes[currentType];
             string name;
             if (arguments == null)
@@ -201,7 +302,8 @@ public class SemanticAnalyzer
             else
             {
                 var list = arguments.Expressions
-                    .Select(expr => new Variable { Name = "", Type = EvalExpression(expr, currentClass) }).ToList();
+                    .Select(expr => new Variable { Name = "", Type = EvalExpression(expr, currentClass, curVariables) })
+                    .ToList();
 
                 name = CreateName(identifier.Name, list);
             }
@@ -209,11 +311,11 @@ public class SemanticAnalyzer
             if (!curClass.Methods.ContainsKey(name))
             {
                 ReportFatal($"There is no such method: {name}");
+                throw new Exception();
             }
 
             var method = curClass.Methods[name];
-            
-            
+            currentType = method.ReturnType;
         }
 
         return currentType;
