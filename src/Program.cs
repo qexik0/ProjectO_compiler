@@ -24,6 +24,11 @@ public class CLIFrontent
             inputFile,
             outputFile
         };
+        var semanticReport = new Command("semantic-report", "Produce a semantic analysis report")
+        {
+            inputFile,
+            outputFile
+        };
         lexicalReport.SetHandler((input, output) => {
             var lexer = new Lexer();
             using var source = new StreamReader(input.FullName);
@@ -88,8 +93,41 @@ public class CLIFrontent
                 return sb.ToString();
             }
         }, inputFile, outputFile);
+        semanticReport.SetHandler((input, output) =>
+        {
+            var lexer = new Lexer();
+            using var source = new StreamReader(input.FullName);
+            using var report = new StreamWriter(output);
+            var tokens = lexer.Tokenize(source);
+            if (tokens.Any(x => x.Type == TokenType.Undefined))
+            {
+                var failedTokens = tokens.Where(x => x.Type == TokenType.Undefined).ToArray();
+                report.WriteLine("Lexical analysis failed. Undefined tokens:");
+                foreach (var token in failedTokens)
+                {
+                    report.WriteLine($"{token.Value} at {token.LineNumber}:{token.ColumnNumber}");
+                }
+                report.WriteLine("Syntax analysis aborted.");
+                return;
+            }
+            var syntaxer = new SyntaxAnalyzer(tokens);
+            nodes.AstNode program;
+            try
+            {
+                program = syntaxer.RunAnalyzer();
+            }
+            catch (Exception ex)
+            {
+                report.WriteLine($"Syntax Analyzing failed with the following error:\n{ex.Message}");
+                return;
+            }
+            report.WriteLine("Syntax analyzing finished successfully!");
+            var semanticAnalyzer = new SemanticAnalyzer(program as nodes.Program, tokens, report);
+            semanticAnalyzer.AnalyzeProgram();
+        }, inputFile, outputFile);
         rootCommand.Add(lexicalReport);
         rootCommand.Add(syntaxReport);
+        rootCommand.Add(semanticReport);
         rootCommand.Invoke(args);
     }
 }

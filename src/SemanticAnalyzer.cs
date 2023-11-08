@@ -9,12 +9,14 @@ public class SemanticAnalyzer
     private Program _root;
     private List<Token> _tokens;
     private Dictionary<string, CurrentClass> _classes;
+    private StreamWriter _report;
 
-    public SemanticAnalyzer(Program root, List<Token> tokens)
+    public SemanticAnalyzer(Program root, List<Token> tokens, StreamWriter report)
     {
         _root = root;
         _tokens = tokens;
         _classes = CollectClasses(_root);
+        _report = report;
         AddBasicClasses();
     }
 
@@ -340,12 +342,12 @@ public class SemanticAnalyzer
 
     private void ReportFatal(string text)
     {
-        // TODO(qexik): implement reporting
+        _report.WriteLine($"NON-FATAL: {text}");
     }
 
     private void ReportNonFatal(string text)
     {
-        // TODO(qexik): implement reporting
+        _report.WriteLine($"FATAL: {text}");
     }
 
     private void AddBasicClasses()
