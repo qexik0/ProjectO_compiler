@@ -227,10 +227,13 @@ public class SemanticAnalyzer
                                 : EvalExpression(returnStatement.ReturnExpression, currentClass, newDict);
                             if (type != returnType)
                             {
-                                ReportNonFatal($"The method should return type {returnType}, but tries to return {type}");
+                                ReportNonFatal(
+                                    $"The method should return type {returnType}, but tries to return {type}");
                             }
+
                             break;
                     }
+
                     break;
             }
         }
@@ -293,6 +296,7 @@ public class SemanticAnalyzer
                 ReportFatal($"There is no such Type {currentType}");
                 throw new Exception();
             }
+
             var curClass = classes[currentType];
             string name;
             if (arguments == null)
@@ -424,96 +428,3 @@ class Constructor : IEquatable<Constructor>
         return Type.Equals(other.Type) && Parameters.SequenceEqual(other.Parameters);
     }
 }
-
-
-// foreach (var memberDeclaration in declaration.Members)
-//         {
-//             var member = memberDeclaration.Member;
-//             switch (member)
-//             {
-//                 case MethodDeclaration method:
-//                     var methodParameters = new List<Variable>();
-//                     if (method.MethodParameters != null)
-//                     {
-//                         methodParameters.AddRange(method.MethodParameters.ParameterDeclarations.Select(parameter =>
-//                             new Variable
-//                             {
-//                                 Name = parameter.ParameterIdentifier.Name,
-//                                 Type = GetTypeFromClassName(parameter.ParameterClassName)
-//                             }));
-//                     }
-//
-//                     AnalyzeBody(method.MethodBody, variables.Concat(methodParameters).ToList(), methods, currentClass,
-//                         method.ReturnTypeIdentifier == null
-//                             ? "Void"
-//                             : GetTypeFromClassName(method.ReturnTypeIdentifier));
-//                     break;
-//                 case ConstructorDeclaration constructor:
-//                     var constructorParameters = new List<Variable>();
-//                     if (constructor.ConstructorParameters != null)
-//                     {
-//                         constructorParameters.AddRange(constructor.ConstructorParameters.ParameterDeclarations.Select(
-//                             parameter =>
-//                                 new Variable
-//                                 {
-//                                     Name = parameter.ParameterIdentifier.Name,
-//                                     Type = GetTypeFromClassName(parameter.ParameterClassName)
-//                                 }
-//                         ));
-//                     }
-//
-//                     AnalyzeBody(constructor.ConstructorBody, variables.Concat(constructorParameters).ToList(), methods,
-//                         currentClass, "Void");
-//                     break;
-//             }
-//         }
-
-// private (List<Variable>, List<Method>, List<Constructor>) GetMembersWithTypes(ClassDeclaration declaration)
-// {
-//     var variables = new List<Variable>();
-//     var methods = new List<Method>();
-//     var constructors = new List<Constructor>();
-//
-//     foreach (var member in declaration.Members)
-//     {
-//         switch (member.Member)
-//         {
-//             case VariableDeclaration variableDeclaration:
-//                 var varName = variableDeclaration.VariableIdentifier.Name;
-//                 var className =
-//                     (ClassName)((Primary)variableDeclaration.VariableExpression.PrimaryOrConstructorCall).Node;
-//                 var type = GetTypeFromClassName(className);
-//                 var variable = new Variable { Name = varName, Type = type };
-//                 variables.Add(variable);
-//                 break;
-//             case MethodDeclaration methodDeclaration:
-//                 var methodName = methodDeclaration.MethodIdentifier.Name;
-//                 var returnType = methodDeclaration.ReturnTypeIdentifier;
-//                 var methodType = returnType == null ? "Void" : GetTypeFromClassName(returnType);
-//
-//                 var method = new Method { Name = methodName, ReturnType = methodType };
-//                 if (methodDeclaration.MethodParameters != null)
-//                 {
-//                     method.Parameters.AddRange(methodDeclaration.MethodParameters.ParameterDeclarations.Select(
-//                         parameter =>
-//                             GetTypeFromClassName(parameter.ParameterClassName)));
-//                 }
-//
-//                 methods.Add(method);
-//                 break;
-//             case ConstructorDeclaration constructorDeclaration:
-//                 var constructor = new Constructor { Type = GetTypeFromClassName(declaration.Name) };
-//                 if (constructorDeclaration.ConstructorParameters != null)
-//                 {
-//                     constructor.Parameters.AddRange(
-//                         constructorDeclaration.ConstructorParameters.ParameterDeclarations.Select(parameter =>
-//                             GetTypeFromClassName(parameter.ParameterClassName)));
-//                 }
-//
-//                 constructors.Add(constructor);
-//                 break;
-//         }
-//     }
-//
-//     return (variables, methods, constructors);
-// }
