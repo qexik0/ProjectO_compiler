@@ -175,23 +175,20 @@ public class SemanticAnalyzer
     {
         // expression.PrimaryOrConstructorCall.
         var currentType = "";
-        switch (expression.PrimaryOrConstructorCall)
+        currentType = expression.PrimaryOrConstructorCall switch
         {
-            case Primary primary:
-                currentType = primary.Node switch
-                {
-                    IntegerLiteral => "Integer",
-                    RealLiteral => "Real",
-                    BooleanLiteral => "Boolean",
-                    This => currentClass.Name,
-                    ClassName className => className.ClassIdentifier.Name,
-                    _ => currentType
-                };
-                break;
-            case ConstructorCall constructorCall:
-                currentType = constructorCall.ConstructorClassName.ClassIdentifier.Name;
-                break;
-        }
+            Primary primary => primary.Node switch
+            {
+                IntegerLiteral => "Integer",
+                RealLiteral => "Real",
+                BooleanLiteral => "Boolean",
+                This => currentClass.Name,
+                ClassName className => className.ClassIdentifier.Name,
+                _ => currentType
+            },
+            ConstructorCall constructorCall => constructorCall.ConstructorClassName.ClassIdentifier.Name,
+            _ => currentType
+        };
 
         foreach (var (identifier, arguments) in expression.Calls)
         {
@@ -211,7 +208,7 @@ public class SemanticAnalyzer
 
             if (!curClass.Methods.ContainsKey(name))
             {
-                throw new Exception("");
+                ReportNonFatal($"There is no such method: {name}");
             }
 
             var method = curClass.Methods[name];
@@ -234,6 +231,11 @@ public class SemanticAnalyzer
         var brackets = new StringBuilder(genericCount).Insert(0, "]", genericCount).ToString();
         type.Append(brackets);
         return type.ToString();
+    }
+
+    private void ReportNonFatal(string text)
+    {
+        // TODO(qexik): implement reporting
     }
 }
 
