@@ -12,7 +12,7 @@ public class CLIFrontent
         Thread.CurrentThread.CurrentCulture = ci;
         Thread.CurrentThread.CurrentUICulture = ci;
         var rootCommand = new RootCommand("Project O language compiler");
-        var inputFile = new Option<FileInfo>(name: "--input",description: "Input source file");
+        var inputFile = new Option<FileInfo>(name: "--input", description: "Input source file");
         var outputFile = new Option<string>(name: "--output", description: "Output path for the lexical report");
         var lexicalReport = new Command("lexer-report", "Produce a lexical analysis report")
         {
@@ -29,7 +29,8 @@ public class CLIFrontent
             inputFile,
             outputFile
         };
-        lexicalReport.SetHandler((input, output) => {
+        lexicalReport.SetHandler((input, output) =>
+        {
             var lexer = new Lexer();
             using var source = new StreamReader(input.FullName);
             var tokens = lexer.Tokenize(source);
@@ -54,9 +55,11 @@ public class CLIFrontent
                 {
                     report.WriteLine($"{token.Value} at {token.LineNumber}:{token.ColumnNumber}");
                 }
+
                 report.WriteLine("Syntax analysis aborted.");
                 return;
             }
+
             var syntaxer = new SyntaxAnalyzer(tokens);
             nodes.AstNode program;
             try
@@ -68,6 +71,7 @@ public class CLIFrontent
                 report.WriteLine($"Syntax Analyzing failed with the following error:\n{ex.Message}");
                 return;
             }
+
             report.WriteLine("Syntax analyzing finished successfully! The AST:");
             report.WriteLine(PrettifySExpression(program.ToString()));
 
@@ -87,8 +91,10 @@ public class CLIFrontent
                     {
                         --indent;
                     }
+
                     sb.Append(c);
                 }
+
                 sb.Remove(0, Environment.NewLine.Length);
                 return sb.ToString();
             }
@@ -107,9 +113,11 @@ public class CLIFrontent
                 {
                     report.WriteLine($"{token.Value} at {token.LineNumber}:{token.ColumnNumber}");
                 }
+
                 report.WriteLine("Syntax analysis aborted.");
                 return;
             }
+
             var syntaxer = new SyntaxAnalyzer(tokens);
             nodes.AstNode program;
             try
@@ -121,9 +129,19 @@ public class CLIFrontent
                 report.WriteLine($"Syntax Analyzing failed with the following error:\n{ex.Message}");
                 return;
             }
-            report.WriteLine("Syntax analyzing finished successfully!");
-            var semanticAnalyzer = new SemanticAnalyzer(program as nodes.Program, tokens, report);
-            semanticAnalyzer.AnalyzeProgram();
+
+            report.WriteLine("Syntax analyzing finished successfully!\n");
+            report.WriteLine("Semantics Report:");
+            var semanticAnalyzer = new SemanticAnalyzer((nodes.Program)program, tokens, report);
+            try
+            {
+                semanticAnalyzer.AnalyzeProgram();
+                report.WriteLine("Semantic Analyzing finished successfully!");
+            }
+            catch (Exception)
+            {
+                report.WriteLine("Semantic Analyzing finished with errors!");
+            }
         }, inputFile, outputFile);
         rootCommand.Add(lexicalReport);
         rootCommand.Add(syntaxReport);

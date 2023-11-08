@@ -151,7 +151,7 @@ public class SemanticAnalyzer
         }
     }
 
-    private void AnalyzeBody(Body body, CurrentClass currentClass, Dictionary<string, Variable> outerVariables,
+    private bool AnalyzeBody(Body body, CurrentClass currentClass, Dictionary<string, Variable> outerVariables,
         string returnType, bool shouldReturn)
     {
         var newVariables = new Dictionary<string, Variable>();
@@ -205,7 +205,7 @@ public class SemanticAnalyzer
                                     $"Condition in WhileLoop should have type Boolean, but got {conditionType}");
                             }
 
-                            AnalyzeBody(whileLoop.WhileBody, currentClass, newDict, returnType, false);
+                            hasReturn = AnalyzeBody(whileLoop.WhileBody, currentClass, newDict, returnType, false);
                             break;
                         case IfStatement ifStatement:
                             var ifConditionType =
@@ -216,8 +216,9 @@ public class SemanticAnalyzer
                                     $"Condition in WhileLoop should have type Boolean, but got {ifConditionType}");
                             }
 
-                            AnalyzeBody(ifStatement.IfBody, currentClass, newDict, returnType, false);
-                            AnalyzeBody(ifStatement.ElseBody, currentClass, newDict, returnType, false);
+                            var ret1 = AnalyzeBody(ifStatement.IfBody, currentClass, newDict, returnType, false);
+                            var ret2 = AnalyzeBody(ifStatement.ElseBody, currentClass, newDict, returnType, false);
+                            hasReturn = ret1 && ret2;
                             break;
                         case ReturnStatement returnStatement:
                             hasReturn = true;
@@ -242,6 +243,8 @@ public class SemanticAnalyzer
             // TODO: explain where
             ReportNonFatal($"Missing return statement");
         }
+
+        return true;
     }
 
     private Dictionary<string, Variable> MergeDicts(Dictionary<string, Variable> d1, Dictionary<string, Variable> d2)
@@ -342,12 +345,12 @@ public class SemanticAnalyzer
 
     private void ReportFatal(string text)
     {
-        _report.WriteLine($"NON-FATAL: {text}");
+        _report.WriteLine($"FATAL: {text}");
     }
 
     private void ReportNonFatal(string text)
     {
-        _report.WriteLine($"FATAL: {text}");
+        _report.WriteLine($"NON-FATAL: {text}");
     }
 
     private void AddBasicClasses()
