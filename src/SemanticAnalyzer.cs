@@ -147,11 +147,13 @@ public class SemanticAnalyzer
 
         foreach (var (key, constructor) in currentClass.Constructors)
         {
-            AnalyzeBody(constructor.ConstructorBody!, currentClass, constructor.Name, constructor.Parameters, "Void", false);
+            AnalyzeBody(constructor.ConstructorBody!, currentClass, constructor.Name, constructor.Parameters, "Void",
+                false);
         }
     }
 
-    private bool AnalyzeBody(Body body, CurrentClass currentClass, string curMethod, Dictionary<string, Variable> outerVariables,
+    private bool AnalyzeBody(Body body, CurrentClass currentClass, string curMethod,
+        Dictionary<string, Variable> outerVariables,
         string returnType, bool shouldReturn)
     {
         var newVariables = new Dictionary<string, Variable>();
@@ -205,7 +207,8 @@ public class SemanticAnalyzer
                                     $"Condition in WhileLoop should have type Boolean, but got {conditionType}");
                             }
 
-                            hasReturn = AnalyzeBody(whileLoop.WhileBody, currentClass, curMethod, newDict, returnType, false);
+                            hasReturn = AnalyzeBody(whileLoop.WhileBody, currentClass, curMethod, newDict, returnType,
+                                false);
                             break;
                         case IfStatement ifStatement:
                             var ifConditionType =
@@ -216,8 +219,10 @@ public class SemanticAnalyzer
                                     $"Condition in WhileLoop should have type Boolean, but got {ifConditionType}");
                             }
 
-                            var ret1 = AnalyzeBody(ifStatement.IfBody, currentClass, curMethod, newDict, returnType, false);
-                            var ret2 = AnalyzeBody(ifStatement.ElseBody, currentClass, curMethod, newDict, returnType, false);
+                            var ret1 = AnalyzeBody(ifStatement.IfBody, currentClass, curMethod, newDict, returnType,
+                                false);
+                            var ret2 = AnalyzeBody(ifStatement.ElseBody, currentClass, curMethod, newDict, returnType,
+                                false);
                             hasReturn = ret1 && ret2;
                             break;
                         case ReturnStatement returnStatement:
@@ -354,6 +359,9 @@ public class SemanticAnalyzer
 
     private void AddBasicClasses()
     {
+        AddClass();
+        AddAnyValue();
+        AddAnyRef();
         AddInteger();
         AddReal();
         AddBoolean();
@@ -361,10 +369,31 @@ public class SemanticAnalyzer
         AddList();
     }
 
+    private void AddClass()
+    {
+        var cl = new CurrentClass { Name = "Class" };
+
+        _classes.Add("Class", cl);
+    }
+
+    private void AddAnyValue()
+    {
+        var anyValue = new CurrentClass { Name = "AnyValue", BaseClass = "Class" };
+
+        _classes.Add("AnyValue", anyValue);
+    }
+
+    private void AddAnyRef()
+    {
+        var anyRef = new CurrentClass { Name = "AnyRef", BaseClass = "Class" };
+
+        _classes.Add("AnyRef", anyRef);
+    }
+
     private void AddInteger()
     {
         // create Integer
-        var integer = new CurrentClass { Name = "Integer" };
+        var integer = new CurrentClass { Name = "Integer", BaseClass = "AnyValue" };
         // adding methods
         integer.Methods.Add("toReal()", new Method { Name = "toReal()", ReturnType = "Real" });
         integer.Methods.Add("toBoolean()", new Method { Name = "toBoolean()", ReturnType = "Boolean" });
@@ -468,7 +497,7 @@ public class SemanticAnalyzer
     private void AddReal()
     {
         // create Real class
-        var real = new CurrentClass { Name = "Real" };
+        var real = new CurrentClass { Name = "Real", BaseClass = "AnyValue" };
 
         // adding methods to Real
         real.Methods.Add("toInteger()", new Method { Name = "toInteger()", ReturnType = "Integer" });
@@ -577,7 +606,7 @@ public class SemanticAnalyzer
     private void AddBoolean()
     {
         // create Boolean class
-        var boolean = new CurrentClass { Name = "Boolean" };
+        var boolean = new CurrentClass { Name = "Boolean", BaseClass = "AnyValue" };
 
         // adding methods to Boolean
         boolean.Methods.Add("toInteger()", new Method { Name = "toInteger()", ReturnType = "Integer" });
@@ -607,7 +636,7 @@ public class SemanticAnalyzer
     private void AddArray()
     {
         // create Array class
-        var array = new CurrentClass { Name = "Array", Generic = "T" };
+        var array = new CurrentClass { Name = "Array", Generic = "T", BaseClass = "AnyRef" };
 
         // adding methods to Array
         array.Methods.Add("toList()", new Method { Name = "toList()", ReturnType = "List" });
@@ -632,7 +661,7 @@ public class SemanticAnalyzer
     private void AddList()
     {
         // create List class
-        var list = new CurrentClass { Name = "List", Generic = "T" };
+        var list = new CurrentClass { Name = "List", Generic = "T", BaseClass = "AnyRef" };
 
         // adding methods to List
         var appendMethod = new Method { Name = "Append(T)", ReturnType = "List" };
