@@ -191,7 +191,7 @@ public class SemanticAnalyzer
                                         ? outVariable.Type
                                         : currentClass.Variables[assignment.AssignmentIdentifier.Name].Type;
                             var exprType = EvalExpression(assignment.AssignmentExpression, currentClass, newDict);
-                            if (varType != exprType)
+                            if (!CheckIfAncestor(exprType, varType))
                             {
                                 ReportNonFatal(
                                     $"Cannot assign type {exprType} to Variable {assignment.AssignmentIdentifier.Name} of type {varType}");
@@ -345,6 +345,27 @@ public class SemanticAnalyzer
         var brackets = new StringBuilder(genericCount).Insert(0, "]", genericCount).ToString();
         type.Append(brackets);
         return type.ToString();
+    }
+
+    private bool CheckIfAncestor(string className, string candidate)
+    {
+        if (className == candidate)
+        {
+            return true;
+        }
+
+        var curClass = _classes.TryGetValue(className, out var cur) ? cur.BaseClass : null;
+        while (curClass != null)
+        {
+            if (curClass == candidate)
+            {
+                return true;
+            }
+
+            curClass = _classes.TryGetValue(curClass, out cur) ? cur.BaseClass : null;
+        }
+
+        return false;
     }
 
     private void ReportFatal(string text)
