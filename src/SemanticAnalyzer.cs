@@ -141,14 +141,27 @@ public class SemanticAnalyzer
         var currentClass = _classes[declaration.Name.ClassIdentifier.Name];
         foreach (var (key, method) in currentClass.Methods)
         {
+            AnalyzeParameters(method.Parameters);
             AnalyzeBody(method.MethodBody!, currentClass, method.Name, method.Parameters, method.ReturnType,
                 method.ReturnType != "Void");
         }
 
         foreach (var (key, constructor) in currentClass.Constructors)
         {
+            AnalyzeParameters(constructor.Parameters);
             AnalyzeBody(constructor.ConstructorBody!, currentClass, constructor.Name, constructor.Parameters, "Void",
                 false);
+        }
+    }
+
+    private void AnalyzeParameters(Dictionary<string, Variable> parameters)
+    {
+        foreach (var (key, parameter) in parameters)
+        {
+            if (!_classes.ContainsKey(parameter.Type))
+            {
+                ReportNonFatal($"Type {parameter.Type} is not defined!");
+            }
         }
     }
 
@@ -165,10 +178,15 @@ public class SemanticAnalyzer
             switch (node)
             {
                 case VariableDeclaration variableDeclaration:
+                    var varExprType = EvalExpression(variableDeclaration.VariableExpression, currentClass, newDict);
+                    if (!_classes.ContainsKey(varExprType))
+                    {
+                        ReportNonFatal($"Type {varExprType} is not defined!");
+                    }
                     newVariables.Add(variableDeclaration.VariableIdentifier.Name, new Variable
                     {
                         Name = variableDeclaration.VariableIdentifier.Name,
-                        Type = EvalExpression(variableDeclaration.VariableExpression, currentClass, newDict)
+                        Type = varExprType
                     });
                     break;
                 case Statement statement:
@@ -191,6 +209,10 @@ public class SemanticAnalyzer
                                         ? outVariable.Type
                                         : currentClass.Variables[assignment.AssignmentIdentifier.Name].Type;
                             var exprType = EvalExpression(assignment.AssignmentExpression, currentClass, newDict);
+                            if (!_classes.ContainsKey(exprType))
+                            {
+                                ReportNonFatal($"Type {exprType} is not defined!");
+                            }
                             if (!CheckIfAncestor(exprType, varType))
                             {
                                 ReportNonFatal(
