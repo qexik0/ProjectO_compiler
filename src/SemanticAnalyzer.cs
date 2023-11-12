@@ -15,8 +15,8 @@ public class SemanticAnalyzer
     {
         _root = root;
         _tokens = tokens;
-        _classes = CollectClasses(_root);
         _report = report;
+        _classes = CollectClasses(_root);
         AddBasicClasses();
     }
 
@@ -33,7 +33,7 @@ public class SemanticAnalyzer
         Dictionary<string, CurrentClass> allClasses = new();
         foreach (var classDeclaration in root.ProgramClasses)
         {
-            var curClass = new CurrentClass()
+            var curClass = new CurrentClass
             {
                 Name = classDeclaration.Name.ClassIdentifier.Name,
                 BaseClass = classDeclaration.BaseClassName == null
@@ -95,7 +95,6 @@ public class SemanticAnalyzer
                                     }));
                         }
 
-                        // TODO: decide about class name
                         var constructor = new Constructor
                         {
                             Name = CreateName("", tempParams),
@@ -113,7 +112,9 @@ public class SemanticAnalyzer
                 }
             }
 
-            allClasses.Add(curClass.Name, curClass);
+            if (allClasses.TryAdd(curClass.Name, curClass)) continue;
+            ReportFatal($"The class {curClass.Name} is already defined!");
+            throw new Exception();
         }
 
         return allClasses;

@@ -132,9 +132,9 @@ public class CLIFrontent
 
             report.WriteLine("Syntax analyzing finished successfully!\n");
             report.WriteLine("Semantics Report:");
-            var semanticAnalyzer = new SemanticAnalyzer((nodes.Program)program, tokens, report);
             try
             {
+                var semanticAnalyzer = new SemanticAnalyzer((nodes.Program)program, tokens, report);
                 semanticAnalyzer.AnalyzeProgram();
                 report.WriteLine("Semantic Analyzing finished successfully!");
             }
