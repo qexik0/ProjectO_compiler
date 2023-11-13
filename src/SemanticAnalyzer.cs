@@ -71,7 +71,12 @@ public class SemanticAnalyzer
                             method.Parameters.Add(parameter.Name, parameter);
                         }
 
-                        curClass.Methods.Add(method.Name, method);
+                        if (!curClass.Methods.TryAdd(method.Name, method))
+                        {
+                            ReportFatal($"The method {method.Name} is already defined in class {curClass.Name}!");
+                            throw new Exception();
+                        }
+
                         break;
                     case VariableDeclaration variableDeclaration:
                         var primary = (Primary)variableDeclaration.VariableExpression.PrimaryOrConstructorCall;
@@ -80,7 +85,12 @@ public class SemanticAnalyzer
                             Name = variableDeclaration.VariableIdentifier.Name,
                             Type = GetTypeFromClassName((ClassName)primary.Node)
                         };
-                        curClass.Variables.Add(variable.Name, variable);
+                        if (!curClass.Variables.TryAdd(variable.Name, variable))
+                        {
+                            ReportFatal($"The variable {variable.Name} is already defined in class {curClass.Name}!");
+                            throw new Exception();
+                        }
+
                         break;
                     case ConstructorDeclaration constructorDeclaration:
                         var tempParams = new List<Variable>();
@@ -107,7 +117,13 @@ public class SemanticAnalyzer
                             constructor.Parameters.Add(parameter.Name, parameter);
                         }
 
-                        curClass.Constructors.Add(constructor.Name, constructor);
+                        if (!curClass.Constructors.TryAdd(constructor.Name, constructor))
+                        {
+                            ReportFatal(
+                                $"The constructor {constructor.Name} is already defined in class {curClass.Name}!");
+                            throw new Exception();
+                        }
+
                         break;
                 }
             }
@@ -130,7 +146,7 @@ public class SemanticAnalyzer
             res.Append(',');
         }
 
-        res.Remove(res.Length - 1, 1);
+        if (parameters.Count > 0) res.Remove(res.Length - 1, 1);
 
         res.Append(')');
 
@@ -157,7 +173,7 @@ public class SemanticAnalyzer
 
     private void AnalyzeParameters(Dictionary<string, Variable> parameters)
     {
-        foreach (var (key, parameter) in parameters)
+        foreach (var (_, parameter) in parameters)
         {
             if (!_classes.ContainsKey(parameter.Type))
             {
@@ -184,11 +200,18 @@ public class SemanticAnalyzer
                     {
                         ReportNonFatal($"Type {varExprType} is not defined!");
                     }
-                    newVariables.Add(variableDeclaration.VariableIdentifier.Name, new Variable
+
+                    if (!newVariables.TryAdd(variableDeclaration.VariableIdentifier.Name, new Variable
+                        {
+                            Name = variableDeclaration.VariableIdentifier.Name,
+                            Type = varExprType
+                        }))
                     {
-                        Name = variableDeclaration.VariableIdentifier.Name,
-                        Type = varExprType
-                    });
+                        ReportFatal(
+                            $"The variable {variableDeclaration.VariableIdentifier.Name} is already defined in scope in method {curMethod}!");
+                        throw new Exception();
+                    }
+
                     break;
                 case Statement statement:
                     switch (statement.StatementNode)
@@ -214,6 +237,7 @@ public class SemanticAnalyzer
                             {
                                 ReportNonFatal($"Type {exprType} is not defined!");
                             }
+
                             if (!CheckIfAncestor(exprType, varType))
                             {
                                 ReportNonFatal(
