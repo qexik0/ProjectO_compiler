@@ -156,18 +156,43 @@ public class SemanticAnalyzer
     private void AnalyzeClass(ClassDeclaration declaration)
     {
         var currentClass = _classes[declaration.Name.ClassIdentifier.Name];
-        foreach (var (key, method) in currentClass.Methods)
+        AnalyzeInheritance(currentClass);
+        foreach (var (_, method) in currentClass.Methods)
         {
             AnalyzeParameters(method.Parameters);
             AnalyzeBody(method.MethodBody!, currentClass, method.Name, method.Parameters, method.ReturnType,
                 method.ReturnType != "Void");
         }
 
-        foreach (var (key, constructor) in currentClass.Constructors)
+        foreach (var (_, constructor) in currentClass.Constructors)
         {
             AnalyzeParameters(constructor.Parameters);
             AnalyzeBody(constructor.ConstructorBody!, currentClass, constructor.Name, constructor.Parameters, "Void",
                 false);
+        }
+    }
+
+    private void AnalyzeInheritance(CurrentClass cl)
+    {
+        var currentClass = cl;
+        var set = new HashSet<string> { currentClass.Name };
+        while (currentClass is { BaseClass: not null })
+        {
+            if (set.Contains(currentClass.BaseClass))
+            {
+                ReportFatal($"The error occured while analyzing inheritance for class {cl.Name}");
+                throw new Exception();
+            }
+            set.Add(currentClass.BaseClass);
+            if (_classes.TryGetValue(currentClass.BaseClass, out var res))
+            {
+                currentClass = res;
+            }
+            else
+            {
+                ReportNonFatal($"Type {currentClass.BaseClass} is not defined!");
+                currentClass = null;
+            }
         }
     }
 
