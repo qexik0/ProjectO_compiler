@@ -183,6 +183,7 @@ public class SemanticAnalyzer
                 ReportFatal($"The error occured while analyzing inheritance for class {cl.Name}");
                 throw new Exception();
             }
+
             set.Add(currentClass.BaseClass);
             if (_classes.TryGetValue(currentClass.BaseClass, out var res))
             {
@@ -217,11 +218,22 @@ public class SemanticAnalyzer
         foreach (var node in body.StatementsOrDeclarations)
         {
             var newDict = MergeDicts(newVariables, outerVariables);
+            if (hasReturn)
+            {
+                ReportInfo(
+                    $"Unreachable code after return in {(curMethod[0] == '(' ? "Constructor " + curMethod : curMethod)} of {currentClass.Name}");
+            }
+
             switch (node)
             {
                 case VariableDeclaration variableDeclaration:
                     var varExprType = EvalExpression(variableDeclaration.VariableExpression, currentClass, newDict);
-                    if (!_classes.ContainsKey(varExprType))
+                    if (varExprType == "Void")
+                    {
+                        ReportFatal(
+                            $"Unable to assign type Void to variable {variableDeclaration.VariableIdentifier.Name}");
+                    }
+                    else if (!_classes.ContainsKey(varExprType))
                     {
                         ReportNonFatal($"Type {varExprType} is not defined!");
                     }
@@ -233,7 +245,7 @@ public class SemanticAnalyzer
                         }))
                     {
                         ReportFatal(
-                            $"The variable {variableDeclaration.VariableIdentifier.Name} is already defined in scope in method {curMethod}!");
+                            $"The variable {variableDeclaration.VariableIdentifier.Name} is already defined in scope in method {(curMethod[0] == '(' ? "Constructor " + curMethod : curMethod)}!");
                         throw new Exception();
                     }
 
@@ -308,6 +320,9 @@ public class SemanticAnalyzer
                                     $"The method should return type {returnType}, but tries to return {type}");
                             }
 
+                            break;
+                        case Expression expression:
+                            EvalExpression(expression, currentClass, newDict);
                             break;
                     }
 
@@ -448,6 +463,11 @@ public class SemanticAnalyzer
     private void ReportNonFatal(string text)
     {
         _report.WriteLine($"NON-FATAL: {text}");
+    }
+
+    private void ReportInfo(string text)
+    {
+        _report.WriteLine($"INFO: {text}");
     }
 
     private void AddBasicClasses()
