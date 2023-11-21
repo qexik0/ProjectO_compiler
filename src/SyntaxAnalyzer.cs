@@ -282,6 +282,7 @@ public class SyntaxAnalyzer
             {
                 arguments = null;
             }
+
             expression.Calls.Add((identifier, arguments));
         }
 
@@ -387,7 +388,8 @@ public class SyntaxAnalyzer
     {
         ConsumeToken(TokenType.Return);
         Expression? expression = null;
-        if (!CheckForStatement() && !CheckForVariableDeclaration() && PeekToken().Type != TokenType.End)
+        if (!CheckForStatement() && !CheckForVariableDeclaration() && PeekToken().Type != TokenType.End &&
+            PeekToken().Type != TokenType.Else)
         {
             expression = ParseExpression();
         }
