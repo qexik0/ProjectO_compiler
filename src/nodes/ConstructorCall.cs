@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using LLVMSharp.Interop;
 
 namespace OCompiler.nodes;
 
@@ -6,11 +7,6 @@ public class ConstructorCall : AstNode
 {
     public required ClassName ConstructorClassName { get; set; }
     public Arguments? ConstructorArguments { get; set; }
-
-    public void CodeGen()
-    {
-        
-    }
 
     public override string ToString()
     {

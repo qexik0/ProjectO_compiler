@@ -12,19 +12,31 @@ public class ConstructorDeclaration : AstNode
     public void CodeGen(in LLVMTypeRef classType, in LLVMModuleRef module)
     {
         unsafe {
-            //here the types of arguments and pass them to FunctionType.
-            //var paramTypes = Array.Empty<LLVMTypeRef>();
-            var constructorType = LLVM.FunctionType(LLVM.PointerType(classType, 0), null, 0, 0);
-            var constructorFunc = module.AddFunction($"{classType.StructName}.constructor", constructorType);
+            // HERE - IF DERIVED FROM AnyValue - StructType, otherwise PointerType
+            var returnType = LLVM.PointerType(classType, 0);
+            var paramTypes = new List<LLVMTypeRef>();
+            if (ConstructorParameters != null)
+            {
+                foreach (var parameter in ConstructorParameters.ParameterDeclarations)
+                {
+                    LLVMTypeRef parameterType = TypeRegistry.GetLLVMType(parameter.ParameterClassName.ClassIdentifier.Name);
+                    paramTypes.Add(parameterType);
+                }
+            }
+            fixed (LLVMTypeRef* paramsPtr = paramTypes.ToArray())
+            {
+                var constructorType = LLVM.FunctionType(returnType, (LLVMOpaqueType**) paramsPtr, (uint) paramTypes.Count, 0);
+                // DO NOT FORGET TO HANDLE OVERLOADING
+                var constructorFunc = module.AddFunction($"{classType.StructName}.constructor", constructorType);
+                var entry = constructorFunc.AppendBasicBlock("entry");
+                using var builder = module.Context.CreateBuilder();
+                builder.PositionAtEnd(entry);
+                // TODO: this two lines should be written in place of any return inside the constructor
+                var instancePtr = builder.BuildMalloc(classType, "instance");
+                builder.BuildRet(instancePtr);
+                //ConstructorBody.CodeGen();
+            }
 
-            var entry = constructorFunc.AppendBasicBlock("entry");
-            using var builder = module.Context.CreateBuilder();
-            builder.PositionAtEnd(entry);
-
-            var instancePtr = builder.BuildMalloc(classType, "instance");
-
-            builder.BuildRet(instancePtr);
-            //ConstructorBody.CodeGen();
         }
     }
 
