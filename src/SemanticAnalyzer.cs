@@ -382,6 +382,23 @@ public class SemanticAnalyzer
             currentType = classVariable.Type;
         }
 
+        if (expression.PrimaryOrConstructorCall is ConstructorCall call)
+        {
+            var tempParams = (from exp in call.ConstructorArguments?.Expressions ?? new List<Expression>()
+                select new Variable { Type = EvalExpression(exp, currentClass, curVariables) }).ToList();
+
+            var name = CreateName("", tempParams);
+            if (!_classes.ContainsKey(currentType))
+            {
+                ReportFatal($"Class {currentType} is not defined!");
+                throw new Exception();
+            }
+            if (!_classes[currentType].Constructors.ContainsKey(name))
+            {
+                ReportNonFatal($"There is no constructors matching {name} in class {currentType}!");
+            }
+        }
+
         foreach (var (identifier, arguments) in expression.Calls)
         {
             if (!_classes.ContainsKey(currentType))
@@ -598,8 +615,8 @@ public class SemanticAnalyzer
         integer.Methods.Add("Equal(Real)", equalMethodReal);
 
         // adding constructors
-        integer.Constructors.Add("Integer(Integer)", new Constructor { Name = "Integer(Integer)", Type = "Integer" });
-        integer.Constructors.Add("Integer(Real)", new Constructor { Name = "Integer(Real)", Type = "Integer" });
+        integer.Constructors.Add("(Integer)", new Constructor { Name = "Integer(Integer)", Type = "Integer" });
+        integer.Constructors.Add("(Real)", new Constructor { Name = "Integer(Real)", Type = "Integer" });
         // adding variables
         integer.Variables.Add("Min", new Variable { Name = "Min", Type = "Integer" });
         integer.Variables.Add("Max", new Variable { Name = "Max", Type = "Integer" });
@@ -704,9 +721,9 @@ public class SemanticAnalyzer
         real.Methods.Add("Equal(Real)", equalMethodReal);
 
         // adding constructors to Real
-        real.Constructors.Add("Real()", new Constructor { Name = "Real()" });
-        real.Constructors.Add("Real(Integer)", new Constructor { Name = "Real(Integer)", Type = "Real" });
-        real.Constructors.Add("Real(Real)", new Constructor { Name = "Real(Real)", Type = "Real" });
+        real.Constructors.Add("()", new Constructor { Name = "Real()" });
+        real.Constructors.Add("(Integer)", new Constructor { Name = "Real(Integer)", Type = "Real" });
+        real.Constructors.Add("(Real)", new Constructor { Name = "Real(Real)", Type = "Real" });
 
         // adding variables to Real
         real.Variables.Add("Min", new Variable { Name = "Min", Type = "Real" });
@@ -740,8 +757,8 @@ public class SemanticAnalyzer
         boolean.Methods.Add("Not()", notMethod);
 
         // adding constructors to Boolean
-        boolean.Constructors.Add("Boolean()", new Constructor { Name = "Boolean()" });
-        boolean.Constructors.Add("Boolean(Boolean)", new Constructor { Name = "Boolean(Boolean)", Type = "Boolean" });
+        boolean.Constructors.Add("()", new Constructor { Name = "Boolean()" });
+        boolean.Constructors.Add("(Boolean)", new Constructor { Name = "Boolean(Boolean)", Type = "Boolean" });
 
         _classes.Add("Boolean", boolean);
     }
@@ -765,8 +782,8 @@ public class SemanticAnalyzer
         array.Methods.Add("Set(Integer,T)", setMethod);
 
         // adding constructors to Array
-        array.Constructors.Add("Array()", new Constructor { Name = "Array()" });
-        array.Constructors.Add("Array(Integer)", new Constructor { Name = "Array(Integer)", Type = "Array" });
+        array.Constructors.Add("()", new Constructor { Name = "Array()" });
+        array.Constructors.Add("(Integer)", new Constructor { Name = "Array(Integer)", Type = "Array" });
 
         _classes.Add("Array", array);
     }
@@ -788,7 +805,7 @@ public class SemanticAnalyzer
         list.Methods.Add("Tail()", tailMethod);
 
         // adding constructors to List
-        list.Constructors.Add("List()", new Constructor { Name = "List()" });
+        list.Constructors.Add("()", new Constructor { Name = "List()" });
         // The empty parameter constructor is the same as the default, so it may not need to be added again.
         list.Constructors.Add("List(T)", new Constructor { Name = "List(T)", Type = "List" });
         var constructorWithCount = new Constructor { Name = "List(T,Integer)", Type = "List" };
