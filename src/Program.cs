@@ -135,15 +135,16 @@ public class CLIFrontent
 
             report.WriteLine("Syntax analyzing finished successfully!\n");
             report.WriteLine("Semantics Report:");
+            var semanticResult = false;
             try
             {
                 var semanticAnalyzer = new SemanticAnalyzer((nodes.Program)program, tokens, report);
-                semanticAnalyzer.AnalyzeProgram();
-                report.WriteLine("Semantic Analyzing finished successfully!");
+                semanticResult = semanticAnalyzer.AnalyzeProgram();
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                report.WriteLine("Semantic Analyzing finished with errors!");
+                report.WriteLine(e.Message);
+                report.WriteLine("Semantic Analyzing finished with uncaught errors!");
             }
         }, inputFile, outputFile);
         rootCommand.Add(lexicalReport);

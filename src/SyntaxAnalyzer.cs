@@ -314,6 +314,7 @@ public class SyntaxAnalyzer
         AstNode node = nextToken.Type switch
         {
             TokenType.Identifier => PeekToken(1).Type == TokenType.Assignment ? ParseAssignment() : ParseExpression(),
+            TokenType.This => ParseExpression(),
             TokenType.While => ParseWhileLoop(),
             TokenType.If => ParseIfStatement(),
             TokenType.Return => ParseReturnStatement(),
