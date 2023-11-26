@@ -281,7 +281,7 @@ public class SemanticAnalyzer
                         case Assignment assignment:
                             if (!newVariables.ContainsKey(assignment.AssignmentIdentifier.Name) &&
                                 !outerVariables.ContainsKey(assignment.AssignmentIdentifier.Name) &&
-                                !currentClass.Variables.ContainsKey(assignment.AssignmentIdentifier.Name))
+                                !currentClass.ContainsVariable(assignment.AssignmentIdentifier.Name, _classes))
                             {
                                 ReportFatal($"Undeclared Variable: {assignment.AssignmentIdentifier.Name}");
                                 throw new AnalyzerException();
@@ -293,7 +293,7 @@ public class SemanticAnalyzer
                                     : outerVariables.TryGetValue(assignment.AssignmentIdentifier.Name,
                                         out var outVariable)
                                         ? outVariable.Type
-                                        : currentClass.Variables[assignment.AssignmentIdentifier.Name].Type;
+                                        : currentClass.GetVariable(assignment.AssignmentIdentifier.Name, _classes)!.Type;
                             var exprType = EvalExpression(assignment.AssignmentExpression, currentClass, newDict);
                             if (!_classes.ContainsKey(exprType))
                             {
@@ -419,7 +419,7 @@ public class SemanticAnalyzer
                 throw new AnalyzerException();
             }
 
-            if (!_classes[currentType].Constructors.ContainsKey(name))
+            if (!_classes[currentType].ContainsConstructor(name, _classes))
             {
                 ReportNonFatal($"There is no constructors matching {name} in class {currentType}!");
             }
@@ -448,14 +448,14 @@ public class SemanticAnalyzer
                 name = CreateName(identifier.Name, list);
             }
 
-            if (!curClass.Methods.ContainsKey(name))
+            if (!curClass.ContainsMethod(name, _classes))
             {
                 ReportFatal($"There is no such method in class {curClass.Name}: {name}");
                 throw new AnalyzerException();
             }
 
-            var method = curClass.Methods[name];
-            currentType = method.ReturnType;
+            var method = curClass.GetMethod(name, _classes);
+            currentType = method!.ReturnType;
         }
 
         return currentType;
@@ -859,6 +859,90 @@ class CurrentClass
     public Dictionary<string, Variable> Variables { get; } = new();
 
     public Dictionary<string, Constructor> Constructors { get; } = new();
+
+    public bool ContainsMethod(string name, Dictionary<string, CurrentClass> classes)
+    {
+        if (Methods.ContainsKey(name)) return true;
+
+        var curClass = BaseClass;
+        while (curClass != null)
+        {
+            if (classes[curClass].Methods.ContainsKey(name)) return true;
+            curClass = classes[curClass].BaseClass;
+        }
+
+        return false;
+    }
+
+    public Method? GetMethod(string name, Dictionary<string, CurrentClass> classes)
+    {
+        if (Methods.TryGetValue(name, out var method)) return method;
+
+        var curClass = BaseClass;
+        while (curClass != null)
+        {
+            if (classes[curClass].Methods.TryGetValue(name, out var value)) return value;
+            curClass = classes[curClass].BaseClass;
+        }
+
+        return null;
+    }
+
+    public bool ContainsVariable(string name, Dictionary<string, CurrentClass> classes)
+    {
+        if (Variables.ContainsKey(name)) return true;
+
+        var curClass = BaseClass;
+        while (curClass != null)
+        {
+            if (classes[curClass].Variables.ContainsKey(name)) return true;
+            curClass = classes[curClass].BaseClass;
+        }
+
+        return false;
+    }
+
+    public Variable? GetVariable(string name, Dictionary<string, CurrentClass> classes)
+    {
+        if (Variables.TryGetValue(name, out var variable)) return variable;
+
+        var curClass = BaseClass;
+        while (curClass != null)
+        {
+            if (classes[curClass].Variables.TryGetValue(name, out Variable? value)) return value;
+            curClass = classes[curClass].BaseClass;
+        }
+
+        return null;
+    }
+
+    public bool ContainsConstructor(string name, Dictionary<string, CurrentClass> classes)
+    {
+        if (Constructors.ContainsKey(name)) return true;
+
+        var curClass = BaseClass;
+        while (curClass != null)
+        {
+            if (classes[curClass].Constructors.ContainsKey(name)) return true;
+            curClass = classes[curClass].BaseClass;
+        }
+
+        return false;
+    }
+
+    public Constructor? GetConstructor(string name, Dictionary<string, CurrentClass> classes)
+    {
+        if (Constructors.TryGetValue(name, out var constructor)) return constructor;
+
+        var curClass = BaseClass;
+        while (curClass != null)
+        {
+            if (classes[curClass].Constructors.TryGetValue(name, out Constructor? value)) return value;
+            curClass = classes[curClass].BaseClass;
+        }
+
+        return null;
+    }
 }
 
 class Variable
