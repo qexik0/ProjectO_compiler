@@ -1,0 +1,16 @@
+class Program is
+    var x : Integer(5)
+    var y : x
+    var z : true
+    var a : z
+    method pupa(x: Integer, y: Real, z: Boolean) : Integer is
+        return 1
+    end
+    this(x: Integer, y: Real, z: Boolean) is
+    end
+end
+
+class Huy is
+    var z : Program(5, 6.0, true)
+    var y : z.z
+end

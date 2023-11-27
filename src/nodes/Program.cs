@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using LLVMSharp;
 using LLVMSharp.Interop;
+using OCompiler.Codegen;
 
 namespace OCompiler.nodes;
 
@@ -24,10 +25,14 @@ public class Program : AstNode
     {
         using var context = LLVMContextRef.Create();
         using var module = context.CreateModuleWithName("ProjectO module");
-        using var builder = context.CreateBuilder();
-        foreach (var classDecl in ProgramClasses)
+        Codegen.IntegerType.AddIntegerClass(module);
+        // foreach (var classDecl in ProgramClasses)
+        // {
+        //     classDecl.CodeGen(module, builder);
+        // }
+        if (module.TryVerify(LLVMVerifierFailureAction.LLVMPrintMessageAction, out string message))
         {
-            classDecl.CodeGen(module, builder);
+            Console.WriteLine(message);
         }
         Console.WriteLine(module.PrintToString());
     }
