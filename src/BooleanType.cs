@@ -90,7 +90,7 @@ public unsafe static class BooleanType
         fixed (LLVMOpaqueType** prms = paramTypes)
         {
             var notFunc = module.AddFunction("Boolean.toInteger%%",
-                LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0));
+                LLVM.FunctionType(intType, prms, (uint)paramTypes.Length, 0));
             var context = module.Context;
             using var builder = context.CreateBuilder();
             var entry = notFunc.AppendBasicBlock("entry");
