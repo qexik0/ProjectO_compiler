@@ -10,6 +10,7 @@ public unsafe static class IntegerType
         var realType = LLVM.DoubleTypeInContext(module.Context);
         var intPtr = LLVM.PointerTypeInContext(module.Context, 0);
         var boolType = LLVM.Int1TypeInContext(module.Context);
+        var voidType = LLVM.VoidTypeInContext(module.Context);
 
         var paramTypes = new[] {intPtr, intType};
         fixed (LLVMOpaqueType** prms = paramTypes)
@@ -93,23 +94,25 @@ public unsafe static class IntegerType
             builder.BuildRet(isNonZero);
         }
 
-        paramTypes = new[] {intType};
+        paramTypes = new[] {intPtr, intType};
         fixed (LLVMOpaqueType** prms = paramTypes)
         {
-            var intConstructor = module.AddFunction("Integer%Integer%", LLVM.FunctionType(intType, prms, (uint)paramTypes.Length, 0));
+            var intConstructor = module.AddFunction("Integer%Integer%", LLVM.FunctionType(voidType, prms, (uint)paramTypes.Length, 0));
             var context = module.Context;
             using var builder = context.CreateBuilder();
             var entry = intConstructor.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
 
-            var thisInt = intConstructor.GetParam(0);
-            builder.BuildRet(thisInt);
+            var thisPtr = intConstructor.GetParam(0);
+            var otherInt = intConstructor.GetParam(1);
+            builder.BuildStore(otherInt, thisPtr);
+            builder.BuildRetVoid();
         }
 
         paramTypes = new[] {intPtr, realType};
         fixed (LLVMOpaqueType** prms = paramTypes)
         {
-            var realConstructor = module.AddFunction("Integer%Real%", LLVM.FunctionType(intType, prms, (uint)paramTypes.Length, 0));
+            var realConstructor = module.AddFunction("Integer%Real%", LLVM.FunctionType(voidType, prms, (uint)paramTypes.Length, 0));
             var context = module.Context;
             using var builder = context.CreateBuilder();
             var entry = realConstructor.AppendBasicBlock("entry");
@@ -117,9 +120,9 @@ public unsafe static class IntegerType
 
             var thisPtr = realConstructor.GetParam(0);
             var otherReal = realConstructor.GetParam(1);
-            var thisInt = builder.BuildLoad2(intType, thisPtr, "thisInt");
             var res = builder.BuildFPToSI(otherReal, intType, "res");
-            builder.BuildRet(res);
+            builder.BuildStore(res, thisPtr);
+            builder.BuildRetVoid();
         }
 
         paramTypes = new[] {intPtr, intType};
