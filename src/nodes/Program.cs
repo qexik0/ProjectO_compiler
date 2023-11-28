@@ -26,6 +26,7 @@ public class Program : AstNode
         using var context = LLVMContextRef.Create();
         using var module = context.CreateModuleWithName("ProjectO module");
         Codegen.IntegerType.AddIntegerClass(module);
+        Codegen.BooleanType.AddBooleanClass(module);
         Codegen.RealType.AddRealClass(module);
         // foreach (var classDecl in ProgramClasses)
         // {
