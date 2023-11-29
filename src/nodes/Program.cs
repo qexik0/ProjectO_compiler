@@ -32,10 +32,12 @@ public class Program : AstNode
         // {
         //     classDecl.CodeGen(module, builder);
         // }
+        Codegen.MainFunction.AddMainFunction(module);
         if (module.TryVerify(LLVMVerifierFailureAction.LLVMPrintMessageAction, out string message))
         {
             Console.WriteLine(message);
         }
+        module.PrintToFile("output.ll");
         Console.WriteLine(module.PrintToString());
     }
 }

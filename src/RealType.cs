@@ -96,7 +96,7 @@ public unsafe static class RealType
             var otherReal = addFunc.GetParam(1);
             
             var thisReal = builder.BuildLoad2(realType, thisPtr, "thisReal");
-            var sum = builder.BuildAdd(thisReal, otherReal, "sum");
+            var sum = builder.BuildFAdd(thisReal, otherReal, "sum");
             builder.BuildRet(sum);
         }
         
@@ -116,7 +116,7 @@ public unsafe static class RealType
             var thisReal = builder.BuildLoad2(realType, thisPtr, "thisReal");
             var otherReal = builder.BuildSIToFP(otherInt, realType, "otherReal");
             
-            var sum = builder.BuildAdd(thisReal, otherReal, "sum");
+            var sum = builder.BuildFAdd(thisReal, otherReal, "sum");
             builder.BuildRet(sum);
         }
         

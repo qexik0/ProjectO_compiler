@@ -1,10 +1,21 @@
 ﻿using System.Text;
+using LLVMSharp.Interop;
 
 namespace OCompiler.nodes;
 
 public class Arguments : AstNode
 {
     public List<Expression> Expressions { get; } = new List<Expression>();
+
+    public unsafe List<LLVMValueRef> CodeGen(in LLVMModuleRef module, in LLVMBuilderRef builder, in Dictionary<string, LLVMValueRef> symbolTable)
+    {
+        var args = new List<LLVMValueRef>();
+        foreach (var expr in Expressions)
+        {
+            args.Add(expr.CodeGen(module, builder, symbolTable));
+        }
+        return args;
+    }
 
     public override string ToString()
     {

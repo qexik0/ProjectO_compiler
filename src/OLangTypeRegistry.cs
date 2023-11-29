@@ -50,115 +50,115 @@ public unsafe static class OLangTypeRegistry
     //     inheritanceRelation[className] = baseClass;
     // }
 
-    // public static string ClassExpressionType(string curClass, Expression expression)
-    // {
-    //     var currentType = expression.PrimaryOrConstructorCall switch
-    //     {
-    //         Primary primary => primary.Node switch
-    //         {
-    //             IntegerLiteral => "Integer",
-    //             RealLiteral => "Real",
-    //             BooleanLiteral => "Boolean",
-    //             ClassName className => GetVariableType(curClass, className.ClassIdentifier.Name), // could only be identifier
-    //             _ => throw new ApplicationException($"Could not derive type for the expression {expression}")
-    //         },
-    //         ConstructorCall constructorCall => MangleClassName(constructorCall.ConstructorClassName),
-    //         _ => throw new ApplicationException($"Could not derive type for the expression {expression}")
-    //     };
-    //     foreach (var (identifier, arguments) in expression.Calls)
-    //     {
-    //         if (!typeVariables.TryGetValue(currentType, out var _))
-    //         {
-    //             throw new ApplicationException($"Type {currentType} was not defined earlier");
-    //         }
-    //         var returnType = typeVariables[currentType].MethodReturnTypes[MangleFunctionName(currentType, identifier, arguments)];
-    //         currentType = returnType;
-    //     }
-    //     return currentType;
-    // }
+    public static string ClassExpressionType(string curClass, Expression expression)
+    {
+        var currentType = expression.PrimaryOrConstructorCall switch
+        {
+            Primary primary => primary.Node switch
+            {
+                IntegerLiteral => "Integer",
+                RealLiteral => "Real",
+                BooleanLiteral => "Boolean",
+                ClassName className => GetVariableType(curClass, className.ClassIdentifier.Name), // could only be identifier
+                _ => throw new ApplicationException($"Could not derive type for the expression {expression}")
+            },
+            ConstructorCall constructorCall => MangleClassName(constructorCall.ConstructorClassName),
+            _ => throw new ApplicationException($"Could not derive type for the expression {expression}")
+        };
+        foreach (var (identifier, arguments) in expression.Calls)
+        {
+            if (!typeVariables.TryGetValue(currentType, out var _))
+            {
+                throw new ApplicationException($"Type {currentType} was not defined earlier");
+            }
+            var returnType = typeVariables[currentType].MethodReturnTypes[MangleFunctionName(currentType, identifier, arguments)];
+            currentType = returnType;
+        }
+        return currentType;
+    }
 
-    // public static string MangleClassName(ClassName className)
-    // {
-    //     StringBuilder sb = new();
-    //     sb.Append(className.ClassIdentifier.Name);
-    //     var genericName = className.GenericClassName;
-    //     int genericNames = 0;
-    //     while (genericName != null)
-    //     {
-    //         sb.Append($"#{genericName.ClassIdentifier.Name}");
-    //         genericName = genericName.GenericClassName;
-    //         ++genericNames;
-    //     }
-    //     while (genericNames > 0)
-    //     {
-    //         genericNames--;
-    //         sb.Append('#');
-    //     }
-    //     return sb.ToString();
-    // }
+    public static string MangleClassName(ClassName className)
+    {
+        StringBuilder sb = new();
+        sb.Append(className.ClassIdentifier.Name);
+        var genericName = className.GenericClassName;
+        int genericNames = 0;
+        while (genericName != null)
+        {
+            sb.Append($"#{genericName.ClassIdentifier.Name}");
+            genericName = genericName.GenericClassName;
+            ++genericNames;
+        }
+        while (genericNames > 0)
+        {
+            genericNames--;
+            sb.Append('#');
+        }
+        return sb.ToString();
+    }
 
-    // public static string MangleFunctionName(ConstructorCall constructorCall)
-    // {
-    //     StringBuilder sb = new ();
-    //     sb.Append(MangleClassName(constructorCall.ConstructorClassName));
-    //     sb.Append("%");
-    //     if (constructorCall.ConstructorArguments == null)
-    //     {
-    //         sb.Append("%");
-    //         return sb.ToString();
-    //     }
-    //     List<string> mangledArgumentTypes = new ();
-    //     foreach (var argument in constructorCall.ConstructorArguments.Expressions)
-    //     {
-    //         var argumentType = ClassExpressionType(MangleClassName(constructorCall.ConstructorClassName), argument);
-    //         mangledArgumentTypes.Add(argumentType);
-    //     }
-    //     sb.Append(string.Join(',', mangledArgumentTypes));
-    //     sb.Append('%');
-    //     return sb.ToString();
-    // }
+    public static string MangleFunctionName(ConstructorCall constructorCall)
+    {
+        StringBuilder sb = new ();
+        sb.Append(MangleClassName(constructorCall.ConstructorClassName));
+        sb.Append("%");
+        if (constructorCall.ConstructorArguments == null)
+        {
+            sb.Append("%");
+            return sb.ToString();
+        }
+        List<string> mangledArgumentTypes = new ();
+        foreach (var argument in constructorCall.ConstructorArguments.Expressions)
+        {
+            var argumentType = ClassExpressionType(MangleClassName(constructorCall.ConstructorClassName), argument);
+            mangledArgumentTypes.Add(argumentType);
+        }
+        sb.Append(string.Join(',', mangledArgumentTypes));
+        sb.Append('%');
+        return sb.ToString();
+    }
 
-    // public static string MangleFunctionName(string className, ConstructorDeclaration constructorDecl)
-    // {
-    //     StringBuilder sb = new ();
-    //     sb.Append(className);
-    //     sb.Append("%");
-    //     if (constructorDecl.ConstructorParameters == null)
-    //     {
-    //         sb.Append("%");
-    //         return sb.ToString();
-    //     }
-    //     List<string> mangledArgumentTypes = new ();
-    //     foreach (var argument in constructorDecl.ConstructorParameters.ParameterDeclarations)
-    //     {
-    //         var argumentType = MangleClassName(argument.ParameterClassName);
-    //         mangledArgumentTypes.Add(argumentType);
-    //     }
-    //     sb.Append(string.Join(',', mangledArgumentTypes));
-    //     sb.Append('%');
-    //     return sb.ToString();
-    // }
+    public static string MangleFunctionName(string className, ConstructorDeclaration constructorDecl)
+    {
+        StringBuilder sb = new ();
+        sb.Append(className);
+        sb.Append("%");
+        if (constructorDecl.ConstructorParameters == null)
+        {
+            sb.Append("%");
+            return sb.ToString();
+        }
+        List<string> mangledArgumentTypes = new ();
+        foreach (var argument in constructorDecl.ConstructorParameters.ParameterDeclarations)
+        {
+            var argumentType = MangleClassName(argument.ParameterClassName);
+            mangledArgumentTypes.Add(argumentType);
+        }
+        sb.Append(string.Join(',', mangledArgumentTypes));
+        sb.Append('%');
+        return sb.ToString();
+    }
 
-    // public static string MangleFunctionName(string className, Identifier identifier, Arguments? arguments)
-    // {
-    //     StringBuilder sb = new ();
-    //     sb.Append($"{className}.{identifier}");
-    //     sb.Append("%");
-    //     if (arguments == null)
-    //     {
-    //         sb.Append("%");
-    //         return sb.ToString();
-    //     }
-    //     List<string> mangledArgumentTypes = new ();
-    //     foreach (var argument in arguments.Expressions)
-    //     {
-    //         var argumentType = ClassExpressionType(className, argument);
-    //         mangledArgumentTypes.Add(argumentType);
-    //     }
-    //     sb.Append(string.Join(',', mangledArgumentTypes));
-    //     sb.Append('%');
-    //     return sb.ToString();
-    // }
+    public static string MangleFunctionName(string className, Identifier identifier, Arguments? arguments)
+    {
+        StringBuilder sb = new ();
+        sb.Append($"{className}.{identifier}");
+        sb.Append("%");
+        if (arguments == null)
+        {
+            sb.Append("%");
+            return sb.ToString();
+        }
+        List<string> mangledArgumentTypes = new ();
+        foreach (var argument in arguments.Expressions)
+        {
+            var argumentType = ClassExpressionType(className, argument);
+            mangledArgumentTypes.Add(argumentType);
+        }
+        sb.Append(string.Join(',', mangledArgumentTypes));
+        sb.Append('%');
+        return sb.ToString();
+    }
 
     // public static string MangleFunctionName(string className, MethodDeclaration methodDeclaration)
     // {
@@ -181,10 +181,10 @@ public unsafe static class OLangTypeRegistry
     //     return sb.ToString();
     // }
 
-    // public static string GetVariableType(string className, string identifier)
-    // {
-    //     return typeVariables[className].FieldTypes[identifier];
-    // }
+    public static string GetVariableType(string className, string identifier)
+    {
+        return typeVariables[className].FieldTypes[identifier];
+    }
 
     // public static LLVMTypeRef GetLLVMClassType(in LLVMModuleRef module, in LLVMBuilderRef builder, string className)
     // {
