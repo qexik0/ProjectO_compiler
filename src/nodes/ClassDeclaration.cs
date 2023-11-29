@@ -12,37 +12,37 @@ public class ClassDeclaration : AstNode
 
     public void CodeGen(in LLVMModuleRef module, in LLVMBuilderRef builder)
     {
-    //     if (BaseClassName != null)
-    //     {
-    //         // init a vtable, copy members of base class into type registry
-    //     }
-    //     var className = OLangTypeRegistry.MangleClassName(Name);
-    //     OLangTypeRegistry.AddClass(className);
-    //     foreach (var member in Members)
-    //     {
-    //         if (member.Member is VariableDeclaration varDecl)
-    //         {
-    //             var fieldType = OLangTypeRegistry.ClassExpressionType(className, varDecl.VariableExpression);
-    //             OLangTypeRegistry.AddClassField(className, varDecl.VariableIdentifier.Name, fieldType);
-    //         }
-    //     }
-    //     var classType = OLangTypeRegistry.GetLLVMClassType(module, builder, className);
+        if (BaseClassName != null)
+        {
+            // init a vtable, copy members of base class into type registry
+        }
+        var className = OLangTypeRegistry.MangleClassName(Name);
+        OLangTypeRegistry.AddClass(className);
+        foreach (var member in Members)
+        {
+            if (member.Member is VariableDeclaration varDecl)
+            {
+                var fieldType = OLangTypeRegistry.ClassExpressionType(className, varDecl.VariableExpression);
+                OLangTypeRegistry.AddClassField(className, varDecl.VariableIdentifier.Name, fieldType);
+            }
+        }
+        var classType = OLangTypeRegistry.GetLLVMClassType(module, builder, className);
 
-    //     foreach (var member in Members)
-    //     {
-    //         if (member.Member is ConstructorDeclaration constructorDeclaration)
-    //         {
-    //             constructorDeclaration.CodeGen(module, className);
-    //         }
-    //     }
+        foreach (var member in Members)
+        {
+            if (member.Member is ConstructorDeclaration constructorDeclaration)
+            {
+                constructorDeclaration.CodeGen(module, className);
+            }
+        }
 
-    //     foreach (var member in Members)
-    //     {
-    //         if (member.Member is MethodDeclaration methodDeclaration)
-    //         {
-    //             methodDeclaration.CodeGen(module, className);
-    //         }
-    //     }
+        foreach (var member in Members)
+        {
+            if (member.Member is MethodDeclaration methodDeclaration)
+            {
+                methodDeclaration.CodeGen(module, className);
+            }
+        }
     }
 
     public override string ToString()

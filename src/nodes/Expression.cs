@@ -21,7 +21,7 @@ public class Expression : AstNode
                 ClassName className => symbolTable[className.ClassIdentifier.Name], // could only be identifier
                 _ => throw new ApplicationException($"Could not evaluate the expression {this}")
             },
-            ConstructorCall constructorCall => symbolTable[OLangTypeRegistry.MangleFunctionName(constructorCall)],
+            ConstructorCall constructorCall => constructorCall.CodeGen(module, builder, OLangTypeRegistry.llvmTypes, new()),
             _ => throw new ApplicationException($"Could not derive type for the expression {this}")
         };
         string currentType = PrimaryOrConstructorCall switch
@@ -47,7 +47,8 @@ public class Expression : AstNode
             {
                 args.AddRange(call.CodeGen(module, builder, symbolTable));
             }
-            currentVal = builder.BuildCall2(module.GetNamedFunction(OLangTypeRegistry.MangleFunctionName(currentType, identifier, )));
+            var func = module.GetNamedFunction(OLangTypeRegistry.MangleFunctionName(currentType, identifier, call?.Expressions ?? new()));
+            currentVal = builder.BuildCall2(LLVM.GetElementType(LLVM.TypeOf(func)), func, args.ToArray());
         }
         return currentVal;
     }

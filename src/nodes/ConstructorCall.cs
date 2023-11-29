@@ -4,7 +4,7 @@ using OCompiler.Codegen;
 
 namespace OCompiler.nodes;
 
-public class ConstructorCall : AstNode
+public unsafe class ConstructorCall : AstNode
 {
     public required ClassName ConstructorClassName { get; set; }
     public Arguments? ConstructorArguments { get; set; }
@@ -13,16 +13,21 @@ public class ConstructorCall : AstNode
     {
         // TODO: allocate on heap if derived from anyRef
         var res = builder.BuildAlloca(types[ConstructorClassName.ClassIdentifier.Name]);
-        var constructor = symbolTable[OLangTypeRegistry.MangleFunctionName(this)];
+        var constructor = module.GetNamedFunction(OLangTypeRegistry.MangleFunctionName(this));
         var args = new List<LLVMValueRef>();
         if (ConstructorArguments != null)
         {
             foreach (var argument in ConstructorArguments.Expressions)
             {
-                args.Add(argument.CodeGen(module, symbolTable));
+                args.Add(argument.CodeGen(module, builder, symbolTable));
             }
         }
-        builder.BuildCall2(types[OLangTypeRegistry.MangleFunctionName(this)], constructor, args.ToArray());
+        //hardcode
+        var argTypes = new List<LLVMTypeRef>() {LLVM.PointerTypeInContext(module.Context, 0)};
+        fixed (LLVMTypeRef* ptr = argTypes.ToArray())
+        {
+            builder.BuildCall2(LLVM.FunctionType(LLVM.VoidTypeInContext(module.Context), (LLVMOpaqueType**) ptr, 1, 0), constructor, args.ToArray());
+        }
         return res;
     }
 

@@ -28,11 +28,13 @@ public class Program : AstNode
         Codegen.IntegerType.AddIntegerClass(module);
         Codegen.BooleanType.AddBooleanClass(module);
         Codegen.RealType.AddRealClass(module);
-        // foreach (var classDecl in ProgramClasses)
-        // {
-        //     classDecl.CodeGen(module, builder);
-        // }
-        Codegen.MainFunction.AddMainFunction(module);
+        OLangTypeRegistry.Init(module);
+        foreach (var classDecl in ProgramClasses)
+        {
+            using var builder = module.Context.CreateBuilder();
+            classDecl.CodeGen(module, builder);
+        }
+        Codegen.MainFunction.AddMainFunction(module, new());
         if (module.TryVerify(LLVMVerifierFailureAction.LLVMPrintMessageAction, out string message))
         {
             Console.WriteLine(message);

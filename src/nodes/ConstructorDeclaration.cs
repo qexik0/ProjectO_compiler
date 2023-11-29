@@ -12,40 +12,14 @@ public class ConstructorDeclaration : AstNode
 
     public void CodeGen(in LLVMModuleRef module, string className)
     {
-        // OLangTypeRegistry.AddMethod(className, this);
-        // var methodName = OLangTypeRegistry.MangleFunctionName(className, this);
-        // var methodType = OLangTypeRegistry.GetLLVMMethodType(className, this);
-        // var method = module.AddFunction(methodName, methodType);
-        // var entry = method.AppendBasicBlock("entry");
-        // using var builder = module.Context.CreateBuilder();
-        // builder.PositionAtEnd(entry);
-        // // unsafe {
-        // //     // HERE - IF DERIVED FROM AnyValue - StructType, otherwise PointerType
-        // //     var returnType = LLVM.PointerType(classType, 0);
-        // //     var paramTypes = new List<LLVMTypeRef>();
-        // //     if (ConstructorParameters != null)
-        // //     {
-        // //         foreach (var parameter in ConstructorParameters.ParameterDeclarations)
-        // //         {
-        // //             LLVMTypeRef parameterType = TypeRegistry.GetLLVMType(parameter.ParameterClassName.ClassIdentifier.Name);
-        // //             paramTypes.Add(parameterType);
-        // //         }
-        // //     }
-        // //     fixed (LLVMTypeRef* paramsPtr = paramTypes.ToArray())
-        // //     {
-        // //         var constructorType = LLVM.FunctionType(returnType, (LLVMOpaqueType**) paramsPtr, (uint) paramTypes.Count, 0);
-        // //         // DO NOT FORGET TO HANDLE OVERLOADING
-        // //         var constructorFunc = module.AddFunction($"{classType.StructName}.constructor", constructorType);
-        // //         var entry = constructorFunc.AppendBasicBlock("entry");
-        // //         using var builder = module.Context.CreateBuilder();
-        // //         builder.PositionAtEnd(entry);
-        // //         // TODO: this two lines should be written in place of any return inside the constructor
-        // //         var instancePtr = builder.BuildMalloc(classType, "instance");
-        // //         builder.BuildRet(instancePtr);
-        // //         //ConstructorBody.CodeGen();
-        // //     }
-
-        // // }
+        OLangTypeRegistry.AddMethod(className, this);
+        var methodName = OLangTypeRegistry.MangleFunctionName(className, this);
+        var methodType = OLangTypeRegistry.GetLLVMMethodType(className, this);
+        var method = module.AddFunction(methodName, methodType);
+        var entry = method.AppendBasicBlock("entry");
+        using var builder = module.Context.CreateBuilder();
+        builder.PositionAtEnd(entry);
+        ConstructorBody.CodeGen(module, builder);
     }
 
     public override string ToString()

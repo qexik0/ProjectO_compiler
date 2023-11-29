@@ -3,14 +3,15 @@ class Program is
     var y : x
     var z : true
     var a : z
-    method pupa(x: Integer, y: Real, z: Boolean) : Integer is
-        return 1
+    method pupa(x: Integer, y: Real, z: Boolean) is
+        return
     end
-    this(x: Integer, y: Real, z: Boolean) is
+    this() is
+        Integer(10).Plus(5).Neg()
     end
 end
 
 class Huy is
     var z : Program(5, 6.0, true)
-    var y : z.z
+    var y : z
 end
