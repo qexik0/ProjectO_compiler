@@ -51,6 +51,7 @@ public class Expression : AstNode
             //currentVal = builder.BuildCall2(LLVM.TypeOf(func), func, args.ToArray());
             //FOR PRESENTATION - хз почему, но видимо LLVM не хранит тип у себя, вот по хорошему в IntegerClass надо по ходу добавлять типы функций в глобальный мап
             //типы стандартных функций и передавать сюда, но я уже не успеваю.
+            // OLangTypeRegistry.mapping(func.Name);
         }
         return currentVal;
     }

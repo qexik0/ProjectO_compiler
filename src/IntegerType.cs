@@ -4,7 +4,6 @@ namespace OCompiler.Codegen;
 
 public unsafe static class IntegerType
 {
-    public static Dictionary<String, LLVMValueRef> mapping = new Dictionary<string, LLVMValueRef>();  
     public static void AddIntegerClass(in LLVMModuleRef module)
     {
         var intType = LLVM.Int32TypeInContext(module.Context);
@@ -22,7 +21,7 @@ public unsafe static class IntegerType
             var entry = addFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
 
-            mapping["Integer.Plus%Integer%"] = addFunc;
+            OLangTypeRegistry.mapping["Integer.Plus%Integer%"] = addFunc;
 
             var thisPtr = addFunc.GetParam(0);
             var otherInt = addFunc.GetParam(1);
@@ -41,7 +40,7 @@ public unsafe static class IntegerType
             var entry = addFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
             
-            mapping["Integer.Plus%Real%"] = addFunc;
+            OLangTypeRegistry.mapping["Integer.Plus%Real%"] = addFunc;
 
             var thisPtr = addFunc.GetParam(0);
             var otherReal = addFunc.GetParam(1);
@@ -62,7 +61,7 @@ public unsafe static class IntegerType
             var entry = negFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
             
-            mapping["Integer.UnaryMinus%%"] = negFunc;
+            OLangTypeRegistry.mapping["Integer.UnaryMinus%%"] = negFunc;
 
             var thisPtr = negFunc.GetParam(0);
             var thisInt = builder.BuildLoad2(intType, thisPtr, "thisInt");
@@ -79,7 +78,7 @@ public unsafe static class IntegerType
             var entry = toRealFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
             
-            mapping["Integer.ToReal%%"] = toRealFunc;
+            OLangTypeRegistry.mapping["Integer.ToReal%%"] = toRealFunc;
 
             var thisPtr = toRealFunc.GetParam(0);
             var thisInt = builder.BuildLoad2(intType, thisPtr, "thisInt");
@@ -96,7 +95,7 @@ public unsafe static class IntegerType
             var entry = toBoolFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
             
-            mapping["Integer.ToBoolean%%"] = toBoolFunc;
+            OLangTypeRegistry.mapping["Integer.ToBoolean%%"] = toBoolFunc;
 
             var thisPtr = toBoolFunc.GetParam(0);
             var thisInt = builder.BuildLoad2(intType, thisPtr, "thisInt");
@@ -114,7 +113,7 @@ public unsafe static class IntegerType
             var entry = intConstructor.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
             
-            mapping["Integer%Integer%"] = intConstructor;
+            OLangTypeRegistry.mapping["Integer%Integer%"] = intConstructor;
 
             var thisPtr = intConstructor.GetParam(0);
             var otherInt = intConstructor.GetParam(1);
@@ -131,7 +130,7 @@ public unsafe static class IntegerType
             var entry = realConstructor.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
             
-            mapping["Integer%Real%"] = realConstructor;
+            OLangTypeRegistry.mapping["Integer%Real%"] = realConstructor;
 
             var thisPtr = realConstructor.GetParam(0);
             var otherReal = realConstructor.GetParam(1);
@@ -149,7 +148,7 @@ public unsafe static class IntegerType
             var entry = minusFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
             
-            mapping["Integer.Minus%Integer%"] = minusFunc;
+            OLangTypeRegistry.mapping["Integer.Minus%Integer%"] = minusFunc;
 
             var thisPtr = minusFunc.GetParam(0);
             var otherInt = minusFunc.GetParam(1);
@@ -167,7 +166,7 @@ public unsafe static class IntegerType
             var entry = minusFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
             
-            mapping["Integer.Minus%Real%"] = minusFunc;
+            OLangTypeRegistry.mapping["Integer.Minus%Real%"] = minusFunc;
 
             var thisPtr = minusFunc.GetParam(0);
             var otherReal = minusFunc.GetParam(1);
@@ -186,7 +185,7 @@ public unsafe static class IntegerType
             var entry = multFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
             
-            mapping["Integer.Mult%Integer%"] = multFunc;
+            OLangTypeRegistry.mapping["Integer.Mult%Integer%"] = multFunc;
 
             var thisPtr = multFunc.GetParam(0);
             var otherInt = multFunc.GetParam(1);
@@ -204,7 +203,7 @@ public unsafe static class IntegerType
             var entry = multFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
             
-            mapping["Integer.Mult%Real%"] = multFunc;
+            OLangTypeRegistry.mapping["Integer.Mult%Real%"] = multFunc;
 
             var thisPtr = multFunc.GetParam(0);
             var otherReal = multFunc.GetParam(1);
@@ -223,7 +222,7 @@ public unsafe static class IntegerType
             var entry = divFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
             
-            mapping["Integer.Div%Integer%"] = divFunc;
+            OLangTypeRegistry.mapping["Integer.Div%Integer%"] = divFunc;
 
             var thisPtr = divFunc.GetParam(0);
             var otherInt = divFunc.GetParam(1);
@@ -241,7 +240,7 @@ public unsafe static class IntegerType
             var entry = divFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
             
-            mapping["Integer.Div%Real%"] = divFunc;
+            OLangTypeRegistry.mapping["Integer.Div%Real%"] = divFunc;
 
             var thisPtr = divFunc.GetParam(0);
             var otherReal = divFunc.GetParam(1);
@@ -260,7 +259,7 @@ public unsafe static class IntegerType
             var entry = remFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
             
-            mapping["Integer.Rem%Integer%"] = remFunc;
+            OLangTypeRegistry.mapping["Integer.Rem%Integer%"] = remFunc;
 
             var thisPtr = remFunc.GetParam(0);
             var otherInt = remFunc.GetParam(1);
@@ -278,7 +277,7 @@ public unsafe static class IntegerType
             var entry = lessFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
             
-            mapping["Integer.Less%Integer%"] = lessFunc;
+            OLangTypeRegistry.mapping["Integer.Less%Integer%"] = lessFunc;
 
             var thisPtr = lessFunc.GetParam(0);
             var otherInt = lessFunc.GetParam(1);
@@ -296,7 +295,7 @@ public unsafe static class IntegerType
             var entry = lessEqual.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
             
-            mapping["Integer.LessEqual%Integer%"] = lessEqual;
+            OLangTypeRegistry.mapping["Integer.LessEqual%Integer%"] = lessEqual;
 
             var thisPtr = lessEqual.GetParam(0);
             var otherInt = lessEqual.GetParam(1);
@@ -314,7 +313,7 @@ public unsafe static class IntegerType
             var entry = greaterFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
             
-            mapping["Integer.Greater%Integer%"] = greaterFunc;
+            OLangTypeRegistry.mapping["Integer.Greater%Integer%"] = greaterFunc;
 
             var thisPtr = greaterFunc.GetParam(0);
             var otherInt = greaterFunc.GetParam(1);
@@ -332,7 +331,7 @@ public unsafe static class IntegerType
             var entry = greaterEqual.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
             
-            mapping["Integer.GreaterEqual%Integer%"] = greaterEqual;
+            OLangTypeRegistry.mapping["Integer.GreaterEqual%Integer%"] = greaterEqual;
 
             var thisPtr = greaterEqual.GetParam(0);
             var otherInt = greaterEqual.GetParam(1);
@@ -350,7 +349,7 @@ public unsafe static class IntegerType
             var entry = equalFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
             
-            mapping["Integer.Equal%Integer%"] = equalFunc;
+            OLangTypeRegistry.mapping["Integer.Equal%Integer%"] = equalFunc;
 
             var thisPtr = equalFunc.GetParam(0);
             var otherInt = equalFunc.GetParam(1);
@@ -368,7 +367,7 @@ public unsafe static class IntegerType
             var entry = lessFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
             
-            mapping["Integer.Less%Real%"] = lessFunc;
+            OLangTypeRegistry.mapping["Integer.Less%Real%"] = lessFunc;
 
             var thisPtr = lessFunc.GetParam(0);
             var otherReal = lessFunc.GetParam(1);
@@ -387,7 +386,7 @@ public unsafe static class IntegerType
             var entry = lessEqual.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
             
-            mapping["Integer.LessEqual%Real%"] = lessEqual;
+            OLangTypeRegistry.mapping["Integer.LessEqual%Real%"] = lessEqual;
 
             var thisPtr = lessEqual.GetParam(0);
             var otherReal = lessEqual.GetParam(1);
@@ -406,7 +405,7 @@ public unsafe static class IntegerType
             var entry = greaterFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
             
-            mapping["Integer.Greater%Real%"] = greaterFunc;
+            OLangTypeRegistry.mapping["Integer.Greater%Real%"] = greaterFunc;
 
             var thisPtr = greaterFunc.GetParam(0);
             var otherReal = greaterFunc.GetParam(1);
@@ -425,7 +424,7 @@ public unsafe static class IntegerType
             var entry = greaterEqual.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
             
-            mapping["Integer.GreaterEqual%Real%"] = greaterEqual;
+            OLangTypeRegistry.mapping["Integer.GreaterEqual%Real%"] = greaterEqual;
 
             var thisPtr = greaterEqual.GetParam(0);
             var otherReal = greaterEqual.GetParam(1);
@@ -444,7 +443,7 @@ public unsafe static class IntegerType
             var entry = equalFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
             
-            mapping["Integer.Equal%Real%"] = equalFunc;
+            OLangTypeRegistry.mapping["Integer.Equal%Real%"] = equalFunc;
 
             var thisPtr = equalFunc.GetParam(0);
             var otherReal = equalFunc.GetParam(1);

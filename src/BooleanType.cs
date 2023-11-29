@@ -4,7 +4,6 @@ namespace OCompiler.Codegen;
 
 public unsafe static class BooleanType
 {
-    public static Dictionary<String, LLVMValueRef> mapping = new Dictionary<string, LLVMValueRef>();  
     public static void AddBooleanClass(in LLVMModuleRef module)
     {
         var intType = LLVM.Int32TypeInContext(module.Context);
@@ -22,7 +21,7 @@ public unsafe static class BooleanType
             var entry = orFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
 
-            mapping["Boolean.Or%Boolean%"] = orFunc;
+            OLangTypeRegistry.mapping["Boolean.Or%Boolean%"] = orFunc;
 
             var thisPtr = orFunc.GetParam(0);
             var otherBoolean = orFunc.GetParam(1);
@@ -43,7 +42,7 @@ public unsafe static class BooleanType
             var entry = andFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
             
-            mapping["Boolean.And%Boolean%"] = andFunc;
+            OLangTypeRegistry.mapping["Boolean.And%Boolean%"] = andFunc;
 
             var thisPtr = andFunc.GetParam(0);
             var otherBoolean = andFunc.GetParam(1);
@@ -64,7 +63,7 @@ public unsafe static class BooleanType
             var entry = xorFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
             
-            mapping["Boolean.Xor%Boolean%"] = xorFunc;
+            OLangTypeRegistry.mapping["Boolean.Xor%Boolean%"] = xorFunc;
 
             var thisPtr = xorFunc.GetParam(0);
             var otherBoolean = xorFunc.GetParam(1);
@@ -85,7 +84,7 @@ public unsafe static class BooleanType
             var entry = notFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
             
-            mapping["Boolean.Not%%"] = notFunc;
+            OLangTypeRegistry.mapping["Boolean.Not%%"] = notFunc;
 
             var thisPtr = notFunc.GetParam(0);
 
@@ -105,7 +104,7 @@ public unsafe static class BooleanType
             var entry = toInteger.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
             
-            mapping["Boolean.toInteger%%"] = toInteger;
+            OLangTypeRegistry.mapping["Boolean.toInteger%%"] = toInteger;
 
             var thisPtr = toInteger.GetParam(0);
 
