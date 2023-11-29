@@ -389,6 +389,12 @@ entry:
 
 define void @"Program%%"(ptr %0) {
 entry:
+  %1 = alloca i32, align 4
+  call void @"Integer%Integer%"(i32 10)
+  %2 = alloca ptr, align 8
+  store ptr %1, ptr %2, align 8
+  %3 = alloca ptr, align 8
+  store ptr %1, ptr %3, align 8
   ret void
 }
 

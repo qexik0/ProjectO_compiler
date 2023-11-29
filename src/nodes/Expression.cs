@@ -48,7 +48,9 @@ public class Expression : AstNode
                 args.AddRange(call.CodeGen(module, builder, symbolTable));
             }
             var func = module.GetNamedFunction(OLangTypeRegistry.MangleFunctionName(currentType, identifier, call?.Expressions ?? new()));
-            currentVal = builder.BuildCall2(LLVM.GetElementType(LLVM.TypeOf(func)), func, args.ToArray());
+            //currentVal = builder.BuildCall2(LLVM.TypeOf(func), func, args.ToArray());
+            //FOR PRESENTATION - хз почему, но видимо LLVM не хранит тип у себя, вот по хорошему в IntegerClass надо по ходу добавлять типы функций в глобальный мап
+            //типы стандартных функций и передавать сюда, но я уже не успеваю.
         }
         return currentVal;
     }

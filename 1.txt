@@ -1,0 +1,4 @@
+Syntax analyzing finished successfully!
+
+Semantics Report:
+Semantic Analyzing finished with errors!
