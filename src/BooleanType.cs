@@ -4,6 +4,7 @@ namespace OCompiler.Codegen;
 
 public unsafe static class BooleanType
 {
+    public static Dictionary<String, LLVMValueRef> mapping = new Dictionary<string, LLVMValueRef>();  
     public static void AddBooleanClass(in LLVMModuleRef module)
     {
         var intType = LLVM.Int32TypeInContext(module.Context);
@@ -20,6 +21,8 @@ public unsafe static class BooleanType
             using var builder = context.CreateBuilder();
             var entry = orFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+
+            mapping["Boolean.Or%Boolean%"] = orFunc;
 
             var thisPtr = orFunc.GetParam(0);
             var otherBoolean = orFunc.GetParam(1);
@@ -39,6 +42,8 @@ public unsafe static class BooleanType
             using var builder = context.CreateBuilder();
             var entry = andFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            mapping["Boolean.And%Boolean%"] = andFunc;
 
             var thisPtr = andFunc.GetParam(0);
             var otherBoolean = andFunc.GetParam(1);
@@ -58,6 +63,8 @@ public unsafe static class BooleanType
             using var builder = context.CreateBuilder();
             var entry = xorFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            mapping["Boolean.Xor%Boolean%"] = xorFunc;
 
             var thisPtr = xorFunc.GetParam(0);
             var otherBoolean = xorFunc.GetParam(1);
@@ -77,6 +84,8 @@ public unsafe static class BooleanType
             using var builder = context.CreateBuilder();
             var entry = notFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            mapping["Boolean.Not%%"] = notFunc;
 
             var thisPtr = notFunc.GetParam(0);
 
@@ -89,14 +98,16 @@ public unsafe static class BooleanType
         paramTypes = new[] { boolPtr };
         fixed (LLVMOpaqueType** prms = paramTypes)
         {
-            var notFunc = module.AddFunction("Boolean.toInteger%%",
+            var toInteger = module.AddFunction("Boolean.toInteger%%",
                 LLVM.FunctionType(intType, prms, (uint)paramTypes.Length, 0));
             var context = module.Context;
             using var builder = context.CreateBuilder();
-            var entry = notFunc.AppendBasicBlock("entry");
+            var entry = toInteger.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            mapping["Boolean.toInteger%%"] = toInteger;
 
-            var thisPtr = notFunc.GetParam(0);
+            var thisPtr = toInteger.GetParam(0);
 
             var thisBoolean = builder.BuildLoad2(boolType, thisPtr, "thisBoolean");
             

@@ -4,6 +4,7 @@ namespace OCompiler.Codegen;
 
 public unsafe static class RealType
 {
+    public static Dictionary<String, LLVMValueRef> mapping = new Dictionary<string, LLVMValueRef>();
     public static void AddRealClass(in LLVMModuleRef module)
     {
         var intType = LLVM.Int32TypeInContext(module.Context);
@@ -22,6 +23,8 @@ public unsafe static class RealType
             var entry = realConstructor.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
 
+            mapping["Real%Real%"] = realConstructor;
+            
             var thisPtr = realConstructor.GetParam(0);
             var otherReal = realConstructor.GetParam(1);
             
@@ -38,6 +41,8 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = intConstructor.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            mapping["Real%Integer%"] = intConstructor;
 
             var thisPtr = intConstructor.GetParam(0);
             var otherInt = intConstructor.GetParam(1);
@@ -56,6 +61,8 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = toIntFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            mapping["Real.toInteger%%"] = toIntFunc;
 
             var thisPtr = toIntFunc.GetParam(0);
 
@@ -73,6 +80,8 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = toIntFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            mapping["Real.UnaryMinus%%"] = toIntFunc;
 
             var thisPtr = toIntFunc.GetParam(0);
 
@@ -91,6 +100,8 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = addFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            mapping["Real.Plus%Real%"] = addFunc;
 
             var thisPtr = addFunc.GetParam(0);
             var otherReal = addFunc.GetParam(1);
@@ -109,6 +120,8 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = addFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            mapping["Real.Plus%Integer%"] = addFunc;
 
             var thisPtr = addFunc.GetParam(0);
             var otherInt = addFunc.GetParam(1);
@@ -129,6 +142,8 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = minusFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            mapping["Real.Minus%Real%"] = minusFunc;
 
             var thisPtr = minusFunc.GetParam(0);
             var otherReal = minusFunc.GetParam(1);
@@ -147,6 +162,8 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = minusFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            mapping["Real.Minus%Integer%"] = minusFunc;
 
             var thisPtr = minusFunc.GetParam(0);
             var otherInt = minusFunc.GetParam(1);
@@ -167,6 +184,8 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = multFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            mapping["Real.Mult%Real%"] = multFunc;
 
             var thisPtr = multFunc.GetParam(0);
             var otherReal = multFunc.GetParam(1);
@@ -185,6 +204,8 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = multFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            mapping["Real.Mult%Integer%"] = multFunc;
 
             var thisPtr = multFunc.GetParam(0);
             var otherInt = multFunc.GetParam(1);
@@ -205,6 +226,8 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = divFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            mapping["Real.Div%Real%"] = divFunc;
 
             var thisPtr = divFunc.GetParam(0);
             var otherReal = divFunc.GetParam(1);
@@ -223,6 +246,8 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = divFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            mapping["Real.Div%Integer%"] = divFunc;
 
             var thisPtr = divFunc.GetParam(0);
             var otherInt = divFunc.GetParam(1);
@@ -243,6 +268,8 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = divFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            mapping["Real.Rem%Integer%"] = divFunc;
 
             var thisPtr = divFunc.GetParam(0);
             var otherInt = divFunc.GetParam(1);
@@ -264,6 +291,8 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = lessFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            mapping["Real.Less%Real%"] = lessFunc;
 
             var thisPtr = lessFunc.GetParam(0);
             var otherReal = lessFunc.GetParam(1);
@@ -282,6 +311,8 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = lessFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            mapping["Real.Less%Integer%"] = lessFunc;
 
             var thisPtr = lessFunc.GetParam(0);
             var otherInt = lessFunc.GetParam(1);
@@ -302,6 +333,8 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = lessEqualFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            mapping["Real.LessEqual%Real%"] = lessEqualFunc;
 
             var thisPtr = lessEqualFunc.GetParam(0);
             var otherPtr = lessEqualFunc.GetParam(1);
@@ -322,6 +355,8 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = lessFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            mapping["Real.LessEqual%Integer%"] = lessFunc;
 
             var thisPtr = lessFunc.GetParam(0);
             var otherInt = lessFunc.GetParam(1);
@@ -342,6 +377,8 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = greaterFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            mapping["Real.Greater%Real%"] = greaterFunc;
 
             var thisPtr = greaterFunc.GetParam(0);
             var otherPtr = greaterFunc.GetParam(1);
@@ -362,6 +399,8 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = greaterFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            mapping["Real.Greater%Integer%"] = greaterFunc;
 
             var thisPtr = greaterFunc.GetParam(0);
             var otherInt = greaterFunc.GetParam(1);
@@ -383,6 +422,8 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = greaterEqualFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            mapping["Real.GreaterEqual%Real%"] = greaterEqualFunc;
 
             var thisPtr = greaterEqualFunc.GetParam(0);
             var otherPtr = greaterEqualFunc.GetParam(1);
@@ -404,6 +445,8 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = greaterFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            mapping["Real.GreaterEqual%Integer%"] = greaterFunc;
 
             var thisPtr = greaterFunc.GetParam(0);
             var otherInt = greaterFunc.GetParam(1);
@@ -425,6 +468,8 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = equalFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            mapping["Real.Equal%Real%"] = equalFunc;
 
             var thisPtr = equalFunc.GetParam(0);
             var otherPtr = equalFunc.GetParam(1);
@@ -445,6 +490,8 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = equalFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            mapping["Real.Equal%Integer%"] = equalFunc;
 
             var thisPtr = equalFunc.GetParam(0);
             var otherInt = equalFunc.GetParam(1);
