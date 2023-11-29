@@ -15,7 +15,7 @@ public unsafe static class OLangTypeRegistry
     public static readonly Dictionary<string, OLangClass> typeVariables = new ();
     public static readonly Dictionary<string, string> inheritanceRelation = new ();
     public static readonly Dictionary<string, LLVMTypeRef> llvmTypes = new ();
-    public static Dictionary<String, LLVMValueRef> mapping = new Dictionary<string, LLVMValueRef>();  
+    public static Dictionary<String, LLVMTypeRef> mapping = new Dictionary<string, LLVMTypeRef>();  
 
     static OLangTypeRegistry()
     {
