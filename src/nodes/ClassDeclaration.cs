@@ -10,23 +10,24 @@ public class ClassDeclaration : AstNode
     public ClassName? BaseClassName { get; set; }
     public List<MemberDeclaration> Members { get; } = new List<MemberDeclaration>();
 
-    public void CodeGen(in LLVMModuleRef module, in LLVMBuilderRef builder)
+    public void CodeGen(in LLVMModuleRef module)
     {
         if (BaseClassName != null)
         {
             // init a vtable, copy members of base class into type registry
         }
-        var className = OLangTypeRegistry.MangleClassName(Name);
-        OLangTypeRegistry.AddClass(className);
+        // TODO: handle generics
+        var className = Name.ClassIdentifier.Name;
+        OLangTypeRegistry.Types.Add(new() {Identifier = className});
         foreach (var member in Members)
         {
             if (member.Member is VariableDeclaration varDecl)
             {
-                var fieldType = OLangTypeRegistry.ClassExpressionType(className, varDecl.VariableExpression);
-                OLangTypeRegistry.AddClassField(className, varDecl.VariableIdentifier.Name, fieldType);
+                var fieldType = OLangTypeRegistry.FieldExpressionType(className, varDecl.VariableExpression);
+                OLangTypeRegistry.GetClass(className).Fields.Add(new() {Class = fieldType, Identifier = varDecl.VariableIdentifier.Name});
             }
         }
-        var classType = OLangTypeRegistry.GetLLVMClassType(module, builder, className);
+        OLangTypeRegistry.CreateLLVMType(module, className);
 
         foreach (var member in Members)
         {

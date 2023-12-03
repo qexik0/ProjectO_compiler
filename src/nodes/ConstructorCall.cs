@@ -11,20 +11,21 @@ public unsafe class ConstructorCall : AstNode
 
     public LLVMValueRef CodeGen(in LLVMModuleRef module, in LLVMBuilderRef builder, Dictionary<string, LLVMTypeRef> types, Dictionary<string, LLVMValueRef> symbolTable)
     {
-        // TODO: allocate on heap if derived from anyRef
-        var res = builder.BuildAlloca(types[ConstructorClassName.ClassIdentifier.Name]);
-        var constructor = module.GetNamedFunction(OLangTypeRegistry.MangleFunctionName(this));
-        var args = new List<LLVMValueRef>() {res};
-        if (ConstructorArguments != null)
-        {
-            foreach (var argument in ConstructorArguments.Expressions)
-            {
-                args.Add(argument.CodeGen(module, builder, symbolTable));
-            }
-        }
-        builder.BuildCall2(OLangTypeRegistry.mapping[OLangTypeRegistry.MangleFunctionName(this)], constructor, args.ToArray());
-        var resVal = builder.BuildLoad2(types[ConstructorClassName.ClassIdentifier.Name], res);
-        return resVal;
+        throw new Exception();
+        // // TODO: allocate on heap if derived from anyRef
+        // var res = builder.BuildAlloca(types[ConstructorClassName.ClassIdentifier.Name]);
+        // var constructor = module.GetNamedFunction(OLangTypeRegistry.MangleFunctionName(this));
+        // var args = new List<LLVMValueRef>() {res};
+        // if (ConstructorArguments != null)
+        // {
+        //     foreach (var argument in ConstructorArguments.Expressions)
+        //     {
+        //         args.Add(argument.CodeGen(module, builder, symbolTable));
+        //     }
+        // }
+        // builder.BuildCall2(OLangTypeRegistry.mapping[OLangTypeRegistry.MangleFunctionName(this)], constructor, args.ToArray());
+        // var resVal = builder.BuildLoad2(types[ConstructorClassName.ClassIdentifier.Name], res);
+        // return resVal;
     }
 
     public override string ToString()

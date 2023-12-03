@@ -4,61 +4,82 @@ using OCompiler.nodes;
 
 namespace OCompiler.Codegen;
 
+public class OLangParameter
+{
+    public required string Identifier { get; set; }
+    public required string Class {get; set;}
+}
+
+public class OLangMethod
+{
+    public required string Name { get; set; }
+    public List<OLangParameter> Parameters { get; set; } = new();
+    public required string ReturnType { get; set; }
+    public LLVMTypeRef FunctionType { get; set; }
+    public LLVMValueRef FunctionRef { get; set; }
+}
+
 public class OLangClass
 {
-    public Dictionary<string, string> FieldTypes { get; set; } = new ();
-    public Dictionary<string, string> MethodReturnTypes { get; set; } = new ();
+    public required string Identifier;
+    public List<OLangMethod> Methods { get; set; } = new();
+    public List<OLangParameter> Fields { get; set; } = new();
+    public string? InheritedFrom { get; set; }
+    public LLVMTypeRef ClassType { get; set;} 
 }
 
 public unsafe static class OLangTypeRegistry
 {
-    public static readonly Dictionary<string, OLangClass> typeVariables = new ();
-    public static readonly Dictionary<string, string> inheritanceRelation = new ();
-    public static readonly Dictionary<string, LLVMTypeRef> llvmTypes = new ();
-    public static Dictionary<String, LLVMTypeRef> mapping = new Dictionary<string, LLVMTypeRef>();  
-
-    static OLangTypeRegistry()
-    {
-        // typeVariables["AnyVal"] = new ();
-        // typeVariables["Integer"] = new ();
-        // typeVariables["Real"] = new ();
-        // typeVariables["Boolean"] = new ();
-        // typeVariables["AnyRef"] = new ();
-
-        
-
-        inheritanceRelation.Add("Integer", "AnyVal");
-        inheritanceRelation.Add("Real", "AnyVal");
-        inheritanceRelation.Add("Boolean", "AnyVal");
-
-    }
+    public static List<OLangClass> Types = new();
 
     public static void Init(in LLVMModuleRef module)
     {
-        llvmTypes["Integer"] = LLVM.Int32TypeInContext(module.Context);
-        llvmTypes["Real"] = LLVM.DoubleTypeInContext(module.Context);
-        llvmTypes["Boolean"] = LLVM.Int1TypeInContext(module.Context);
-        llvmTypes["Integer%Integer%"] = 
-        llvmTypes[""] = LLVM.VoidTypeInContext(module.Context);
+        Types.Add(new () {Identifier = "AnyValue"});
+        Types.Add(new () {Identifier = "AnyRef"});
+        
+        Types.Add(new() {Identifier = "Integer", InheritedFrom = "AnyValue", ClassType = LLVM.Int32TypeInContext(module.Context)});
+        Types.Add(new() {Identifier = "Real", InheritedFrom = "AnyValue", ClassType = LLVM.DoubleTypeInContext(module.Context)});
+        Types.Add(new() {Identifier = "Boolean", InheritedFrom = "AnyValue", ClassType = LLVM.Int1TypeInContext(module.Context)});
+        Types.Add(new() {Identifier = "", ClassType = LLVM.VoidTypeInContext(module.Context)});
+
+        // TODO: add std
     }
 
-    public static void AddClassField(string className, string fieldName, string fieldType)
+    public static OLangClass GetClass(string identifier)
     {
-        typeVariables[className].FieldTypes[fieldName] = fieldType;
+        return Types.Where(x => x.Identifier == identifier).First();
     }
 
-    public static void AddClassMethod(string className, string methodName, string returnType)
+    public static OLangParameter GetClassField(string currentClass, string variableName)
     {
-        typeVariables[className].MethodReturnTypes[methodName] = returnType;
+        return GetClass(currentClass).Fields.Where(x => variableName == x.Identifier).First();
     }
 
-    public static void AddClass(string className, string baseClass = "AnyRef")
+    public static OLangMethod GetClassMethod(string currentClass, string methodName, List<string> parameters)
     {
-        typeVariables[className] = new ();
-        inheritanceRelation[className] = baseClass;
+        foreach (var method in GetClass(currentClass).Methods)
+        {
+            if (method.Name == methodName && method.Parameters.Count == parameters.Count)
+            {
+                bool good = true;
+                for (int i = 0; i < parameters.Count; i++)
+                {
+                    if (parameters[i] != method.Parameters[i].Class)
+                    {
+                        good = false;
+                        break;
+                    }
+                }
+                if (good)
+                {
+                    return method;
+                }
+            }
+        }
+        throw new KeyNotFoundException("Method not found");
     }
 
-    public static string ClassExpressionType(string curClass, Expression expression)
+    public static string FieldExpressionType(string currentClass, Expression expression)
     {
         var currentType = expression.PrimaryOrConstructorCall switch
         {
@@ -67,283 +88,78 @@ public unsafe static class OLangTypeRegistry
                 IntegerLiteral => "Integer",
                 RealLiteral => "Real",
                 BooleanLiteral => "Boolean",
-                ClassName className => GetVariableType(curClass, className.ClassIdentifier.Name), // could only be identifier
+                ClassName className => GetClassField(currentClass, className.ClassIdentifier.Name).Class,
                 _ => throw new ApplicationException($"Could not derive type for the expression {expression}")
             },
-            ConstructorCall constructorCall => MangleClassName(constructorCall.ConstructorClassName),
+            ConstructorCall constructorCall => constructorCall.ConstructorClassName.ClassIdentifier.Name,
             _ => throw new ApplicationException($"Could not derive type for the expression {expression}")
         };
         foreach (var (identifier, arguments) in expression.Calls)
         {
-            if (!typeVariables.TryGetValue(currentType, out var _))
+            List<string> args = new();
+            if (arguments != null)
             {
-                throw new ApplicationException($"Type {currentType} was not defined earlier");
+                foreach (var parameter in arguments.Expressions)
+                {
+                    var type = FieldExpressionType(currentClass, parameter);
+                    args.Add(type);
+                }
             }
-            var returnType = typeVariables[currentType].MethodReturnTypes[MangleFunctionName(currentType, identifier, arguments)];
-            currentType = returnType;
+            try
+            {
+                var method = GetClassMethod(currentClass, identifier.Name, args);
+                currentType = method.ReturnType;
+            }
+            catch (Exception)
+            {
+                var field = GetClassField(currentClass, identifier.Name);
+                currentType = field.Class;
+            }
         }
         return currentType;
     }
 
-    public static string MangleClassName(ClassName className)
+    public static void CreateLLVMType(in LLVMModuleRef module, string className)
     {
-        StringBuilder sb = new();
-        sb.Append(className.ClassIdentifier.Name);
-        var genericName = className.GenericClassName;
-        int genericNames = 0;
-        while (genericName != null)
+        var classType = module.Context.CreateNamedStruct(className);
+        List<LLVMTypeRef> memberTypes = new ();
+        foreach (var field in GetClass(className).Fields)
         {
-            sb.Append($"#{genericName.ClassIdentifier.Name}");
-            genericName = genericName.GenericClassName;
-            ++genericNames;
-        }
-        while (genericNames > 0)
-        {
-            genericNames--;
-            sb.Append('#');
-        }
-        return sb.ToString();
-    }
-
-    public static string MangleFunctionName(ConstructorCall constructorCall)
-    {
-        StringBuilder sb = new ();
-        sb.Append(MangleClassName(constructorCall.ConstructorClassName));
-        sb.Append("%");
-        if (constructorCall.ConstructorArguments == null)
-        {
-            sb.Append("%");
-            return sb.ToString();
-        }
-        List<string> mangledArgumentTypes = new ();
-        foreach (var argument in constructorCall.ConstructorArguments.Expressions)
-        {
-            var argumentType = ClassExpressionType(MangleClassName(constructorCall.ConstructorClassName), argument);
-            mangledArgumentTypes.Add(argumentType);
-        }
-        sb.Append(string.Join(',', mangledArgumentTypes));
-        sb.Append('%');
-        return sb.ToString();
-    }
-
-    public static string MangleFunctionName(string className, ConstructorDeclaration constructorDecl)
-    {
-        StringBuilder sb = new ();
-        sb.Append(className);
-        sb.Append("%");
-        if (constructorDecl.ConstructorParameters == null)
-        {
-            sb.Append("%");
-            return sb.ToString();
-        }
-        List<string> mangledArgumentTypes = new ();
-        foreach (var argument in constructorDecl.ConstructorParameters.ParameterDeclarations)
-        {
-            var argumentType = MangleClassName(argument.ParameterClassName);
-            mangledArgumentTypes.Add(argumentType);
-        }
-        sb.Append(string.Join(',', mangledArgumentTypes));
-        sb.Append('%');
-        return sb.ToString();
-    }
-
-    public static string MangleFunctionName(string className, Identifier identifier, Arguments? arguments)
-    {
-        StringBuilder sb = new ();
-        sb.Append($"{className}.{identifier}");
-        sb.Append("%");
-        if (arguments == null)
-        {
-            sb.Append("%");
-            return sb.ToString();
-        }
-        List<string> mangledArgumentTypes = new ();
-        foreach (var argument in arguments.Expressions)
-        {
-            var argumentType = ClassExpressionType(className, argument);
-            mangledArgumentTypes.Add(argumentType);
-        }
-        sb.Append(string.Join(',', mangledArgumentTypes));
-        sb.Append('%');
-        return sb.ToString();
-    }
-
-    public static string MangleFunctionName(string className, Identifier identifier, List<Expression> arguments)
-    {
-        StringBuilder sb = new ();
-        sb.Append($"{className}.{identifier.Name}");
-        sb.Append("%");
-        if (arguments == null)
-        {
-            sb.Append("%");
-            return sb.ToString();
-        }
-        List<string> mangledArgumentTypes = new ();
-        foreach (var argument in arguments)
-        {
-            var argumentType = ClassExpressionType(className, argument);
-            mangledArgumentTypes.Add(argumentType);
-        }
-        sb.Append(string.Join(',', mangledArgumentTypes));
-        sb.Append('%');
-        return sb.ToString();
-    }
-
-    public static string MangleFunctionName(string className, MethodDeclaration methodDeclaration)
-    {
-        StringBuilder sb = new ();
-        sb.Append($"{className}.{methodDeclaration.MethodIdentifier.Name}");
-        sb.Append("%");
-        if (methodDeclaration.MethodParameters == null)
-        {
-            sb.Append("%");
-            return sb.ToString();
-        }
-        List<string> mangledArgumentTypes = new ();
-        foreach (var argument in methodDeclaration.MethodParameters.ParameterDeclarations)
-        {
-            var argumentType = MangleClassName(argument.ParameterClassName);
-            mangledArgumentTypes.Add(argumentType);
-        }
-        sb.Append(string.Join(',', mangledArgumentTypes));
-        sb.Append('%');
-        return sb.ToString();
-    }
-
-    public static string GetVariableType(string className, string identifier)
-    {
-        return typeVariables[className].FieldTypes[identifier];
-    }
-
-    public static LLVMTypeRef GetLLVMClassType(in LLVMModuleRef module, in LLVMBuilderRef builder, string className)
-    {
-        if (llvmTypes.ContainsKey(className))
-        {
-            return llvmTypes[className];
-        }
-        LLVMTypeRef classType = module.Context.CreateNamedStruct(className);
-        List<LLVMTypeRef> memberTypes = new List<LLVMTypeRef>();
-        foreach (var field in typeVariables[className].FieldTypes.Keys)
-        {
-            memberTypes.Add(GetLLVMClassType(module, builder, typeVariables[className].FieldTypes[field]));
+            memberTypes.Add(GetClass(field.Class).ClassType);
         }
         classType.StructSetBody(memberTypes.ToArray(), false);
-        llvmTypes[className] = classType;
-        return classType;
+        GetClass(className).ClassType = classType;
     }
 
-    public static unsafe  LLVMTypeRef GetLLVMMethodType(string className, MethodDeclaration methodDeclaration)
+    internal static void CreateLLVMConstructor(in LLVMModuleRef module, string className, OLangMethod method)
     {
-        var methodName = MangleFunctionName(className, methodDeclaration);
-        if (llvmTypes.ContainsKey(methodName))
+        var mangledName = $"{className}%{string.Join(",", method.Parameters.Select(x => x.Class))}%";
+        var returnType = GetClass(method.ReturnType).ClassType;
+        var paramTypes = new List<LLVMTypeRef>() {LLVM.PointerTypeInContext(module.Context, 0)};
+        foreach (var parameter in method.Parameters)
         {
-            return llvmTypes[methodName];
-        }
-        var olangRetType = typeVariables[className].MethodReturnTypes[methodName];
-        LLVMTypeRef returnType;
-        if (olangRetType.EndsWith("*"))
-        {
-            olangRetType = olangRetType.Substring(0, olangRetType.Length - 1);
-            returnType = LLVM.PointerType(llvmTypes[olangRetType], 0);
-        }
-        else
-        {
-            returnType = llvmTypes[olangRetType];
-        }
-        var paramTypes = new List<LLVMTypeRef>
-        {
-            LLVM.PointerType(llvmTypes[className], 0)
-        };
-        if (methodDeclaration.MethodParameters != null)
-        {
-            foreach (var parameter in methodDeclaration.MethodParameters.ParameterDeclarations)
-            {
-                LLVMTypeRef parameterType = llvmTypes[MangleClassName(parameter.ParameterClassName)];
-                paramTypes.Add(parameterType);
-            }
+            paramTypes.Add(GetClass(parameter.Class).ClassType);
         }
         fixed (LLVMTypeRef* paramsPtr = paramTypes.ToArray())
         {
-            var methodType = LLVM.FunctionType(returnType, (LLVMOpaqueType**) paramsPtr, (uint) paramTypes.Count, 0);
-            llvmTypes[methodName] = methodType;
-            return methodType;
+            method.FunctionType = LLVM.FunctionType(returnType, (LLVMOpaqueType**) paramsPtr, (uint) paramTypes.Count, 0);
         }
+        method.FunctionRef = module.AddFunction(mangledName, method.FunctionType);
     }
 
-    public static unsafe  LLVMTypeRef GetLLVMMethodType(string className, ConstructorDeclaration constructorDeclaration)
+    internal static void CreateLLVMMethod(in LLVMModuleRef module, string className, OLangMethod method)
     {
-        var methodName = MangleFunctionName(className, constructorDeclaration);
-        if (llvmTypes.ContainsKey(methodName))
+        var mangledName = $"{className}.{method.Name}%{string.Join(",", method.Parameters.Select(x => x.Class))}%";
+        var returnType = GetClass(method.ReturnType).ClassType;
+        var paramTypes = new List<LLVMTypeRef>() {LLVM.PointerTypeInContext(module.Context, 0)};
+        foreach (var parameter in method.Parameters)
         {
-            return llvmTypes[methodName];
-        }
-        var olangRetType = typeVariables[className].MethodReturnTypes[methodName];
-        LLVMTypeRef returnType;
-        if (olangRetType.EndsWith("*"))
-        {
-            olangRetType = olangRetType.Substring(0, olangRetType.Length - 1);
-            returnType = LLVM.PointerType(llvmTypes[olangRetType], 0);
-        }
-        else
-        {
-            returnType = llvmTypes[olangRetType];
-        }
-        var paramTypes = new List<LLVMTypeRef>
-        {
-            LLVM.PointerType(llvmTypes[className], 0)
-        };
-        if (constructorDeclaration.ConstructorParameters != null)
-        {
-            foreach (var parameter in constructorDeclaration.ConstructorParameters.ParameterDeclarations)
-            {
-                LLVMTypeRef parameterType = llvmTypes[MangleClassName(parameter.ParameterClassName)];
-                paramTypes.Add(parameterType);
-            }
+            paramTypes.Add(GetClass(parameter.Class).ClassType);
         }
         fixed (LLVMTypeRef* paramsPtr = paramTypes.ToArray())
         {
-            var methodType = LLVM.FunctionType(returnType, (LLVMOpaqueType**) paramsPtr, (uint) paramTypes.Count, 0);
-            llvmTypes[methodName] = methodType;
-            return methodType;
+            method.FunctionType = LLVM.FunctionType(returnType, (LLVMOpaqueType**) paramsPtr, (uint) paramTypes.Count, 0);
         }
-    }
-
-    public static void AddMethod(string className, MethodDeclaration methodDeclaration)
-    {
-        var methodName = MangleFunctionName(className, methodDeclaration);
-        if (methodDeclaration.ReturnTypeIdentifier == null)
-        {
-            AddClassMethod(className, methodName, "");
-        }
-        else
-        {
-            AddClassMethod(className, methodName, MangleClassName(methodDeclaration.ReturnTypeIdentifier));
-        }
-    }
-
-    public static void AddMethod(string className, ConstructorDeclaration constructorDeclaration)
-    {
-        var methodName = MangleFunctionName(className, constructorDeclaration);
-        if (IsInheritedFrom(className, "AnyRef"))
-        {
-            AddClassMethod(className, methodName, "");
-        }
-        else
-        {
-            AddClassMethod(className, methodName, $"{className}*");
-        }
-    }
-
-    public static bool IsInheritedFrom(string className, string baseClass)
-    {
-        while (inheritanceRelation.TryGetValue(className, out var inheritedFrom))
-        {
-            if (inheritedFrom == baseClass)
-            {
-                return true;
-            }
-            className = inheritedFrom;
-        }
-        return false;
+        method.FunctionRef = module.AddFunction(mangledName, method.FunctionType);
     }
 }

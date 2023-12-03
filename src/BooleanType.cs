@@ -21,8 +21,6 @@ public unsafe static class BooleanType
             var entry = orFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
 
-            OLangTypeRegistry.mapping["Boolean.Or%Boolean%"] = LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0);
-
             var thisPtr = orFunc.GetParam(0);
             var otherBoolean = orFunc.GetParam(1);
 
@@ -41,8 +39,6 @@ public unsafe static class BooleanType
             using var builder = context.CreateBuilder();
             var entry = andFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
-            
-            OLangTypeRegistry.mapping["Boolean.And%Boolean%"] = LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0);
 
             var thisPtr = andFunc.GetParam(0);
             var otherBoolean = andFunc.GetParam(1);
@@ -62,8 +58,6 @@ public unsafe static class BooleanType
             using var builder = context.CreateBuilder();
             var entry = xorFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
-            
-            OLangTypeRegistry.mapping["Boolean.Xor%Boolean%"] = LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0);
 
             var thisPtr = xorFunc.GetParam(0);
             var otherBoolean = xorFunc.GetParam(1);
@@ -83,8 +77,6 @@ public unsafe static class BooleanType
             using var builder = context.CreateBuilder();
             var entry = notFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
-            
-            OLangTypeRegistry.mapping["Boolean.Not%%"] = LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0);
 
             var thisPtr = notFunc.GetParam(0);
 
@@ -103,8 +95,6 @@ public unsafe static class BooleanType
             using var builder = context.CreateBuilder();
             var entry = toInteger.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
-            
-            OLangTypeRegistry.mapping["Boolean.toInteger%%"] = LLVM.FunctionType(intType, prms, (uint)paramTypes.Length, 0);
 
             var thisPtr = toInteger.GetParam(0);
 

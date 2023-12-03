@@ -389,21 +389,14 @@ entry:
 
 define void @"Program%%"(ptr %0) {
 entry:
-  %1 = alloca i32, align 4
-  call void @"Integer%Integer%"(ptr %1, i32 10)
-  %2 = load i32, ptr %1, align 4
-  %3 = alloca i32, align 4
-  store i32 %2, ptr %3, align 4
-  %4 = call i32 @"Integer.Plus%Integer%"(ptr %3, i32 5)
-  %5 = alloca i32, align 4
-  store i32 %4, ptr %5, align 4
-  %6 = call i1 @"Integer.Less%Integer%"(ptr %5, i32 10)
-  ret void
 }
 
-define void @"Program.pupa%Integer,Real,Boolean%"(ptr %0, i32 %1, double %2, i1 %3) {
+define void @"Program%Integer,Real,Boolean%"(ptr %0, i32 %1, double %2, i1 %3) {
 entry:
-  ret void
+}
+
+define void @"Huy%%"(ptr %0) {
+entry:
 }
 
 define i32 @main() {

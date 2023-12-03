@@ -31,8 +31,7 @@ public class Program : AstNode
         OLangTypeRegistry.Init(module);
         foreach (var classDecl in ProgramClasses)
         {
-            using var builder = module.Context.CreateBuilder();
-            classDecl.CodeGen(module, builder);
+            classDecl.CodeGen(module);
         }
         Codegen.MainFunction.AddMainFunction(module, new());
         if (module.TryVerify(LLVMVerifierFailureAction.LLVMPrintMessageAction, out string message))

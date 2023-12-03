@@ -21,8 +21,6 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = realConstructor.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
-
-            OLangTypeRegistry.mapping["Real%Real%"] = LLVM.FunctionType(voidType, prms, (uint)paramTypes.Length, 0);
             
             var thisPtr = realConstructor.GetParam(0);
             var otherReal = realConstructor.GetParam(1);
@@ -40,8 +38,6 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = intConstructor.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
-            
-            OLangTypeRegistry.mapping["Real%Integer%"] = LLVM.FunctionType(voidType, prms, (uint)paramTypes.Length, 0);
 
             var thisPtr = intConstructor.GetParam(0);
             var otherInt = intConstructor.GetParam(1);
@@ -61,7 +57,6 @@ public unsafe static class RealType
             var entry = toIntFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
             
-            OLangTypeRegistry.mapping["Real.toInteger%%"] = LLVM.FunctionType(intType, prms, (uint)paramTypes.Length, 0);
 
             var thisPtr = toIntFunc.GetParam(0);
 
@@ -79,8 +74,6 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = toIntFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
-            
-            OLangTypeRegistry.mapping["Real.UnaryMinus%%"] = LLVM.FunctionType(realType, prms, (uint)paramTypes.Length, 0);
 
             var thisPtr = toIntFunc.GetParam(0);
 
@@ -100,7 +93,6 @@ public unsafe static class RealType
             var entry = addFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
             
-            OLangTypeRegistry.mapping["Real.Plus%Real%"] = LLVM.FunctionType(realType, prms, (uint)paramTypes.Length, 0);
 
             var thisPtr = addFunc.GetParam(0);
             var otherReal = addFunc.GetParam(1);
@@ -119,8 +111,6 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = addFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
-            
-            OLangTypeRegistry.mapping["Real.Plus%Integer%"] = LLVM.FunctionType(realType, prms, (uint)paramTypes.Length, 0);
 
             var thisPtr = addFunc.GetParam(0);
             var otherInt = addFunc.GetParam(1);
@@ -141,8 +131,6 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = minusFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
-            
-            OLangTypeRegistry.mapping["Real.Minus%Real%"] = LLVM.FunctionType(realType, prms, (uint)paramTypes.Length, 0);
 
             var thisPtr = minusFunc.GetParam(0);
             var otherReal = minusFunc.GetParam(1);
@@ -161,8 +149,6 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = minusFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
-            
-            OLangTypeRegistry.mapping["Real.Minus%Integer%"] = LLVM.FunctionType(realType, prms, (uint)paramTypes.Length, 0);
 
             var thisPtr = minusFunc.GetParam(0);
             var otherInt = minusFunc.GetParam(1);
@@ -183,8 +169,6 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = multFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
-            
-            OLangTypeRegistry.mapping["Real.Mult%Real%"] = LLVM.FunctionType(realType, prms, (uint)paramTypes.Length, 0);
 
             var thisPtr = multFunc.GetParam(0);
             var otherReal = multFunc.GetParam(1);
@@ -203,8 +187,6 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = multFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
-            
-            OLangTypeRegistry.mapping["Real.Mult%Integer%"] = LLVM.FunctionType(realType, prms, (uint)paramTypes.Length, 0);
 
             var thisPtr = multFunc.GetParam(0);
             var otherInt = multFunc.GetParam(1);
@@ -225,8 +207,6 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = divFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
-            
-            OLangTypeRegistry.mapping["Real.Div%Real%"] = LLVM.FunctionType(realType, prms, (uint)paramTypes.Length, 0);
 
             var thisPtr = divFunc.GetParam(0);
             var otherReal = divFunc.GetParam(1);
@@ -245,8 +225,6 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = divFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
-            
-            OLangTypeRegistry.mapping["Real.Div%Integer%"] = LLVM.FunctionType(realType, prms, (uint)paramTypes.Length, 0);
 
             var thisPtr = divFunc.GetParam(0);
             var otherInt = divFunc.GetParam(1);
@@ -267,8 +245,6 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = divFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
-            
-            OLangTypeRegistry.mapping["Real.Rem%Integer%"] = LLVM.FunctionType(realType, prms, (uint)paramTypes.Length, 0);
 
             var thisPtr = divFunc.GetParam(0);
             var otherInt = divFunc.GetParam(1);
@@ -290,8 +266,6 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = lessFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
-            
-            OLangTypeRegistry.mapping["Real.Less%Real%"] = LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0);
 
             var thisPtr = lessFunc.GetParam(0);
             var otherReal = lessFunc.GetParam(1);
@@ -310,8 +284,6 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = lessFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
-            
-            OLangTypeRegistry.mapping["Real.Less%Integer%"] = LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0);
 
             var thisPtr = lessFunc.GetParam(0);
             var otherInt = lessFunc.GetParam(1);
@@ -332,8 +304,6 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = lessEqualFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
-            
-            OLangTypeRegistry.mapping["Real.LessEqual%Real%"] = LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0);
 
             var thisPtr = lessEqualFunc.GetParam(0);
             var otherPtr = lessEqualFunc.GetParam(1);
@@ -354,8 +324,6 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = lessFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
-            
-            OLangTypeRegistry.mapping["Real.LessEqual%Integer%"] = LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0);
 
             var thisPtr = lessFunc.GetParam(0);
             var otherInt = lessFunc.GetParam(1);
@@ -376,8 +344,6 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = greaterFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
-            
-            OLangTypeRegistry.mapping["Real.Greater%Real%"] = LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0);
 
             var thisPtr = greaterFunc.GetParam(0);
             var otherPtr = greaterFunc.GetParam(1);
@@ -398,8 +364,6 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = greaterFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
-            
-            OLangTypeRegistry.mapping["Real.Greater%Integer%"] = LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0);
 
             var thisPtr = greaterFunc.GetParam(0);
             var otherInt = greaterFunc.GetParam(1);
@@ -421,8 +385,6 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = greaterEqualFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
-            
-            OLangTypeRegistry.mapping["Real.GreaterEqual%Real%"] = LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0);
 
             var thisPtr = greaterEqualFunc.GetParam(0);
             var otherPtr = greaterEqualFunc.GetParam(1);
@@ -444,8 +406,6 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = greaterFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
-            
-            OLangTypeRegistry.mapping["Real.GreaterEqual%Integer%"] = LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0);
 
             var thisPtr = greaterFunc.GetParam(0);
             var otherInt = greaterFunc.GetParam(1);
@@ -467,8 +427,6 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = equalFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
-            
-            OLangTypeRegistry.mapping["Real.Equal%Real%"] = LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0);
 
             var thisPtr = equalFunc.GetParam(0);
             var otherPtr = equalFunc.GetParam(1);
@@ -489,8 +447,6 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = equalFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
-            
-            OLangTypeRegistry.mapping["Real.Equal%Integer%"] = LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0);
 
             var thisPtr = equalFunc.GetParam(0);
             var otherInt = equalFunc.GetParam(1);

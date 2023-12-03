@@ -13,14 +13,19 @@ public class MethodDeclaration : AstNode
 
     public unsafe void CodeGen(in LLVMModuleRef module, string className)
     {
-        OLangTypeRegistry.AddMethod(className, this);
-        var methodName = OLangTypeRegistry.MangleFunctionName(className, this);
-        var methodType = OLangTypeRegistry.GetLLVMMethodType(className, this);
-        var method = module.AddFunction(methodName, methodType);
-        var entry = method.AppendBasicBlock("entry");
+        var method = new OLangMethod() {Name = MethodIdentifier.Name, ReturnType = ReturnTypeIdentifier?.ClassIdentifier.Name ?? ""};
+        if (MethodParameters != null)
+        {
+            foreach (var parameter in MethodParameters.ParameterDeclarations)
+            {
+                method.Parameters.Add(new() {Class = parameter.ParameterClassName.ClassIdentifier.Name, Identifier = parameter.ParameterIdentifier.Name});
+            }
+        }
+        OLangTypeRegistry.GetClass(className).Methods.Add(method);
+        OLangTypeRegistry.CreateLLVMConstructor(module, className, method);
+        var entry = method.FunctionRef.AppendBasicBlock("entry");
         using var builder = module.Context.CreateBuilder();
         builder.PositionAtEnd(entry);
-        MethodBody.CodeGen(module, builder);
     }
 
     public override string ToString()
