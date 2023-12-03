@@ -138,7 +138,7 @@ public class CLIFrontent
             var semanticResult = false;
             try
             {
-                var semanticAnalyzer = new SemanticAnalyzer((nodes.Program)program, tokens, report);
+                var semanticAnalyzer = new SemanticAnalyzer((nodes.Program)program, report);
                 semanticResult = semanticAnalyzer.AnalyzeProgram();
             }
             catch (Exception e)
