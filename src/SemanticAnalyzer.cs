@@ -6,16 +6,14 @@ namespace OCompiler;
 
 public class SemanticAnalyzer
 {
-    private Program _root;
-    private List<Token> _tokens;
+    private readonly Program _root;
     private Dictionary<string, CurrentClass> _classes;
-    private StreamWriter _report;
+    private readonly StreamWriter _report;
     private bool _hasErrors;
 
-    public SemanticAnalyzer(Program root, List<Token> tokens, StreamWriter report)
+    public SemanticAnalyzer(Program root, StreamWriter report)
     {
         _root = root;
-        _tokens = tokens;
         _report = report;
         _classes = CollectClasses(_root);
         AddBasicClasses();
@@ -262,6 +260,8 @@ public class SemanticAnalyzer
             {
                 case VariableDeclaration variableDeclaration:
                     var varExprType = EvalExpression(variableDeclaration.VariableExpression, currentClass, newDict);
+                    var generic = varExprType.Contains(',') ? varExprType.Split(',')[1] : null;
+                    varExprType = varExprType.Split(',')[0];
                     if (varExprType == "Void")
                     {
                         ReportFatal(
@@ -275,7 +275,7 @@ public class SemanticAnalyzer
                     if (!newVariables.TryAdd(variableDeclaration.VariableIdentifier.Name, new Variable
                         {
                             Name = variableDeclaration.VariableIdentifier.Name,
-                            Type = varExprType
+                            Type = generic != null ? $"{varExprType},{generic}" : varExprType
                         }))
                     {
                         ReportFatal(
@@ -340,7 +340,7 @@ public class SemanticAnalyzer
 
                             var ret1 = AnalyzeBody(ifStatement.IfBody, currentClass, curMethod, newDict, returnType,
                                 false);
-                            var ret2 = AnalyzeBody(ifStatement.ElseBody, currentClass, curMethod, newDict, returnType,
+                            var ret2 = ifStatement.ElseBody != null && AnalyzeBody(ifStatement.ElseBody, currentClass, curMethod, newDict, returnType,
                                 false);
                             hasReturn = ret1 && ret2;
                             break;
@@ -433,10 +433,22 @@ public class SemanticAnalyzer
             {
                 ReportNonFatal($"There is no constructors matching {name} in class {currentType}!");
             }
+
+            if (_classes[currentType].Generic != null && call.ConstructorClassName.GenericClassName != null)
+            {
+                currentType += $",{call.ConstructorClassName.GenericClassName.ClassIdentifier.Name}";
+            }
         }
 
         foreach (var (identifier, arguments) in expression.Calls)
         {
+            string? generic = null;
+            if (currentType.Contains(','))
+            {
+                generic = currentType.Split(',')[1];
+                currentType = currentType.Split(',')[0];
+            }
+
             if (!_classes.ContainsKey(currentType))
             {
                 ReportFatal($"There is no such Type {currentType}");
@@ -473,6 +485,16 @@ public class SemanticAnalyzer
 
             var method = curClass.GetMethod(name, _classes);
             currentType = method!.ReturnType;
+            if (currentType == curClass.Generic)
+            {
+                if (generic == null)
+                {
+                    ReportFatal("Something strange is going on!");
+                    throw new AnalyzerException();
+                }
+
+                currentType = generic;
+            }
         }
 
         return currentType;
@@ -867,7 +889,7 @@ internal class AnalyzerException : Exception
 
 class CurrentClass
 {
-    public string Name { get; init; }
+    public string Name { get; init; } = "";
     public string? Generic { get; init; }
     public string? BaseClass { get; init; }
 
@@ -964,22 +986,22 @@ class CurrentClass
 
 class Variable
 {
-    public string Name { get; init; }
-    public string Type { get; set; }
+    public string Name { get; init; } = "";
+    public string Type { get; set; } = "";
 }
 
 class Method
 {
-    public string Name { get; init; }
-    public string ReturnType { get; init; }
+    public string Name { get; init; } = "";
+    public string ReturnType { get; init; } = "";
     public Body? MethodBody { get; init; }
     public Dictionary<string, Variable> Parameters { get; } = new();
 }
 
 class Constructor
 {
-    public string Name { get; init; }
-    public string Type { get; init; }
+    public string Name { get; init; } = "";
+    public string Type { get; init; } = "";
     public Body? ConstructorBody { get; init; }
     public Dictionary<string, Variable> Parameters { get; } = new();
 }
