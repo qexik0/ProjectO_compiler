@@ -10,7 +10,7 @@ public class SemanticAnalyzer
     private List<Token> _tokens;
     private Dictionary<string, CurrentClass> _classes;
     private StreamWriter _report;
-    private bool _hasErrors = false;
+    private bool _hasErrors;
 
     public SemanticAnalyzer(Program root, List<Token> tokens, StreamWriter report)
     {
@@ -31,6 +31,11 @@ public class SemanticAnalyzer
         {
             foreach (var declaration in _root.ProgramClasses)
             {
+                AnalyzeVariables(declaration);
+            }
+
+            foreach (var declaration in _root.ProgramClasses)
+            {
                 AnalyzeClass(declaration);
             }
         }
@@ -42,6 +47,19 @@ public class SemanticAnalyzer
         _report.WriteLine(_hasErrors ? "Semantic Analyzer found errors!" : "Semantic Analyzing finished successfully!");
 
         return !_hasErrors;
+    }
+
+    private void AnalyzeVariables(ClassDeclaration declaration)
+    {
+        var currentClass = _classes[declaration.Name.ClassIdentifier.Name];
+        foreach (var member in declaration.Members)
+        {
+            if (member.Member is VariableDeclaration variableDeclaration)
+            {
+                currentClass.Variables[variableDeclaration.VariableIdentifier.Name].Type = EvalExpression(
+                    variableDeclaration.VariableExpression, currentClass, new Dictionary<string, Variable>());
+            }
+        }
     }
 
     private Dictionary<string, CurrentClass> CollectClasses(Program root)
@@ -173,15 +191,6 @@ public class SemanticAnalyzer
         var currentClass = _classes[declaration.Name.ClassIdentifier.Name];
         AnalyzeInheritance(currentClass);
 
-        foreach (var member in declaration.Members)
-        {
-            if (member.Member is VariableDeclaration variableDeclaration)
-            {
-                currentClass.Variables[variableDeclaration.VariableIdentifier.Name].Type = EvalExpression(
-                    variableDeclaration.VariableExpression, currentClass, new Dictionary<string, Variable>());
-            }
-        }
-
         foreach (var (_, method) in currentClass.Methods)
         {
             AnalyzeParameters(method.Parameters);
@@ -293,7 +302,8 @@ public class SemanticAnalyzer
                                     : outerVariables.TryGetValue(assignment.AssignmentIdentifier.Name,
                                         out var outVariable)
                                         ? outVariable.Type
-                                        : currentClass.GetVariable(assignment.AssignmentIdentifier.Name, _classes)!.Type;
+                                        : currentClass.GetVariable(assignment.AssignmentIdentifier.Name, _classes)!
+                                            .Type;
                             var exprType = EvalExpression(assignment.AssignmentExpression, currentClass, newDict);
                             if (!_classes.ContainsKey(exprType))
                             {
@@ -438,6 +448,13 @@ public class SemanticAnalyzer
             if (arguments == null)
             {
                 name = CreateName(identifier.Name, new List<Variable>());
+
+                var curVariable = curClass.GetVariable(identifier.Name, _classes);
+                if (curVariable != null)
+                {
+                    currentType = curVariable.Type;
+                    continue;
+                }
             }
             else
             {
@@ -450,7 +467,7 @@ public class SemanticAnalyzer
 
             if (!curClass.ContainsMethod(name, _classes))
             {
-                ReportFatal($"There is no such method in class {curClass.Name}: {name}");
+                ReportFatal($"There is no such method or variable in class {curClass.Name}: {name}");
                 throw new AnalyzerException();
             }
 
