@@ -1,4 +1,5 @@
 using LLVMSharp.Interop;
+using static OCompiler.Codegen.OLangTypeRegistry;
 
 namespace OCompiler.Codegen;
 
@@ -20,6 +21,21 @@ public unsafe static class BooleanType
             using var builder = context.CreateBuilder();
             var entry = orFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            GetClass("Boolean").Methods.Add(new OLangMethod()
+            {
+                Name = "Or", 
+                FunctionType = LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0),
+                FunctionRef = orFunc,
+                ReturnType = "Boolean",
+                Parameters = new ()
+                {
+                    new ()
+                    {
+                        Class = "Boolean", Identifier = "arg0"
+                    }
+                }
+            });
 
             var thisPtr = orFunc.GetParam(0);
             var otherBoolean = orFunc.GetParam(1);
@@ -39,6 +55,21 @@ public unsafe static class BooleanType
             using var builder = context.CreateBuilder();
             var entry = andFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            GetClass("Boolean").Methods.Add(new OLangMethod()
+            {
+                Name = "And", 
+                FunctionType = LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0),
+                FunctionRef = andFunc,
+                ReturnType = "Boolean",
+                Parameters = new ()
+                {
+                    new ()
+                    {
+                        Class = "Boolean", Identifier = "arg0"
+                    }
+                }
+            });
 
             var thisPtr = andFunc.GetParam(0);
             var otherBoolean = andFunc.GetParam(1);
@@ -58,6 +89,21 @@ public unsafe static class BooleanType
             using var builder = context.CreateBuilder();
             var entry = xorFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            GetClass("Boolean").Methods.Add(new OLangMethod()
+            {
+                Name = "Xor", 
+                FunctionType = LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0),
+                FunctionRef = xorFunc,
+                ReturnType = "Boolean",
+                Parameters = new ()
+                {
+                    new ()
+                    {
+                        Class = "Boolean", Identifier = "arg0"
+                    }
+                }
+            });
 
             var thisPtr = xorFunc.GetParam(0);
             var otherBoolean = xorFunc.GetParam(1);
@@ -77,6 +123,14 @@ public unsafe static class BooleanType
             using var builder = context.CreateBuilder();
             var entry = notFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            GetClass("Boolean").Methods.Add(new OLangMethod()
+            {
+                Name = "Not", 
+                FunctionType = LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0),
+                FunctionRef = notFunc,
+                ReturnType = "Boolean"
+            });
 
             var thisPtr = notFunc.GetParam(0);
 
@@ -95,6 +149,14 @@ public unsafe static class BooleanType
             using var builder = context.CreateBuilder();
             var entry = toInteger.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            GetClass("Boolean").Methods.Add(new OLangMethod()
+            {
+                Name = "toInteger", 
+                FunctionType = LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0),
+                FunctionRef = toInteger,
+                ReturnType = "Boolean"
+            });
 
             var thisPtr = toInteger.GetParam(0);
 

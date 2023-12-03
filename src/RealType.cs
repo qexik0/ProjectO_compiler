@@ -1,6 +1,8 @@
 using LLVMSharp.Interop;
+using static OCompiler.Codegen.OLangTypeRegistry;
 
 namespace OCompiler.Codegen;
+
 
 public unsafe static class RealType
 {
@@ -22,6 +24,21 @@ public unsafe static class RealType
             var entry = realConstructor.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
             
+            GetClass("Real").Methods.Add(new OLangMethod()
+            {
+                Name = "", 
+                FunctionType = LLVM.FunctionType(voidType, prms, (uint)paramTypes.Length, 0),
+                FunctionRef = realConstructor,
+                ReturnType = "",
+                Parameters = new ()
+                {
+                    new ()
+                    {
+                        Class = "Real", Identifier = "arg0"
+                    }
+                }
+            });
+            
             var thisPtr = realConstructor.GetParam(0);
             var otherReal = realConstructor.GetParam(1);
             
@@ -38,6 +55,21 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = intConstructor.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            GetClass("Real").Methods.Add(new OLangMethod()
+            {
+                Name = "", 
+                FunctionType = LLVM.FunctionType(voidType, prms, (uint)paramTypes.Length, 0),
+                FunctionRef = intConstructor,
+                ReturnType = "",
+                Parameters = new ()
+                {
+                    new ()
+                    {
+                        Class = "Integer", Identifier = "arg0"
+                    }
+                }
+            });
 
             var thisPtr = intConstructor.GetParam(0);
             var otherInt = intConstructor.GetParam(1);
@@ -57,6 +89,13 @@ public unsafe static class RealType
             var entry = toIntFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
             
+            GetClass("Real").Methods.Add(new OLangMethod()
+            {
+                Name = "toInteger", 
+                FunctionType = LLVM.FunctionType(intType, prms, (uint)paramTypes.Length, 0),
+                FunctionRef = toIntFunc,
+                ReturnType = "Integer"
+            });
 
             var thisPtr = toIntFunc.GetParam(0);
 
@@ -74,6 +113,14 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = toIntFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            GetClass("Integer").Methods.Add(new OLangMethod()
+            {
+                Name = "UnaryMinus", 
+                FunctionType = LLVM.FunctionType(realType, prms, (uint)paramTypes.Length, 0),
+                FunctionRef = toIntFunc,
+                ReturnType = "Real"
+            });
 
             var thisPtr = toIntFunc.GetParam(0);
 
@@ -93,6 +140,20 @@ public unsafe static class RealType
             var entry = addFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
             
+            GetClass("Real").Methods.Add(new OLangMethod()
+            {
+                Name = "Plus", 
+                FunctionType = LLVM.FunctionType(realType, prms, (uint)paramTypes.Length, 0),
+                FunctionRef = addFunc,
+                ReturnType = "Real",
+                Parameters = new ()
+                {
+                    new ()
+                    {
+                        Class = "Real", Identifier = "arg0"
+                    }
+                }
+            });
 
             var thisPtr = addFunc.GetParam(0);
             var otherReal = addFunc.GetParam(1);
@@ -111,6 +172,21 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = addFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            GetClass("Real").Methods.Add(new OLangMethod()
+            {
+                Name = "Plus", 
+                FunctionType = LLVM.FunctionType(realType, prms, (uint)paramTypes.Length, 0),
+                FunctionRef = addFunc,
+                ReturnType = "Real",
+                Parameters = new ()
+                {
+                    new ()
+                    {
+                        Class = "Integer", Identifier = "arg0"
+                    }
+                }
+            });
 
             var thisPtr = addFunc.GetParam(0);
             var otherInt = addFunc.GetParam(1);
@@ -131,6 +207,21 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = minusFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            GetClass("Real").Methods.Add(new OLangMethod()
+            {
+                Name = "Minus", 
+                FunctionType = LLVM.FunctionType(realType, prms, (uint)paramTypes.Length, 0),
+                FunctionRef = minusFunc,
+                ReturnType = "Real",
+                Parameters = new ()
+                {
+                    new ()
+                    {
+                        Class = "Real", Identifier = "arg0"
+                    }
+                }
+            });
 
             var thisPtr = minusFunc.GetParam(0);
             var otherReal = minusFunc.GetParam(1);
@@ -149,6 +240,21 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = minusFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            GetClass("Real").Methods.Add(new OLangMethod()
+            {
+                Name = "Minus", 
+                FunctionType = LLVM.FunctionType(realType, prms, (uint)paramTypes.Length, 0),
+                FunctionRef = minusFunc,
+                ReturnType = "Real",
+                Parameters = new ()
+                {
+                    new ()
+                    {
+                        Class = "Integer", Identifier = "arg0"
+                    }
+                }
+            });
 
             var thisPtr = minusFunc.GetParam(0);
             var otherInt = minusFunc.GetParam(1);
@@ -169,6 +275,21 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = multFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            GetClass("Real").Methods.Add(new OLangMethod()
+            {
+                Name = "Mult", 
+                FunctionType = LLVM.FunctionType(realType, prms, (uint)paramTypes.Length, 0),
+                FunctionRef = multFunc,
+                ReturnType = "Real",
+                Parameters = new ()
+                {
+                    new ()
+                    {
+                        Class = "Real", Identifier = "arg0"
+                    }
+                }
+            });
 
             var thisPtr = multFunc.GetParam(0);
             var otherReal = multFunc.GetParam(1);
@@ -187,6 +308,21 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = multFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            GetClass("Real").Methods.Add(new OLangMethod()
+            {
+                Name = "Mult", 
+                FunctionType = LLVM.FunctionType(realType, prms, (uint)paramTypes.Length, 0),
+                FunctionRef = multFunc,
+                ReturnType = "Real",
+                Parameters = new ()
+                {
+                    new ()
+                    {
+                        Class = "Integer", Identifier = "arg0"
+                    }
+                }
+            });
 
             var thisPtr = multFunc.GetParam(0);
             var otherInt = multFunc.GetParam(1);
@@ -207,6 +343,21 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = divFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            GetClass("Real").Methods.Add(new OLangMethod()
+            {
+                Name = "Div", 
+                FunctionType = LLVM.FunctionType(realType, prms, (uint)paramTypes.Length, 0),
+                FunctionRef = divFunc,
+                ReturnType = "Real",
+                Parameters = new ()
+                {
+                    new ()
+                    {
+                        Class = "Real", Identifier = "arg0"
+                    }
+                }
+            });
 
             var thisPtr = divFunc.GetParam(0);
             var otherReal = divFunc.GetParam(1);
@@ -225,6 +376,21 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = divFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            GetClass("Real").Methods.Add(new OLangMethod()
+            {
+                Name = "Div", 
+                FunctionType = LLVM.FunctionType(realType, prms, (uint)paramTypes.Length, 0),
+                FunctionRef = divFunc,
+                ReturnType = "Real",
+                Parameters = new ()
+                {
+                    new ()
+                    {
+                        Class = "Integer", Identifier = "arg0"
+                    }
+                }
+            });
 
             var thisPtr = divFunc.GetParam(0);
             var otherInt = divFunc.GetParam(1);
@@ -240,14 +406,29 @@ public unsafe static class RealType
         paramTypes = new[] {realPtr, intType};
         fixed (LLVMOpaqueType** prms = paramTypes)
         {
-            var divFunc = module.AddFunction("Real.Rem%Integer%", LLVM.FunctionType(realType, prms, (uint)paramTypes.Length, 0));
+            var remFunc = module.AddFunction("Real.Rem%Integer%", LLVM.FunctionType(realType, prms, (uint)paramTypes.Length, 0));
             var context = module.Context;
             using var builder = context.CreateBuilder();
-            var entry = divFunc.AppendBasicBlock("entry");
+            var entry = remFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            GetClass("Real").Methods.Add(new OLangMethod()
+            {
+                Name = "Rem", 
+                FunctionType = LLVM.FunctionType(realType, prms, (uint)paramTypes.Length, 0),
+                FunctionRef = remFunc,
+                ReturnType = "Real",
+                Parameters = new ()
+                {
+                    new ()
+                    {
+                        Class = "Integer", Identifier = "arg0"
+                    }
+                }
+            });
 
-            var thisPtr = divFunc.GetParam(0);
-            var otherInt = divFunc.GetParam(1);
+            var thisPtr = remFunc.GetParam(0);
+            var otherInt = remFunc.GetParam(1);
             
             var thisReal = builder.BuildLoad2(realType, thisPtr, "thisReal");
             var otherReal = builder.BuildSIToFP(otherInt, realType, "otherReal");
@@ -266,6 +447,21 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = lessFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            GetClass("Real").Methods.Add(new OLangMethod()
+            {
+                Name = "Less", 
+                FunctionType = LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0),
+                FunctionRef = lessFunc,
+                ReturnType = "Boolean", 
+                Parameters = new ()
+                {
+                    new ()
+                    {
+                        Class = "Real", Identifier = "arg0"
+                    }
+                }
+            });
 
             var thisPtr = lessFunc.GetParam(0);
             var otherReal = lessFunc.GetParam(1);
@@ -284,6 +480,21 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = lessFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            GetClass("Real").Methods.Add(new OLangMethod()
+            {
+                Name = "Less", 
+                FunctionType = LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0),
+                FunctionRef = lessFunc,
+                ReturnType = "Boolean", 
+                Parameters = new ()
+                {
+                    new ()
+                    {
+                        Class = "Integer", Identifier = "arg0"
+                    }
+                }
+            });
 
             var thisPtr = lessFunc.GetParam(0);
             var otherInt = lessFunc.GetParam(1);
@@ -304,6 +515,21 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = lessEqualFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            GetClass("Real").Methods.Add(new OLangMethod()
+            {
+                Name = "LessEqual", 
+                FunctionType = LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0),
+                FunctionRef = lessEqualFunc,
+                ReturnType = "Boolean", 
+                Parameters = new ()
+                {
+                    new ()
+                    {
+                        Class = "Real", Identifier = "arg0"
+                    }
+                }
+            });
 
             var thisPtr = lessEqualFunc.GetParam(0);
             var otherPtr = lessEqualFunc.GetParam(1);
@@ -319,14 +545,29 @@ public unsafe static class RealType
         paramTypes = new[] { realPtr, intType };
         fixed (LLVMOpaqueType** prms = paramTypes)
         {
-            var lessFunc = module.AddFunction("Real.LessEqual%Integer%", LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0));
+            var lessEqualFunc = module.AddFunction("Real.LessEqual%Integer%", LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0));
             var context = module.Context;
             using var builder = context.CreateBuilder();
-            var entry = lessFunc.AppendBasicBlock("entry");
+            var entry = lessEqualFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            GetClass("Real").Methods.Add(new OLangMethod()
+            {
+                Name = "LessEqual", 
+                FunctionType = LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0),
+                FunctionRef = lessEqualFunc,
+                ReturnType = "Boolean", 
+                Parameters = new ()
+                {
+                    new ()
+                    {
+                        Class = "Integer", Identifier = "arg0"
+                    }
+                }
+            });
 
-            var thisPtr = lessFunc.GetParam(0);
-            var otherInt = lessFunc.GetParam(1);
+            var thisPtr = lessEqualFunc.GetParam(0);
+            var otherInt = lessEqualFunc.GetParam(1);
             var thisReal = builder.BuildLoad2(realType, thisPtr, "thisReal");
             var otherReal = builder.BuildSIToFP(otherInt, realType, "otherReal");
 
@@ -344,6 +585,21 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = greaterFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            GetClass("Real").Methods.Add(new OLangMethod()
+            {
+                Name = "Greater", 
+                FunctionType = LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0),
+                FunctionRef = greaterFunc,
+                ReturnType = "Boolean", 
+                Parameters = new ()
+                {
+                    new ()
+                    {
+                        Class = "Real", Identifier = "arg0"
+                    }
+                }
+            });
 
             var thisPtr = greaterFunc.GetParam(0);
             var otherPtr = greaterFunc.GetParam(1);
@@ -364,6 +620,21 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = greaterFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            GetClass("Real").Methods.Add(new OLangMethod()
+            {
+                Name = "Greater", 
+                FunctionType = LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0),
+                FunctionRef = greaterFunc,
+                ReturnType = "Boolean", 
+                Parameters = new ()
+                {
+                    new ()
+                    {
+                        Class = "Integer", Identifier = "arg0"
+                    }
+                }
+            });
 
             var thisPtr = greaterFunc.GetParam(0);
             var otherInt = greaterFunc.GetParam(1);
@@ -385,6 +656,21 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = greaterEqualFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            GetClass("Real").Methods.Add(new OLangMethod()
+            {
+                Name = "GreaterEqual", 
+                FunctionType = LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0),
+                FunctionRef = greaterEqualFunc,
+                ReturnType = "Boolean", 
+                Parameters = new ()
+                {
+                    new ()
+                    {
+                        Class = "Real", Identifier = "arg0"
+                    }
+                }
+            });
 
             var thisPtr = greaterEqualFunc.GetParam(0);
             var otherPtr = greaterEqualFunc.GetParam(1);
@@ -401,14 +687,29 @@ public unsafe static class RealType
         paramTypes = new[] { realPtr, realType };
         fixed (LLVMOpaqueType** prms = paramTypes)
         {
-            var greaterFunc = module.AddFunction("Real.GreaterEqual%Integer%", LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0));
+            var greaterEqualFunc = module.AddFunction("Real.GreaterEqual%Integer%", LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0));
             var context = module.Context;
             using var builder = context.CreateBuilder();
-            var entry = greaterFunc.AppendBasicBlock("entry");
+            var entry = greaterEqualFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            GetClass("Real").Methods.Add(new OLangMethod()
+            {
+                Name = "GreaterEqual", 
+                FunctionType = LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0),
+                FunctionRef = greaterEqualFunc,
+                ReturnType = "Boolean", 
+                Parameters = new ()
+                {
+                    new ()
+                    {
+                        Class = "Integer", Identifier = "arg0"
+                    }
+                }
+            });
 
-            var thisPtr = greaterFunc.GetParam(0);
-            var otherInt = greaterFunc.GetParam(1);
+            var thisPtr = greaterEqualFunc.GetParam(0);
+            var otherInt = greaterEqualFunc.GetParam(1);
             var thisReal = builder.BuildLoad2(realType, thisPtr, "thisReal");
             
             var otherReal = builder.BuildSIToFP(otherInt, realType, "otherReal");
@@ -427,6 +728,21 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = equalFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            GetClass("Real").Methods.Add(new OLangMethod()
+            {
+                Name = "Equal", 
+                FunctionType = LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0),
+                FunctionRef = equalFunc,
+                ReturnType = "Boolean", 
+                Parameters = new ()
+                {
+                    new ()
+                    {
+                        Class = "Real", Identifier = "arg0"
+                    }
+                }
+            });
 
             var thisPtr = equalFunc.GetParam(0);
             var otherPtr = equalFunc.GetParam(1);
@@ -447,6 +763,21 @@ public unsafe static class RealType
             using var builder = context.CreateBuilder();
             var entry = equalFunc.AppendBasicBlock("entry");
             builder.PositionAtEnd(entry);
+            
+            GetClass("Real").Methods.Add(new OLangMethod()
+            {
+                Name = "Equal", 
+                FunctionType = LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0),
+                FunctionRef = equalFunc,
+                ReturnType = "Boolean", 
+                Parameters = new ()
+                {
+                    new ()
+                    {
+                        Class = "Integer", Identifier = "arg0"
+                    }
+                }
+            });
 
             var thisPtr = equalFunc.GetParam(0);
             var otherInt = equalFunc.GetParam(1);
