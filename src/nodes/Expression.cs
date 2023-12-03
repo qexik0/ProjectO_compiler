@@ -9,7 +9,7 @@ public class Expression : AstNode
     public required AstNode PrimaryOrConstructorCall { get; set; }
     public List<(Identifier, Arguments?)> Calls { get; } = new List<(Identifier, Arguments?)>();
 
-    public unsafe LLVMValueRef CodeGen(in LLVMModuleRef module, in LLVMBuilderRef builder, in Dictionary<string, LLVMValueRef> symbolTable)
+    public unsafe LLVMValueRef CodeGen(in LLVMModuleRef module, in LLVMBuilderRef builder, SymbolTable<OLangSymbol> symbolTable)
     {
         throw new Exception();
         // LLVMValueRef currentVal = PrimaryOrConstructorCall switch

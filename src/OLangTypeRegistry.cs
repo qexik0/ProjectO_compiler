@@ -4,6 +4,13 @@ using OCompiler.nodes;
 
 namespace OCompiler.Codegen;
 
+public class OLangSymbol
+{
+    public required string Class { get; set; }
+    public LLVMTypeRef TypeRef { get; set; }
+    public LLVMValueRef ValueRef { get; set; }
+}
+
 public class OLangParameter
 {
     public required string Identifier { get; set; }
