@@ -6,25 +6,57 @@ namespace OCompiler;
 
 public class SemanticAnalyzer
 {
-    private Program _root;
-    private List<Token> _tokens;
+    private readonly Program _root;
     private Dictionary<string, CurrentClass> _classes;
-    private StreamWriter _report;
+    private readonly StreamWriter _report;
+    private bool _hasErrors;
 
-    public SemanticAnalyzer(Program root, List<Token> tokens, StreamWriter report)
+    public SemanticAnalyzer(Program root, StreamWriter report)
     {
         _root = root;
-        _tokens = tokens;
         _report = report;
         _classes = CollectClasses(_root);
         AddBasicClasses();
     }
 
-    public void AnalyzeProgram()
+    /// <summary>
+    /// Analyzes program
+    /// </summary>
+    /// <returns>true when analyzing successful, false otherwise</returns>
+    public bool AnalyzeProgram()
     {
-        foreach (var declaration in _root.ProgramClasses)
+        try
         {
-            AnalyzeClass(declaration);
+            foreach (var declaration in _root.ProgramClasses)
+            {
+                AnalyzeVariables(declaration);
+            }
+
+            foreach (var declaration in _root.ProgramClasses)
+            {
+                AnalyzeClass(declaration);
+            }
+        }
+        catch (AnalyzerException)
+        {
+            _hasErrors = true;
+        }
+
+        _report.WriteLine(_hasErrors ? "Semantic Analyzer found errors!" : "Semantic Analyzing finished successfully!");
+
+        return !_hasErrors;
+    }
+
+    private void AnalyzeVariables(ClassDeclaration declaration)
+    {
+        var currentClass = _classes[declaration.Name.ClassIdentifier.Name];
+        foreach (var member in declaration.Members)
+        {
+            if (member.Member is VariableDeclaration variableDeclaration)
+            {
+                currentClass.Variables[variableDeclaration.VariableIdentifier.Name].Type = EvalExpression(
+                    variableDeclaration.VariableExpression, currentClass, new Dictionary<string, Variable>());
+            }
         }
     }
 
@@ -74,21 +106,20 @@ public class SemanticAnalyzer
                         if (!curClass.Methods.TryAdd(method.Name, method))
                         {
                             ReportFatal($"The method {method.Name} is already defined in class {curClass.Name}!");
-                            throw new Exception();
+                            throw new AnalyzerException();
                         }
 
                         break;
                     case VariableDeclaration variableDeclaration:
-                        var primary = (Primary)variableDeclaration.VariableExpression.PrimaryOrConstructorCall;
                         var variable = new Variable
                         {
                             Name = variableDeclaration.VariableIdentifier.Name,
-                            Type = GetTypeFromClassName((ClassName)primary.Node)
+                            Type = "Unknown"
                         };
                         if (!curClass.Variables.TryAdd(variable.Name, variable))
                         {
                             ReportFatal($"The variable {variable.Name} is already defined in class {curClass.Name}!");
-                            throw new Exception();
+                            throw new AnalyzerException();
                         }
 
                         break;
@@ -121,7 +152,7 @@ public class SemanticAnalyzer
                         {
                             ReportFatal(
                                 $"The constructor {constructor.Name} is already defined in class {curClass.Name}!");
-                            throw new Exception();
+                            throw new AnalyzerException();
                         }
 
                         break;
@@ -130,7 +161,7 @@ public class SemanticAnalyzer
 
             if (allClasses.TryAdd(curClass.Name, curClass)) continue;
             ReportFatal($"The class {curClass.Name} is already defined!");
-            throw new Exception();
+            throw new AnalyzerException();
         }
 
         return allClasses;
@@ -157,6 +188,7 @@ public class SemanticAnalyzer
     {
         var currentClass = _classes[declaration.Name.ClassIdentifier.Name];
         AnalyzeInheritance(currentClass);
+
         foreach (var (_, method) in currentClass.Methods)
         {
             AnalyzeParameters(method.Parameters);
@@ -181,7 +213,7 @@ public class SemanticAnalyzer
             if (set.Contains(currentClass.BaseClass))
             {
                 ReportFatal($"The error occured while analyzing inheritance for class {cl.Name}");
-                throw new Exception();
+                throw new AnalyzerException();
             }
 
             set.Add(currentClass.BaseClass);
@@ -228,6 +260,8 @@ public class SemanticAnalyzer
             {
                 case VariableDeclaration variableDeclaration:
                     var varExprType = EvalExpression(variableDeclaration.VariableExpression, currentClass, newDict);
+                    var generic = varExprType.Contains(',') ? varExprType.Split(',')[1] : null;
+                    varExprType = varExprType.Split(',')[0];
                     if (varExprType == "Void")
                     {
                         ReportFatal(
@@ -241,12 +275,12 @@ public class SemanticAnalyzer
                     if (!newVariables.TryAdd(variableDeclaration.VariableIdentifier.Name, new Variable
                         {
                             Name = variableDeclaration.VariableIdentifier.Name,
-                            Type = varExprType
+                            Type = generic != null ? $"{varExprType},{generic}" : varExprType
                         }))
                     {
                         ReportFatal(
                             $"The variable {variableDeclaration.VariableIdentifier.Name} is already defined in scope in method {(curMethod[0] == '(' ? "Constructor " + curMethod : curMethod)}!");
-                        throw new Exception();
+                        throw new AnalyzerException();
                     }
 
                     break;
@@ -256,10 +290,10 @@ public class SemanticAnalyzer
                         case Assignment assignment:
                             if (!newVariables.ContainsKey(assignment.AssignmentIdentifier.Name) &&
                                 !outerVariables.ContainsKey(assignment.AssignmentIdentifier.Name) &&
-                                !currentClass.Variables.ContainsKey(assignment.AssignmentIdentifier.Name))
+                                !currentClass.ContainsVariable(assignment.AssignmentIdentifier.Name, _classes))
                             {
                                 ReportFatal($"Undeclared Variable: {assignment.AssignmentIdentifier.Name}");
-                                throw new Exception();
+                                throw new AnalyzerException();
                             }
 
                             var varType =
@@ -268,7 +302,8 @@ public class SemanticAnalyzer
                                     : outerVariables.TryGetValue(assignment.AssignmentIdentifier.Name,
                                         out var outVariable)
                                         ? outVariable.Type
-                                        : currentClass.Variables[assignment.AssignmentIdentifier.Name].Type;
+                                        : currentClass.GetVariable(assignment.AssignmentIdentifier.Name, _classes)!
+                                            .Type;
                             var exprType = EvalExpression(assignment.AssignmentExpression, currentClass, newDict);
                             if (!_classes.ContainsKey(exprType))
                             {
@@ -305,7 +340,7 @@ public class SemanticAnalyzer
 
                             var ret1 = AnalyzeBody(ifStatement.IfBody, currentClass, curMethod, newDict, returnType,
                                 false);
-                            var ret2 = AnalyzeBody(ifStatement.ElseBody, currentClass, curMethod, newDict, returnType,
+                            var ret2 = ifStatement.ElseBody != null && AnalyzeBody(ifStatement.ElseBody, currentClass, curMethod, newDict, returnType,
                                 false);
                             hasReturn = ret1 && ret2;
                             break;
@@ -382,12 +417,42 @@ public class SemanticAnalyzer
             currentType = classVariable.Type;
         }
 
+        if (expression.PrimaryOrConstructorCall is ConstructorCall call)
+        {
+            var tempParams = (from exp in call.ConstructorArguments?.Expressions ?? new List<Expression>()
+                select new Variable { Type = EvalExpression(exp, currentClass, curVariables) }).ToList();
+
+            var name = CreateName("", tempParams);
+            if (!_classes.ContainsKey(currentType))
+            {
+                ReportFatal($"Class {currentType} is not defined!");
+                throw new AnalyzerException();
+            }
+
+            if (!_classes[currentType].ContainsConstructor(name, _classes))
+            {
+                ReportNonFatal($"There is no constructors matching {name} in class {currentType}!");
+            }
+
+            if (_classes[currentType].Generic != null && call.ConstructorClassName.GenericClassName != null)
+            {
+                currentType += $",{call.ConstructorClassName.GenericClassName.ClassIdentifier.Name}";
+            }
+        }
+
         foreach (var (identifier, arguments) in expression.Calls)
         {
+            string? generic = null;
+            if (currentType.Contains(','))
+            {
+                generic = currentType.Split(',')[1];
+                currentType = currentType.Split(',')[0];
+            }
+
             if (!_classes.ContainsKey(currentType))
             {
                 ReportFatal($"There is no such Type {currentType}");
-                throw new Exception();
+                throw new AnalyzerException();
             }
 
             var curClass = _classes[currentType];
@@ -395,6 +460,13 @@ public class SemanticAnalyzer
             if (arguments == null)
             {
                 name = CreateName(identifier.Name, new List<Variable>());
+
+                var curVariable = curClass.GetVariable(identifier.Name, _classes);
+                if (curVariable != null)
+                {
+                    currentType = curVariable.Type;
+                    continue;
+                }
             }
             else
             {
@@ -405,14 +477,24 @@ public class SemanticAnalyzer
                 name = CreateName(identifier.Name, list);
             }
 
-            if (!curClass.Methods.ContainsKey(name))
+            if (!curClass.ContainsMethod(name, _classes))
             {
-                ReportFatal($"There is no such method: {name}");
-                throw new Exception();
+                ReportFatal($"There is no such method or variable in class {curClass.Name}: {name}");
+                throw new AnalyzerException();
             }
 
-            var method = curClass.Methods[name];
-            currentType = method.ReturnType;
+            var method = curClass.GetMethod(name, _classes);
+            currentType = method!.ReturnType;
+            if (currentType == curClass.Generic)
+            {
+                if (generic == null)
+                {
+                    ReportFatal("Something strange is going on!");
+                    throw new AnalyzerException();
+                }
+
+                currentType = generic;
+            }
         }
 
         return currentType;
@@ -463,6 +545,7 @@ public class SemanticAnalyzer
     private void ReportNonFatal(string text)
     {
         _report.WriteLine($"NON-FATAL: {text}");
+        _hasErrors = true;
     }
 
     private void ReportInfo(string text)
@@ -598,8 +681,8 @@ public class SemanticAnalyzer
         integer.Methods.Add("Equal(Real)", equalMethodReal);
 
         // adding constructors
-        integer.Constructors.Add("Integer(Integer)", new Constructor { Name = "Integer(Integer)", Type = "Integer" });
-        integer.Constructors.Add("Integer(Real)", new Constructor { Name = "Integer(Real)", Type = "Integer" });
+        integer.Constructors.Add("(Integer)", new Constructor { Name = "Integer(Integer)", Type = "Integer" });
+        integer.Constructors.Add("(Real)", new Constructor { Name = "Integer(Real)", Type = "Integer" });
         // adding variables
         integer.Variables.Add("Min", new Variable { Name = "Min", Type = "Integer" });
         integer.Variables.Add("Max", new Variable { Name = "Max", Type = "Integer" });
@@ -704,9 +787,9 @@ public class SemanticAnalyzer
         real.Methods.Add("Equal(Real)", equalMethodReal);
 
         // adding constructors to Real
-        real.Constructors.Add("Real()", new Constructor { Name = "Real()" });
-        real.Constructors.Add("Real(Integer)", new Constructor { Name = "Real(Integer)", Type = "Real" });
-        real.Constructors.Add("Real(Real)", new Constructor { Name = "Real(Real)", Type = "Real" });
+        real.Constructors.Add("()", new Constructor { Name = "Real()" });
+        real.Constructors.Add("(Integer)", new Constructor { Name = "Real(Integer)", Type = "Real" });
+        real.Constructors.Add("(Real)", new Constructor { Name = "Real(Real)", Type = "Real" });
 
         // adding variables to Real
         real.Variables.Add("Min", new Variable { Name = "Min", Type = "Real" });
@@ -740,8 +823,8 @@ public class SemanticAnalyzer
         boolean.Methods.Add("Not()", notMethod);
 
         // adding constructors to Boolean
-        boolean.Constructors.Add("Boolean()", new Constructor { Name = "Boolean()" });
-        boolean.Constructors.Add("Boolean(Boolean)", new Constructor { Name = "Boolean(Boolean)", Type = "Boolean" });
+        boolean.Constructors.Add("()", new Constructor { Name = "Boolean()" });
+        boolean.Constructors.Add("(Boolean)", new Constructor { Name = "Boolean(Boolean)", Type = "Boolean" });
 
         _classes.Add("Boolean", boolean);
     }
@@ -765,8 +848,8 @@ public class SemanticAnalyzer
         array.Methods.Add("Set(Integer,T)", setMethod);
 
         // adding constructors to Array
-        array.Constructors.Add("Array()", new Constructor { Name = "Array()" });
-        array.Constructors.Add("Array(Integer)", new Constructor { Name = "Array(Integer)", Type = "Array" });
+        array.Constructors.Add("()", new Constructor { Name = "Array()" });
+        array.Constructors.Add("(Integer)", new Constructor { Name = "Array(Integer)", Type = "Array" });
 
         _classes.Add("Array", array);
     }
@@ -788,21 +871,25 @@ public class SemanticAnalyzer
         list.Methods.Add("Tail()", tailMethod);
 
         // adding constructors to List
-        list.Constructors.Add("List()", new Constructor { Name = "List()" });
+        list.Constructors.Add("()", new Constructor { Name = "List()" });
         // The empty parameter constructor is the same as the default, so it may not need to be added again.
-        list.Constructors.Add("List(T)", new Constructor { Name = "List(T)", Type = "List" });
-        var constructorWithCount = new Constructor { Name = "List(T,Integer)", Type = "List" };
+        list.Constructors.Add("(T)", new Constructor { Name = "(T)", Type = "List" });
+        var constructorWithCount = new Constructor { Name = "(T,Integer)", Type = "List" };
         constructorWithCount.Parameters.Add("p", new Variable { Name = "p", Type = "T" });
         constructorWithCount.Parameters.Add("count", new Variable { Name = "count", Type = "Integer" });
-        list.Constructors.Add("List(T,Integer`)", constructorWithCount);
+        list.Constructors.Add("(T,Integer)", constructorWithCount);
 
         _classes.Add("List", list);
     }
 }
 
+internal class AnalyzerException : Exception
+{
+}
+
 class CurrentClass
 {
-    public string Name { get; init; }
+    public string Name { get; init; } = "";
     public string? Generic { get; init; }
     public string? BaseClass { get; init; }
 
@@ -811,26 +898,110 @@ class CurrentClass
     public Dictionary<string, Variable> Variables { get; } = new();
 
     public Dictionary<string, Constructor> Constructors { get; } = new();
+
+    public bool ContainsMethod(string name, Dictionary<string, CurrentClass> classes)
+    {
+        if (Methods.ContainsKey(name)) return true;
+
+        var curClass = BaseClass;
+        while (curClass != null)
+        {
+            if (classes[curClass].Methods.ContainsKey(name)) return true;
+            curClass = classes[curClass].BaseClass;
+        }
+
+        return false;
+    }
+
+    public Method? GetMethod(string name, Dictionary<string, CurrentClass> classes)
+    {
+        if (Methods.TryGetValue(name, out var method)) return method;
+
+        var curClass = BaseClass;
+        while (curClass != null)
+        {
+            if (classes[curClass].Methods.TryGetValue(name, out var value)) return value;
+            curClass = classes[curClass].BaseClass;
+        }
+
+        return null;
+    }
+
+    public bool ContainsVariable(string name, Dictionary<string, CurrentClass> classes)
+    {
+        if (Variables.ContainsKey(name)) return true;
+
+        var curClass = BaseClass;
+        while (curClass != null)
+        {
+            if (classes[curClass].Variables.ContainsKey(name)) return true;
+            curClass = classes[curClass].BaseClass;
+        }
+
+        return false;
+    }
+
+    public Variable? GetVariable(string name, Dictionary<string, CurrentClass> classes)
+    {
+        if (Variables.TryGetValue(name, out var variable)) return variable;
+
+        var curClass = BaseClass;
+        while (curClass != null)
+        {
+            if (classes[curClass].Variables.TryGetValue(name, out Variable? value)) return value;
+            curClass = classes[curClass].BaseClass;
+        }
+
+        return null;
+    }
+
+    public bool ContainsConstructor(string name, Dictionary<string, CurrentClass> classes)
+    {
+        if (Constructors.ContainsKey(name)) return true;
+
+        var curClass = BaseClass;
+        while (curClass != null)
+        {
+            if (classes[curClass].Constructors.ContainsKey(name)) return true;
+            curClass = classes[curClass].BaseClass;
+        }
+
+        return false;
+    }
+
+    public Constructor? GetConstructor(string name, Dictionary<string, CurrentClass> classes)
+    {
+        if (Constructors.TryGetValue(name, out var constructor)) return constructor;
+
+        var curClass = BaseClass;
+        while (curClass != null)
+        {
+            if (classes[curClass].Constructors.TryGetValue(name, out Constructor? value)) return value;
+            curClass = classes[curClass].BaseClass;
+        }
+
+        return null;
+    }
 }
 
 class Variable
 {
-    public string Name { get; init; }
-    public string Type { get; init; }
+    public string Name { get; init; } = "";
+    public string Type { get; set; } = "";
 }
 
 class Method
 {
-    public string Name { get; init; }
-    public string ReturnType { get; init; }
+    public string Name { get; init; } = "";
+    public string ReturnType { get; init; } = "";
     public Body? MethodBody { get; init; }
     public Dictionary<string, Variable> Parameters { get; } = new();
 }
 
 class Constructor
 {
-    public string Name { get; init; }
-    public string Type { get; init; }
+    public string Name { get; init; } = "";
+    public string Type { get; init; } = "";
     public Body? ConstructorBody { get; init; }
     public Dictionary<string, Variable> Parameters { get; } = new();
 }
