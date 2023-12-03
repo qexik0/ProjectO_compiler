@@ -42,7 +42,7 @@ public class Expression : AstNode
         {
             var ptr = builder.BuildAlloca(currentVal.TypeOf);
             var thisPtr = builder.BuildStore(currentVal, ptr);
-            var args = new List<LLVMValueRef>() {thisPtr};
+            var args = new List<LLVMValueRef>() {ptr};
             if (call != null)
             {
                 args.AddRange(call.CodeGen(module, builder, symbolTable));

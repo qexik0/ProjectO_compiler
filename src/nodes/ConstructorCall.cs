@@ -14,7 +14,7 @@ public unsafe class ConstructorCall : AstNode
         // TODO: allocate on heap if derived from anyRef
         var res = builder.BuildAlloca(types[ConstructorClassName.ClassIdentifier.Name]);
         var constructor = module.GetNamedFunction(OLangTypeRegistry.MangleFunctionName(this));
-        var args = new List<LLVMValueRef>();
+        var args = new List<LLVMValueRef>() {res};
         if (ConstructorArguments != null)
         {
             foreach (var argument in ConstructorArguments.Expressions)
@@ -22,13 +22,9 @@ public unsafe class ConstructorCall : AstNode
                 args.Add(argument.CodeGen(module, builder, symbolTable));
             }
         }
-        //hardcode
-        var argTypes = new List<LLVMTypeRef>() {LLVM.PointerTypeInContext(module.Context, 0)};
-        fixed (LLVMTypeRef* ptr = argTypes.ToArray())
-        {
-            builder.BuildCall2(LLVM.FunctionType(LLVM.VoidTypeInContext(module.Context), (LLVMOpaqueType**) ptr, 1, 0), constructor, args.ToArray());
-        }
-        return res;
+        builder.BuildCall2(OLangTypeRegistry.mapping[OLangTypeRegistry.MangleFunctionName(this)], constructor, args.ToArray());
+        var resVal = builder.BuildLoad2(types[ConstructorClassName.ClassIdentifier.Name], res);
+        return resVal;
     }
 
     public override string ToString()

@@ -390,11 +390,14 @@ entry:
 define void @"Program%%"(ptr %0) {
 entry:
   %1 = alloca i32, align 4
-  call void @"Integer%Integer%"(i32 10)
-  %2 = alloca ptr, align 8
-  store ptr %1, ptr %2, align 8
-  %3 = alloca ptr, align 8
-  store ptr %1, ptr %3, align 8
+  call void @"Integer%Integer%"(ptr %1, i32 10)
+  %2 = load i32, ptr %1, align 4
+  %3 = alloca i32, align 4
+  store i32 %2, ptr %3, align 4
+  %4 = call i32 @"Integer.Plus%Integer%"(ptr %3, i32 5)
+  %5 = alloca i32, align 4
+  store i32 %4, ptr %5, align 4
+  %6 = call i1 @"Integer.Less%Integer%"(ptr %5, i32 10)
   ret void
 }
 
