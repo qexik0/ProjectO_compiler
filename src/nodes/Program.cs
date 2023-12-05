@@ -31,15 +31,6 @@ public class Program : AstNode
         Codegen.RealType.AddRealClass(module);
         Codegen.ConsoleType.AddConsoleClass(module);
 
-        var args = new List<LLVMTypeRef>
-        {
-            LLVM.Int32TypeInContext(context)
-        };
-        fixed (LLVMTypeRef* typeArgs = args.ToArray())
-        {
-            module.AddFunction("printInteger", LLVM.FunctionType(LLVM.VoidTypeInContext(module.Context), (LLVMOpaqueType**) typeArgs, 1, 0));
-        }
-
         foreach (var classDecl in ProgramClasses)
         {
             classDecl.CodeGen(module);

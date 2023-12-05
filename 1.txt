@@ -1,4 +1,5 @@
 Syntax analyzing finished successfully!
 
 Semantics Report:
-Semantic Analyzing finished with errors!
+FATAL: Class Console is not defined!
+Semantic Analyzer found errors!

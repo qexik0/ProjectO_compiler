@@ -1,9 +1,6 @@
 ; ModuleID = 'ProjectO module'
 source_filename = "ProjectO module"
 
-%Program = type { %Huy, %Huy, i1, i1 }
-%Huy = type { i32, i32 }
-
 define i32 @"Integer.Plus%Integer%"(ptr %0, i32 %1) {
 entry:
   %thisInt = load i32, ptr %0, align 4
@@ -412,8 +409,6 @@ entry:
   ret void
 }
 
-declare void @printInteger(i32)
-
 define void @"Huy%%"(ptr %0) {
 entry:
   %1 = alloca i32, align 4
@@ -498,11 +493,4 @@ entry:
 define void @"Program.pupa%Integer,Real,Boolean%"(ptr %0, i32 %1, double %2, i1 %3) {
 entry:
   ret void
-}
-
-define i32 @main() {
-entry:
-  %0 = alloca %Program, align 8
-  call void @"Program%%"(ptr %0)
-  ret i32 0
 }
