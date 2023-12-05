@@ -16,19 +16,17 @@ class Program is
         return
     end
     this() is
-        Integer(10).Plus(5).Less(10)
-        Console(10)
-        Console(5.9)
-        Console(true)
-        if Integer(10).Less(5) then
-            Console(42)
-        else
-            Console(24)
-        end
+        var x: 5
+        var y: 7
 
-        while Integer(100).Less(48) loop
-            Console(1.0)
-        end
+        Console(x)
+        Console(y)
+
+        y := x
+        x := 100
+
+        Console(x)
+        Console(y)
         return
     end
     this(x: Integer, y: Real, z: Boolean) is

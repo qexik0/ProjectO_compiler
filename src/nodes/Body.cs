@@ -39,6 +39,10 @@ public class Body : AstNode
             {
                 decl.CodeGen(module, builder, curClass, symbolTable);
             }
+            else if (line is Statement statemnt && statemnt.StatementNode is Assignment ass)
+            {
+                ass.CodeGen(module, builder, curClass, symbolTable);
+            }
         }
     }
 

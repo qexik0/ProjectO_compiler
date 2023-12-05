@@ -1,3 +1,5 @@
-Lexical analysis failed. Undefined tokens:
-= at 31:11
-Syntax analysis aborted.
+Syntax analyzing finished successfully!
+
+Semantics Report:
+FATAL: Class Console is not defined!
+Semantic Analyzer found errors!
