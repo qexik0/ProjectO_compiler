@@ -17,6 +17,7 @@ public unsafe static class IntegerType
         fixed (LLVMOpaqueType** prms = paramTypes)
         {
             var addFunc = module.AddFunction("Integer.Plus%Integer%", LLVM.FunctionType(intType, prms, (uint)paramTypes.Length, 0));
+            LLVM.SetFunctionCallConv(addFunc, (uint)LLVMCallConv.LLVMCCallConv);
             var context = module.Context;
             using var builder = context.CreateBuilder();
             var entry = addFunc.AppendBasicBlock("entry");
@@ -49,6 +50,7 @@ public unsafe static class IntegerType
         fixed (LLVMOpaqueType** prms = paramTypes)
         {
             var addFunc = module.AddFunction("Integer.Plus%Real%", LLVM.FunctionType(realType, prms, (uint)paramTypes.Length, 0));
+            LLVM.SetFunctionCallConv(addFunc, (uint)LLVMCallConv.LLVMCCallConv);
             var context = module.Context;
             using var builder = context.CreateBuilder();
             var entry = addFunc.AppendBasicBlock("entry");
@@ -83,6 +85,7 @@ public unsafe static class IntegerType
         fixed (LLVMOpaqueType** prms = paramTypes)
         {
             var negFunc = module.AddFunction("Integer.UnaryMinus%%", LLVM.FunctionType(intType, prms, (uint)paramTypes.Length, 0));
+            LLVM.SetFunctionCallConv(negFunc, (uint)LLVMCallConv.LLVMCCallConv);
             var context = module.Context;
             using var builder = context.CreateBuilder();
             var entry = negFunc.AppendBasicBlock("entry");
@@ -106,6 +109,7 @@ public unsafe static class IntegerType
         fixed (LLVMOpaqueType** prms = paramTypes)
         {
             var toRealFunc = module.AddFunction("Integer.ToReal%%", LLVM.FunctionType(realType, prms, (uint)paramTypes.Length, 0));
+            LLVM.SetFunctionCallConv(toRealFunc, (uint)LLVMCallConv.LLVMCCallConv);
             var context = module.Context;
             using var builder = context.CreateBuilder();
             var entry = toRealFunc.AppendBasicBlock("entry");
@@ -129,6 +133,7 @@ public unsafe static class IntegerType
         fixed (LLVMOpaqueType** prms = paramTypes)
         {
             var toBoolFunc = module.AddFunction("Integer.ToBoolean%%", LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0));
+            LLVM.SetFunctionCallConv(toBoolFunc, (uint)LLVMCallConv.LLVMCCallConv);
             var context = module.Context;
             using var builder = context.CreateBuilder();
             var entry = toBoolFunc.AppendBasicBlock("entry");
@@ -153,6 +158,7 @@ public unsafe static class IntegerType
         fixed (LLVMOpaqueType** prms = paramTypes)
         {
             var intConstructor = module.AddFunction("Integer%Integer%", LLVM.FunctionType(voidType, prms, (uint)paramTypes.Length, 0));
+            LLVM.SetFunctionCallConv(intConstructor, (uint)LLVMCallConv.LLVMCCallConv);
             var context = module.Context;
             using var builder = context.CreateBuilder();
             var entry = intConstructor.AppendBasicBlock("entry");
@@ -183,6 +189,7 @@ public unsafe static class IntegerType
         fixed (LLVMOpaqueType** prms = paramTypes)
         {
             var realConstructor = module.AddFunction("Integer%Real%", LLVM.FunctionType(voidType, prms, (uint)paramTypes.Length, 0));
+            LLVM.SetFunctionCallConv(realConstructor, (uint)LLVMCallConv.LLVMCCallConv);
             var context = module.Context;
             using var builder = context.CreateBuilder();
             var entry = realConstructor.AppendBasicBlock("entry");
@@ -214,6 +221,7 @@ public unsafe static class IntegerType
         fixed (LLVMOpaqueType** prms = paramTypes)
         {
             var minusFunc = module.AddFunction("Integer.Minus%Integer%", LLVM.FunctionType(intType, prms, (uint)paramTypes.Length, 0));
+            LLVM.SetFunctionCallConv(minusFunc, (uint)LLVMCallConv.LLVMCCallConv);
             var context = module.Context;
             using var builder = context.CreateBuilder();
             var entry = minusFunc.AppendBasicBlock("entry");
@@ -245,6 +253,7 @@ public unsafe static class IntegerType
         fixed (LLVMOpaqueType** prms = paramTypes)
         {
             var minusFunc = module.AddFunction("Integer.Minus%Real%", LLVM.FunctionType(realType, prms, (uint)paramTypes.Length, 0));
+            LLVM.SetFunctionCallConv(minusFunc, (uint)LLVMCallConv.LLVMCCallConv);
             var context = module.Context;
             using var builder = context.CreateBuilder();
             var entry = minusFunc.AppendBasicBlock("entry");
@@ -277,6 +286,7 @@ public unsafe static class IntegerType
         fixed (LLVMOpaqueType** prms = paramTypes)
         {
             var multFunc = module.AddFunction("Integer.Mult%Integer%", LLVM.FunctionType(intType, prms, (uint)paramTypes.Length, 0));
+            LLVM.SetFunctionCallConv(multFunc, (uint)LLVMCallConv.LLVMCCallConv);
             var context = module.Context;
             using var builder = context.CreateBuilder();
             var entry = multFunc.AppendBasicBlock("entry");
@@ -308,6 +318,7 @@ public unsafe static class IntegerType
         fixed (LLVMOpaqueType** prms = paramTypes)
         {
             var multFunc = module.AddFunction("Integer.Mult%Real%", LLVM.FunctionType(realType, prms, (uint)paramTypes.Length, 0));
+            LLVM.SetFunctionCallConv(multFunc, (uint)LLVMCallConv.LLVMCCallConv);
             var context = module.Context;
             using var builder = context.CreateBuilder();
             var entry = multFunc.AppendBasicBlock("entry");
@@ -340,6 +351,7 @@ public unsafe static class IntegerType
         fixed (LLVMOpaqueType** prms = paramTypes)
         {
             var divFunc = module.AddFunction("Integer.Div%Integer%", LLVM.FunctionType(intType, prms, (uint)paramTypes.Length, 0));
+            LLVM.SetFunctionCallConv(divFunc, (uint)LLVMCallConv.LLVMCCallConv);
             var context = module.Context;
             using var builder = context.CreateBuilder();
             var entry = divFunc.AppendBasicBlock("entry");
@@ -371,6 +383,7 @@ public unsafe static class IntegerType
         fixed (LLVMOpaqueType** prms = paramTypes)
         {
             var divFunc = module.AddFunction("Integer.Div%Real%", LLVM.FunctionType(realType, prms, (uint)paramTypes.Length, 0));
+            LLVM.SetFunctionCallConv(divFunc, (uint)LLVMCallConv.LLVMCCallConv);
             var context = module.Context;
             using var builder = context.CreateBuilder();
             var entry = divFunc.AppendBasicBlock("entry");
@@ -403,6 +416,7 @@ public unsafe static class IntegerType
         fixed (LLVMOpaqueType** prms = paramTypes)
         {
             var remFunc = module.AddFunction("Integer.Rem%Integer%", LLVM.FunctionType(intType, prms, (uint)paramTypes.Length, 0));
+            LLVM.SetFunctionCallConv(remFunc, (uint)LLVMCallConv.LLVMCCallConv);
             var context = module.Context;
             using var builder = context.CreateBuilder();
             var entry = remFunc.AppendBasicBlock("entry");
@@ -434,6 +448,7 @@ public unsafe static class IntegerType
         fixed (LLVMOpaqueType** prms = paramTypes)
         {
             var lessFunc = module.AddFunction("Integer.Less%Integer%", LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0));
+            LLVM.SetFunctionCallConv(lessFunc, (uint)LLVMCallConv.LLVMCCallConv);
             var context = module.Context;
             using var builder = context.CreateBuilder();
             var entry = lessFunc.AppendBasicBlock("entry");
@@ -465,6 +480,7 @@ public unsafe static class IntegerType
         fixed (LLVMOpaqueType** prms = paramTypes)
         {
             var lessEqual = module.AddFunction("Integer.LessEqual%Integer%", LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0));
+            LLVM.SetFunctionCallConv(lessEqual, (uint)LLVMCallConv.LLVMCCallConv);
             var context = module.Context;
             using var builder = context.CreateBuilder();
             var entry = lessEqual.AppendBasicBlock("entry");
@@ -496,6 +512,7 @@ public unsafe static class IntegerType
         fixed (LLVMOpaqueType** prms = paramTypes)
         {
             var greaterFunc = module.AddFunction("Integer.Greater%Integer%", LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0));
+            LLVM.SetFunctionCallConv(greaterFunc, (uint)LLVMCallConv.LLVMCCallConv);
             var context = module.Context;
             using var builder = context.CreateBuilder();
             var entry = greaterFunc.AppendBasicBlock("entry");
@@ -527,6 +544,7 @@ public unsafe static class IntegerType
         fixed (LLVMOpaqueType** prms = paramTypes)
         {
             var greaterEqual = module.AddFunction("Integer.GreaterEqual%Integer%", LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0));
+            LLVM.SetFunctionCallConv(greaterEqual, (uint)LLVMCallConv.LLVMCCallConv);
             var context = module.Context;
             using var builder = context.CreateBuilder();
             var entry = greaterEqual.AppendBasicBlock("entry");
@@ -558,6 +576,7 @@ public unsafe static class IntegerType
         fixed (LLVMOpaqueType** prms = paramTypes)
         {
             var equalFunc = module.AddFunction("Integer.Equal%Integer%", LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0));
+            LLVM.SetFunctionCallConv(equalFunc, (uint)LLVMCallConv.LLVMCCallConv);
             var context = module.Context;
             using var builder = context.CreateBuilder();
             var entry = equalFunc.AppendBasicBlock("entry");
@@ -589,6 +608,7 @@ public unsafe static class IntegerType
         fixed (LLVMOpaqueType** prms = paramTypes)
         {
             var lessFunc = module.AddFunction("Integer.Less%Real%", LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0));
+            LLVM.SetFunctionCallConv(lessFunc, (uint)LLVMCallConv.LLVMCCallConv);
             var context = module.Context;
             using var builder = context.CreateBuilder();
             var entry = lessFunc.AppendBasicBlock("entry");
@@ -621,6 +641,7 @@ public unsafe static class IntegerType
         fixed (LLVMOpaqueType** prms = paramTypes)
         {
             var lessEqual = module.AddFunction("Integer.LessEqual%Real%", LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0));
+            LLVM.SetFunctionCallConv(lessEqual, (uint)LLVMCallConv.LLVMCCallConv);
             var context = module.Context;
             using var builder = context.CreateBuilder();
             var entry = lessEqual.AppendBasicBlock("entry");
@@ -653,6 +674,7 @@ public unsafe static class IntegerType
         fixed (LLVMOpaqueType** prms = paramTypes)
         {
             var greaterFunc = module.AddFunction("Integer.Greater%Real%", LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0));
+            LLVM.SetFunctionCallConv(greaterFunc, (uint)LLVMCallConv.LLVMCCallConv);
             var context = module.Context;
             using var builder = context.CreateBuilder();
             var entry = greaterFunc.AppendBasicBlock("entry");
@@ -685,6 +707,7 @@ public unsafe static class IntegerType
         fixed (LLVMOpaqueType** prms = paramTypes)
         {
             var greaterEqual = module.AddFunction("Integer.GreaterEqual%Real%", LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0));
+            LLVM.SetFunctionCallConv(greaterEqual, (uint)LLVMCallConv.LLVMCCallConv);
             var context = module.Context;
             using var builder = context.CreateBuilder();
             var entry = greaterEqual.AppendBasicBlock("entry");
@@ -717,6 +740,7 @@ public unsafe static class IntegerType
         fixed (LLVMOpaqueType** prms = paramTypes)
         {
             var equalFunc = module.AddFunction("Integer.Equal%Real%", LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0));
+            LLVM.SetFunctionCallConv(equalFunc, (uint)LLVMCallConv.LLVMCCallConv);
             var context = module.Context;
             using var builder = context.CreateBuilder();
             var entry = equalFunc.AppendBasicBlock("entry");
