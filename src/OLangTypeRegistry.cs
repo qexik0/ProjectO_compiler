@@ -49,7 +49,6 @@ public unsafe static class OLangTypeRegistry
         Types.Add(new() {Identifier = "Boolean", InheritedFrom = "AnyValue", ClassType = LLVM.Int1TypeInContext(module.Context)});
         Types.Add(new() {Identifier = "", ClassType = LLVM.VoidTypeInContext(module.Context)});
 
-        // TODO: add std
     }
 
     public static OLangClass GetClass(string identifier)
@@ -114,12 +113,64 @@ public unsafe static class OLangTypeRegistry
             }
             try
             {
-                var method = GetClassMethod(currentClass, identifier.Name, args);
+                var method = GetClassMethod(currentType, identifier.Name, args);
                 currentType = method.ReturnType;
             }
             catch (Exception)
             {
-                var field = GetClassField(currentClass, identifier.Name);
+                var field = GetClassField(currentType, identifier.Name);
+                currentType = field.Class;
+            }
+        }
+        return currentType;
+    }
+
+    public static string GetSymbolInBody(string curClass, SymbolTable<OLangSymbol> symbolTable, string identifier)
+    {
+        try
+        {
+            return symbolTable.FindSymbol(identifier).Class;
+        }
+        catch (Exception)
+        {
+            return GetClassField(curClass, identifier).Class;
+        }
+    }
+
+    public static string BodyExpressionType(string currentClass, Expression expression, SymbolTable<OLangSymbol> symbolTable)
+    {
+        var currentType = expression.PrimaryOrConstructorCall switch
+        {
+            Primary primary => primary.Node switch
+            {
+                IntegerLiteral => "Integer",
+                RealLiteral => "Real",
+                BooleanLiteral => "Boolean",
+                ClassName className => GetSymbolInBody(currentClass, symbolTable, className.ClassIdentifier.Name),
+                _ => throw new ApplicationException($"Could not derive type for the expression {expression}")
+            },
+            ConstructorCall constructorCall => constructorCall.ConstructorClassName.ClassIdentifier.Name,
+            _ => throw new ApplicationException($"Could not derive type for the expression {expression}")
+        };
+        foreach (var (identifier, arguments) in expression.Calls)
+        {
+            List<string> args = new();
+            if (arguments != null)
+            {
+                foreach (var parameter in arguments.Expressions)
+                {
+                    var type = BodyExpressionType(currentClass, parameter, symbolTable);
+                    args.Add(type);
+                }
+            }
+            try
+            {
+                var method = GetClassMethod(currentType, identifier.Name, args);
+                currentType = method.ReturnType;
+            }
+            catch (Exception)
+            {
+                var field = GetClassField(currentType, identifier.Name);
                 currentType = field.Class;
             }
         }

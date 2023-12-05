@@ -11,47 +11,70 @@ public class Expression : AstNode
 
     public unsafe LLVMValueRef CodeGen(in LLVMModuleRef module, in LLVMBuilderRef builder, SymbolTable<OLangSymbol> symbolTable)
     {
-        throw new Exception();
-        // LLVMValueRef currentVal = PrimaryOrConstructorCall switch
-        // {
-        //     Primary primary => primary.Node switch
-        //     {
-        //         IntegerLiteral intLiteral => intLiteral.CodeGen(module),
-        //         RealLiteral realLiteral => realLiteral.CodeGen(module),
-        //         BooleanLiteral booleanLiteral => booleanLiteral.CodeGen(module),
-        //         ClassName className => symbolTable[className.ClassIdentifier.Name], // could only be identifier
-        //         _ => throw new ApplicationException($"Could not evaluate the expression {this}")
-        //     },
-        //     ConstructorCall constructorCall => constructorCall.CodeGen(module, builder, OLangTypeRegistry.llvmTypes, new()),
-        //     _ => throw new ApplicationException($"Could not derive type for the expression {this}")
-        // };
-        // string currentType = PrimaryOrConstructorCall switch
-        // {
-        //     Primary primary => primary.Node switch
-        //     {
-        //         IntegerLiteral => "Integer",
-        //         RealLiteral => "Real",
-        //         BooleanLiteral => "Boolean",
-        //         ClassName className => className.ClassIdentifier.Name,
-        //         _ => throw new ApplicationException($"Could not derive type for the expression {this}")
-        //     },
-        //     ConstructorCall constructorCall => OLangTypeRegistry.MangleClassName(constructorCall.ConstructorClassName),
-        //     _ => throw new ApplicationException($"Could not derive type for the expression {this}")
-        // };
-        // List<string> mangledArgumentTypes = new ();
-        // foreach (var (identifier, call) in Calls)
-        // {
-        //     var ptr = builder.BuildAlloca(currentVal.TypeOf);
-        //     var thisPtr = builder.BuildStore(currentVal, ptr);
-        //     var args = new List<LLVMValueRef>() {ptr};
-        //     if (call != null)
-        //     {
-        //         args.AddRange(call.CodeGen(module, builder, symbolTable));
-        //     }
-        //     var func = module.GetNamedFunction(OLangTypeRegistry.MangleFunctionName(currentType, identifier, call?.Expressions ?? new()));
-        //     currentVal = builder.BuildCall2(OLangTypeRegistry.mapping[OLangTypeRegistry.MangleFunctionName(currentType, identifier, call?.Expressions ?? new())], func, args.ToArray());
-        // }
-        // return currentVal;
+        if ((PrimaryOrConstructorCall is Primary pr) && (pr.Node is ClassName cn) && (cn.ClassIdentifier.Name == "Console"))
+        {
+            builder.BuildCall2()
+        }
+        LLVMValueRef currentVal = PrimaryOrConstructorCall switch
+        {
+            Primary primary => primary.Node switch
+            {
+                IntegerLiteral intLiteral => intLiteral.CodeGen(module),
+                RealLiteral realLiteral => realLiteral.CodeGen(module),
+                BooleanLiteral booleanLiteral => booleanLiteral.CodeGen(module),
+                ClassName className => symbolTable.FindSymbol(className.ClassIdentifier.Name).ValueRef, // could only be identifier
+                _ => throw new ApplicationException($"Could not evaluate the expression {this}")
+            },
+            ConstructorCall constructorCall => constructorCall.CodeGen(module, builder, symbolTable),
+            _ => throw new ApplicationException($"Could not derive type for the expression {this}")
+        };
+        string currentType = PrimaryOrConstructorCall switch
+        {
+            Primary primary => primary.Node switch
+            {
+                IntegerLiteral => "Integer",
+                RealLiteral => "Real",
+                BooleanLiteral => "Boolean",
+                ClassName className => className.ClassIdentifier.Name,
+                _ => throw new ApplicationException($"Could not derive type for the expression {this}")
+            },
+            ConstructorCall constructorCall => constructorCall.ConstructorClassName.ClassIdentifier.Name,
+            _ => throw new ApplicationException($"Could not derive type for the expression {this}")
+        };
+        foreach (var (identifier, call) in Calls)
+        {
+            var ptr = builder.BuildAlloca(currentVal.TypeOf);
+            builder.BuildStore(currentVal, ptr);
+            var argTypes = new List<string>();
+            var args = new List<LLVMValueRef>() {ptr};
+            if (call != null)
+            {
+                foreach (var arg in call.Expressions)
+                {
+                    argTypes.Add(OLangTypeRegistry.BodyExpressionType(currentType, arg, symbolTable));
+                    args.Add(arg.CodeGen(module, builder, symbolTable));
+                }
+            }
+            try
+            {
+                var method = OLangTypeRegistry.GetClassMethod(currentType, identifier.Name, argTypes);
+                currentVal = builder.BuildCall2(method.FunctionType, method.FunctionRef, args.ToArray());
+                currentType = method.ReturnType;
+            }
+            catch (Exception)
+            {
+                var indexClass = OLangTypeRegistry.GetClass(currentType);
+                var index = indexClass.Fields.FindIndex(x => x.Identifier == identifier.Name);
+                var indices = new LLVMValueRef[]
+                {
+                    LLVM.ConstInt(LLVM.Int32Type(), 0, 0), // always start with 0 for struct
+                    LLVM.ConstInt(LLVM.Int32Type(), (ulong) index, 0) // index of the field
+                };
+                currentVal = builder.BuildInBoundsGEP2(indexClass.ClassType, ptr, indices);
+                currentType = indexClass.Fields[index].Class;
+            }
+        }
+        return currentVal;
     }
 
     public override string ToString()

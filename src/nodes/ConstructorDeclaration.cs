@@ -25,7 +25,14 @@ public class ConstructorDeclaration : AstNode
         var entry = method.FunctionRef.AppendBasicBlock("entry");
         using var builder = module.Context.CreateBuilder();
         builder.PositionAtEnd(entry);
-        // ConstructorBody.CodeGen(module, builder);
+        SymbolTable<OLangSymbol> symbolTable = new();
+        var args = method.Parameters;
+        symbolTable.DefineSymbol("this", new () {Class = className, TypeRef = OLangTypeRegistry.GetClass(className).ClassType, ValueRef = method.FunctionRef.GetParam(0)});
+        for (int i = 0; i < args.Count; i++)
+        {
+            symbolTable.DefineSymbol(args[i].Identifier, new () {Class = args[i].Class, TypeRef = OLangTypeRegistry.GetClass(args[i].Class).ClassType, ValueRef = method.FunctionRef.GetParam((uint) i + 1)});
+        }
+        ConstructorBody.CodeGen(module, builder, symbolTable);
     }
 
     public override string ToString()

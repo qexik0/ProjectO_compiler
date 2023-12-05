@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using LLVMSharp.Interop;
+using OCompiler.Codegen;
 
 namespace OCompiler.nodes;
 
@@ -7,7 +8,7 @@ public class Arguments : AstNode
 {
     public List<Expression> Expressions { get; } = new List<Expression>();
 
-    public unsafe List<LLVMValueRef> CodeGen(in LLVMModuleRef module, in LLVMBuilderRef builder, in Dictionary<string, LLVMValueRef> symbolTable)
+    public unsafe List<LLVMValueRef> CodeGen(in LLVMModuleRef module, in LLVMBuilderRef builder, in SymbolTable<OLangSymbol> symbolTable)
     {
         var args = new List<LLVMValueRef>();
         foreach (var expr in Expressions)

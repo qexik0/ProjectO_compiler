@@ -9,23 +9,24 @@ public unsafe class ConstructorCall : AstNode
     public required ClassName ConstructorClassName { get; set; }
     public Arguments? ConstructorArguments { get; set; }
 
-    public LLVMValueRef CodeGen(in LLVMModuleRef module, in LLVMBuilderRef builder, Dictionary<string, LLVMTypeRef> types, Dictionary<string, LLVMValueRef> symbolTable)
+    public LLVMValueRef CodeGen(in LLVMModuleRef module, in LLVMBuilderRef builder, SymbolTable<OLangSymbol> symbolTable)
     {
-        throw new Exception();
-        // // TODO: allocate on heap if derived from anyRef
-        // var res = builder.BuildAlloca(types[ConstructorClassName.ClassIdentifier.Name]);
-        // var constructor = module.GetNamedFunction(OLangTypeRegistry.MangleFunctionName(this));
-        // var args = new List<LLVMValueRef>() {res};
-        // if (ConstructorArguments != null)
-        // {
-        //     foreach (var argument in ConstructorArguments.Expressions)
-        //     {
-        //         args.Add(argument.CodeGen(module, builder, symbolTable));
-        //     }
-        // }
-        // builder.BuildCall2(OLangTypeRegistry.mapping[OLangTypeRegistry.MangleFunctionName(this)], constructor, args.ToArray());
-        // var resVal = builder.BuildLoad2(types[ConstructorClassName.ClassIdentifier.Name], res);
-        // return resVal;
+        // TODO: allocate on heap if derived from anyRef
+        var res = builder.BuildAlloca(OLangTypeRegistry.GetClass(ConstructorClassName.ClassIdentifier.Name).ClassType);
+        var args = new List<LLVMValueRef>() {res};
+        var olangArgs = new List<string>();
+        if (ConstructorArguments != null)
+        {
+            args.AddRange(ConstructorArguments.CodeGen(module, builder, symbolTable));
+            foreach (var arg in ConstructorArguments.Expressions)
+            {
+                olangArgs.Add(OLangTypeRegistry.BodyExpressionType(ConstructorClassName.ClassIdentifier.Name, arg, symbolTable));
+            }
+        }
+        var constructor = OLangTypeRegistry.GetClassMethod(ConstructorClassName.ClassIdentifier.Name, "", olangArgs);
+        builder.BuildCall2(constructor.FunctionType, constructor.FunctionRef, args.ToArray());
+        var resVal = builder.BuildLoad2(OLangTypeRegistry.GetClass(ConstructorClassName.ClassIdentifier.Name).ClassType, res);
+        return resVal;
     }
 
     public override string ToString()

@@ -22,10 +22,19 @@ public class MethodDeclaration : AstNode
             }
         }
         OLangTypeRegistry.GetClass(className).Methods.Add(method);
-        OLangTypeRegistry.CreateLLVMConstructor(module, className, method);
+        OLangTypeRegistry.CreateLLVMMethod(module, className, method);
         var entry = method.FunctionRef.AppendBasicBlock("entry");
         using var builder = module.Context.CreateBuilder();
         builder.PositionAtEnd(entry);
+        //symbol table
+        SymbolTable<OLangSymbol> symbolTable = new();
+        var args = method.Parameters;
+        symbolTable.DefineSymbol("this", new () {Class = className, TypeRef = OLangTypeRegistry.GetClass(className).ClassType, ValueRef = method.FunctionRef.GetParam(0)});
+        for (int i = 0; i < args.Count; i++)
+        {
+            symbolTable.DefineSymbol(args[i].Identifier, new () {Class = args[i].Class, TypeRef = OLangTypeRegistry.GetClass(args[i].Class).ClassType, ValueRef = method.FunctionRef.GetParam((uint) i + 1)});
+        }
+        MethodBody.CodeGen(module, builder, symbolTable);
     }
 
     public override string ToString()
