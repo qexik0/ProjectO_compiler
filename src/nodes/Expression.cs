@@ -19,6 +19,7 @@ public class Expression : AstNode
                 RealLiteral realLiteral => realLiteral.CodeGen(module),
                 BooleanLiteral booleanLiteral => booleanLiteral.CodeGen(module),
                 ClassName className => symbolTable.FindSymbol(className.ClassIdentifier.Name).ValueRef, // could only be identifier
+                This thisVar => symbolTable.FindSymbol("this").ValueRef,
                 _ => throw new ApplicationException($"Could not evaluate the expression {this}")
             },
             ConstructorCall constructorCall => constructorCall.CodeGen(module, builder, symbolTable),
@@ -32,6 +33,7 @@ public class Expression : AstNode
                 RealLiteral => "Real",
                 BooleanLiteral => "Boolean",
                 ClassName className => className.ClassIdentifier.Name,
+                This thisVar => symbolTable.FindSymbol("this").Class,
                 _ => throw new ApplicationException($"Could not derive type for the expression {this}")
             },
             ConstructorCall constructorCall => constructorCall.ConstructorClassName.ClassIdentifier.Name,
@@ -61,12 +63,14 @@ public class Expression : AstNode
             {
                 var indexClass = OLangTypeRegistry.GetClass(currentType);
                 var index = indexClass.Fields.FindIndex(x => x.Identifier == identifier.Name);
+                var field = indexClass.Fields.Where(x => x.Identifier == identifier.Name).First();
                 var indices = new LLVMValueRef[]
                 {
                     LLVM.ConstInt(LLVM.Int32Type(), 0, 0), // always start with 0 for struct
                     LLVM.ConstInt(LLVM.Int32Type(), (ulong) index, 0) // index of the field
                 };
-                currentVal = builder.BuildInBoundsGEP2(indexClass.ClassType, ptr, indices);
+                var currentPtr = builder.BuildInBoundsGEP2(indexClass.ClassType, ptr, indices);
+                currentVal = builder.BuildLoad2(OLangTypeRegistry.GetClass(field.Class).ClassType, currentPtr);
                 currentType = indexClass.Fields[index].Class;
             }
         }

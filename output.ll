@@ -1,6 +1,9 @@
 ; ModuleID = 'ProjectO module'
 source_filename = "ProjectO module"
 
+%Program = type { %Huy, %Huy, i1, i1 }
+%Huy = type { i32, i32 }
+
 define i32 @"Integer.Plus%Integer%"(ptr %0, i32 %1) {
 entry:
   %thisInt = load i32, ptr %0, align 4
@@ -423,65 +426,25 @@ entry:
   ret void
 }
 
+define void @"Huy.print%Integer%"(ptr %0, i32 %1) {
+entry:
+  %2 = alloca i32, align 4
+  call void @"Console%Integer%"(ptr %2, i32 %1)
+  %3 = load i32, ptr %2, align 4
+  ret void
+}
+
 define void @"Program%%"(ptr %0) {
 entry:
   %1 = alloca i32, align 4
-  call void @"Integer%Integer%"(ptr %1, i32 10)
+  call void @"Integer%Integer%"(ptr %1, i32 42)
   %2 = load i32, ptr %1, align 4
   %3 = alloca i32, align 4
   store i32 %2, ptr %3, align 4
   %4 = call i32 @"Integer.Plus%Integer%"(ptr %3, i32 5)
   %5 = alloca i32, align 4
-  store i32 %4, ptr %5, align 4
-  %6 = call i1 @"Integer.Less%Integer%"(ptr %5, i32 10)
-  %7 = alloca i32, align 4
-  call void @"Console%Integer%"(ptr %7, i32 10)
-  %8 = load i32, ptr %7, align 4
-  %9 = alloca i32, align 4
-  call void @"Console%Real%"(ptr %9, double 5.900000e+00)
-  %10 = load i32, ptr %9, align 4
-  %11 = alloca i32, align 4
-  call void @"Console%Boolean%"(ptr %11, i1 true)
-  %12 = load i32, ptr %11, align 4
-  %13 = alloca i32, align 4
-  call void @"Integer%Integer%"(ptr %13, i32 10)
-  %14 = load i32, ptr %13, align 4
-  %15 = alloca i32, align 4
-  store i32 %14, ptr %15, align 4
-  %16 = call i1 @"Integer.Less%Integer%"(ptr %15, i32 5)
-  br i1 %16, label %then, label %else
-
-then:                                             ; preds = %entry
-  %17 = alloca i32, align 4
-  call void @"Console%Integer%"(ptr %17, i32 42)
-  %18 = load i32, ptr %17, align 4
-  br label %ifcont
-
-else:                                             ; preds = %entry
-  %19 = alloca i32, align 4
-  call void @"Console%Integer%"(ptr %19, i32 24)
-  %20 = load i32, ptr %19, align 4
-  br label %ifcont
-
-ifcont:                                           ; preds = %else, %then
-  br label %whileEntry
-
-whileEntry:                                       ; preds = %whileBody, %ifcont
-  %21 = alloca i32, align 4
-  call void @"Integer%Integer%"(ptr %21, i32 100)
-  %22 = load i32, ptr %21, align 4
-  %23 = alloca i32, align 4
-  store i32 %22, ptr %23, align 4
-  %24 = call i1 @"Integer.Less%Integer%"(ptr %23, i32 48)
-  br i1 %24, label %whileBody, label %whileExit
-
-whileBody:                                        ; preds = %whileEntry
-  %25 = alloca i32, align 4
-  call void @"Console%Real%"(ptr %25, double 1.000000e+00)
-  %26 = load i32, ptr %25, align 4
-  br label %whileEntry
-
-whileExit:                                        ; preds = %whileEntry
+  call void @"Console%Integer%"(ptr %5, i32 %4)
+  %6 = load i32, ptr %5, align 4
   ret void
 }
 
@@ -493,4 +456,11 @@ entry:
 define void @"Program.pupa%Integer,Real,Boolean%"(ptr %0, i32 %1, double %2, i1 %3) {
 entry:
   ret void
+}
+
+define i32 @main() {
+entry:
+  %0 = alloca %Program, align 8
+  call void @"Program%%"(ptr %0)
+  ret i32 0
 }

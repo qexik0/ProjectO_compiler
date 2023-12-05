@@ -35,6 +35,10 @@ public class Body : AstNode
             {
                 whileLoop.CodeGen(module, builder, curClass, symbolTable);
             }
+            else if (line is VariableDeclaration decl)
+            {
+                decl.CodeGen(module, builder, curClass, symbolTable);
+            }
         }
     }
 

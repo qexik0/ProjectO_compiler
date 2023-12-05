@@ -148,6 +148,7 @@ public unsafe static class OLangTypeRegistry
                 RealLiteral => "Real",
                 BooleanLiteral => "Boolean",
                 ClassName className => GetSymbolInBody(currentClass, symbolTable, className.ClassIdentifier.Name),
+                This => currentClass,
                 _ => throw new ApplicationException($"Could not derive type for the expression {expression}")
             },
             ConstructorCall constructorCall => constructorCall.ConstructorClassName.ClassIdentifier.Name,
