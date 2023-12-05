@@ -204,6 +204,7 @@ public unsafe static class OLangTypeRegistry
             method.FunctionType = LLVM.FunctionType(returnType, (LLVMOpaqueType**) paramsPtr, (uint) paramTypes.Count, 0);
         }
         method.FunctionRef = module.AddFunction(mangledName, method.FunctionType);
+        LLVM.SetFunctionCallConv(method.FunctionRef, (uint)LLVMCallConv.LLVMCCallConv);
     }
 
     internal static void CreateLLVMMethod(in LLVMModuleRef module, string className, OLangMethod method)
@@ -220,5 +221,6 @@ public unsafe static class OLangTypeRegistry
             method.FunctionType = LLVM.FunctionType(returnType, (LLVMOpaqueType**) paramsPtr, (uint) paramTypes.Count, 0);
         }
         method.FunctionRef = module.AddFunction(mangledName, method.FunctionType);
+        LLVM.SetFunctionCallConv(method.FunctionRef, (uint)LLVMCallConv.LLVMCCallConv);
     }
 }

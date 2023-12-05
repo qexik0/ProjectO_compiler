@@ -32,7 +32,7 @@ public class ConstructorDeclaration : AstNode
         {
             symbolTable.DefineSymbol(args[i].Identifier, new () {Class = args[i].Class, TypeRef = OLangTypeRegistry.GetClass(args[i].Class).ClassType, ValueRef = method.FunctionRef.GetParam((uint) i + 1)});
         }
-        ConstructorBody.CodeGen(module, builder, symbolTable);
+        ConstructorBody.CodeGen(module, builder, className, symbolTable);
     }
 
     public override string ToString()

@@ -8,12 +8,10 @@ public class Body : AstNode
 {
     public List<AstNode> StatementsOrDeclarations { get; } = new List<AstNode>();
 
-    public unsafe void CodeGen(in LLVMModuleRef module, in LLVMBuilderRef builder, SymbolTable<OLangSymbol> symbolTable)
+    public unsafe void CodeGen(in LLVMModuleRef module, in LLVMBuilderRef builder, string curClass, SymbolTable<OLangSymbol> symbolTable)
     {
-        bool lastWasReturn = false;
         foreach (var line in StatementsOrDeclarations)
         {
-            lastWasReturn = false;
             if (line is Statement stmnt && stmnt.StatementNode is Expression expr)
             {
                 expr.CodeGen(module, builder, symbolTable);
@@ -28,12 +26,15 @@ public class Body : AstNode
                 {
                     builder.BuildRetVoid();
                 }
-                lastWasReturn = true;
             }
-        }
-        if (!lastWasReturn)
-        {
-            builder.BuildRetVoid();
+            else if (line is Statement st && st.StatementNode is IfStatement ifStatement)
+            {
+                ifStatement.CodeGen(module, builder, curClass, symbolTable);
+            }
+            else if (line is Statement stat && stat.StatementNode is WhileLoop whileLoop)
+            {
+                whileLoop.CodeGen(module, builder, curClass, symbolTable);
+            }
         }
     }
 

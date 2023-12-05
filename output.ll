@@ -448,6 +448,45 @@ entry:
   %11 = alloca i32, align 4
   call void @"Console%Boolean%"(ptr %11, i1 true)
   %12 = load i32, ptr %11, align 4
+  %13 = alloca i32, align 4
+  call void @"Integer%Integer%"(ptr %13, i32 10)
+  %14 = load i32, ptr %13, align 4
+  %15 = alloca i32, align 4
+  store i32 %14, ptr %15, align 4
+  %16 = call i1 @"Integer.Less%Integer%"(ptr %15, i32 5)
+  br i1 %16, label %then, label %else
+
+then:                                             ; preds = %entry
+  %17 = alloca i32, align 4
+  call void @"Console%Integer%"(ptr %17, i32 42)
+  %18 = load i32, ptr %17, align 4
+  br label %ifcont
+
+else:                                             ; preds = %entry
+  %19 = alloca i32, align 4
+  call void @"Console%Integer%"(ptr %19, i32 24)
+  %20 = load i32, ptr %19, align 4
+  br label %ifcont
+
+ifcont:                                           ; preds = %else, %then
+  br label %whileEntry
+
+whileEntry:                                       ; preds = %whileBody, %ifcont
+  %21 = alloca i32, align 4
+  call void @"Integer%Integer%"(ptr %21, i32 100)
+  %22 = load i32, ptr %21, align 4
+  %23 = alloca i32, align 4
+  store i32 %22, ptr %23, align 4
+  %24 = call i1 @"Integer.Less%Integer%"(ptr %23, i32 48)
+  br i1 %24, label %whileBody, label %whileExit
+
+whileBody:                                        ; preds = %whileEntry
+  %25 = alloca i32, align 4
+  call void @"Console%Real%"(ptr %25, double 1.000000e+00)
+  %26 = load i32, ptr %25, align 4
+  br label %whileEntry
+
+whileExit:                                        ; preds = %whileEntry
   ret void
 }
 

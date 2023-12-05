@@ -3,6 +3,7 @@ class Huy is
     var y : z
     this() is
         Integer(10).Plus(5).Less(10)
+        return
     end
 end
 
@@ -19,6 +20,16 @@ class Program is
         Console(10)
         Console(5.9)
         Console(true)
+        if Integer(10).Less(5) then
+            Console(42)
+        else
+            Console(24)
+        end
+
+        while Integer(100).Less(48) loop
+            Console(1.0)
+        end
+        return
     end
     this(x: Integer, y: Real, z: Boolean) is
         return

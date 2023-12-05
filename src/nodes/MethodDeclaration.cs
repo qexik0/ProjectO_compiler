@@ -34,7 +34,7 @@ public class MethodDeclaration : AstNode
         {
             symbolTable.DefineSymbol(args[i].Identifier, new () {Class = args[i].Class, TypeRef = OLangTypeRegistry.GetClass(args[i].Class).ClassType, ValueRef = method.FunctionRef.GetParam((uint) i + 1)});
         }
-        MethodBody.CodeGen(module, builder, symbolTable);
+        MethodBody.CodeGen(module, builder, className, symbolTable);
     }
 
     public override string ToString()
