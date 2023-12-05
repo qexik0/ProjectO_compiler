@@ -17,6 +17,7 @@ public unsafe static class BooleanType
         {
             var orFunc = module.AddFunction("Boolean.Or%Boolean%",
                 LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0));
+            LLVM.SetFunctionCallConv(orFunc, (uint)LLVMCallConv.LLVMCCallConv);
             var context = module.Context;
             using var builder = context.CreateBuilder();
             var entry = orFunc.AppendBasicBlock("entry");
@@ -51,6 +52,7 @@ public unsafe static class BooleanType
         {
             var andFunc = module.AddFunction("Boolean.And%Boolean%",
                 LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0));
+            LLVM.SetFunctionCallConv(andFunc, (uint)LLVMCallConv.LLVMCCallConv);
             var context = module.Context;
             using var builder = context.CreateBuilder();
             var entry = andFunc.AppendBasicBlock("entry");
@@ -85,6 +87,7 @@ public unsafe static class BooleanType
         {
             var xorFunc = module.AddFunction("Boolean.Xor%Boolean%",
                 LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0));
+            LLVM.SetFunctionCallConv(xorFunc, (uint)LLVMCallConv.LLVMCCallConv);
             var context = module.Context;
             using var builder = context.CreateBuilder();
             var entry = xorFunc.AppendBasicBlock("entry");
@@ -119,6 +122,7 @@ public unsafe static class BooleanType
         {
             var notFunc = module.AddFunction("Boolean.Not%%",
                 LLVM.FunctionType(boolType, prms, (uint)paramTypes.Length, 0));
+            LLVM.SetFunctionCallConv(notFunc, (uint)LLVMCallConv.LLVMCCallConv);
             var context = module.Context;
             using var builder = context.CreateBuilder();
             var entry = notFunc.AppendBasicBlock("entry");
@@ -145,6 +149,7 @@ public unsafe static class BooleanType
         {
             var toInteger = module.AddFunction("Boolean.toInteger%%",
                 LLVM.FunctionType(intType, prms, (uint)paramTypes.Length, 0));
+            LLVM.SetFunctionCallConv(toInteger, (uint)LLVMCallConv.LLVMCCallConv);
             var context = module.Context;
             using var builder = context.CreateBuilder();
             var entry = toInteger.AppendBasicBlock("entry");
