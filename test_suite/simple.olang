@@ -17,7 +17,7 @@ class Program is
     this() is
         Integer(10).Plus(5).Less(10)
         Console(10)
-        Console(5.6)
+        Console(5.9)
         Console(true)
     end
     this(x: Integer, y: Real, z: Boolean) is

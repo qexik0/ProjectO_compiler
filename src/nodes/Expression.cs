@@ -11,10 +11,6 @@ public class Expression : AstNode
 
     public unsafe LLVMValueRef CodeGen(in LLVMModuleRef module, in LLVMBuilderRef builder, SymbolTable<OLangSymbol> symbolTable)
     {
-        if ((PrimaryOrConstructorCall is Primary pr) && (pr.Node is ClassName cn) && (cn.ClassIdentifier.Name == "Console"))
-        {
-            builder.BuildCall2()
-        }
         LLVMValueRef currentVal = PrimaryOrConstructorCall switch
         {
             Primary primary => primary.Node switch

@@ -47,6 +47,7 @@ public unsafe static class OLangTypeRegistry
         Types.Add(new() {Identifier = "Integer", InheritedFrom = "AnyValue", ClassType = LLVM.Int32TypeInContext(module.Context)});
         Types.Add(new() {Identifier = "Real", InheritedFrom = "AnyValue", ClassType = LLVM.DoubleTypeInContext(module.Context)});
         Types.Add(new() {Identifier = "Boolean", InheritedFrom = "AnyValue", ClassType = LLVM.Int1TypeInContext(module.Context)});
+        Types.Add(new() {Identifier = "Console", InheritedFrom = "AnyValue", ClassType = LLVM.Int32TypeInContext(module.Context)});
         Types.Add(new() {Identifier = "", ClassType = LLVM.VoidTypeInContext(module.Context)});
 
     }

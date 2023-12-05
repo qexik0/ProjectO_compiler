@@ -21,7 +21,7 @@ public class Program : AstNode
         return sb.ToString();
     }
 
-    public void CodeGen()
+    public unsafe void CodeGen()
     {
         using var context = LLVMContextRef.Create();
         using var module = context.CreateModuleWithName("ProjectO module");
@@ -29,9 +29,16 @@ public class Program : AstNode
         Codegen.IntegerType.AddIntegerClass(module);
         Codegen.BooleanType.AddBooleanClass(module);
         Codegen.RealType.AddRealClass(module);
+        Codegen.ConsoleType.AddConsoleClass(module);
 
-        
-        module.AddFunction("printInteger", LLVM.FunctionType(LLVM.VoidTypeInContext(module.Context), ));
+        var args = new List<LLVMTypeRef>
+        {
+            LLVM.Int32TypeInContext(context)
+        };
+        fixed (LLVMTypeRef* typeArgs = args.ToArray())
+        {
+            module.AddFunction("printInteger", LLVM.FunctionType(LLVM.VoidTypeInContext(module.Context), (LLVMOpaqueType**) typeArgs, 1, 0));
+        }
 
         foreach (var classDecl in ProgramClasses)
         {

@@ -388,6 +388,32 @@ entry:
   ret i1 %res
 }
 
+declare void @printInt(i32)
+
+declare void @printReal(double)
+
+declare void @printBool(i1)
+
+define void @"Console%Integer%"(ptr %0, i32 %1) {
+entry:
+  call void @printInt(i32 %1)
+  ret void
+}
+
+define void @"Console%Real%"(ptr %0, double %1) {
+entry:
+  call void @printReal(double %1)
+  ret void
+}
+
+define void @"Console%Boolean%"(ptr %0, i1 %1) {
+entry:
+  call void @printBool(i1 %1)
+  ret void
+}
+
+declare void @printInteger(i32)
+
 define void @"Huy%%"(ptr %0) {
 entry:
   %1 = alloca i32, align 4
@@ -413,6 +439,15 @@ entry:
   %5 = alloca i32, align 4
   store i32 %4, ptr %5, align 4
   %6 = call i1 @"Integer.Less%Integer%"(ptr %5, i32 10)
+  %7 = alloca i32, align 4
+  call void @"Console%Integer%"(ptr %7, i32 10)
+  %8 = load i32, ptr %7, align 4
+  %9 = alloca i32, align 4
+  call void @"Console%Real%"(ptr %9, double 5.900000e+00)
+  %10 = load i32, ptr %9, align 4
+  %11 = alloca i32, align 4
+  call void @"Console%Boolean%"(ptr %11, i1 true)
+  %12 = load i32, ptr %11, align 4
   ret void
 }
 
