@@ -340,8 +340,8 @@ public class SemanticAnalyzer
 
                             var ret1 = AnalyzeBody(ifStatement.IfBody, currentClass, curMethod, newDict, returnType,
                                 false);
-                            var ret2 = ifStatement.ElseBody != null && AnalyzeBody(ifStatement.ElseBody, currentClass, curMethod, newDict, returnType,
-                                false);
+                            var ret2 = ifStatement.ElseBody != null && AnalyzeBody(ifStatement.ElseBody, currentClass,
+                                curMethod, newDict, returnType, false);
                             hasReturn = ret1 && ret2;
                             break;
                         case ReturnStatement returnStatement:
@@ -563,11 +563,12 @@ public class SemanticAnalyzer
         AddBoolean();
         AddArray();
         AddList();
+        AddConsole();
     }
 
     private void AddClass()
     {
-        var cl = new CurrentClass { Name = "Class" };
+        var cl = new CurrentClass { Name = "Class", BaseClass = "AnyRef" };
 
         _classes.Add("Class", cl);
     }
@@ -681,8 +682,14 @@ public class SemanticAnalyzer
         integer.Methods.Add("Equal(Real)", equalMethodReal);
 
         // adding constructors
-        integer.Constructors.Add("(Integer)", new Constructor { Name = "Integer(Integer)", Type = "Integer" });
-        integer.Constructors.Add("(Real)", new Constructor { Name = "Integer(Real)", Type = "Integer" });
+        var intConstructor = new Constructor { Name = "Integer(Integer)", Type = "Integer" };
+        intConstructor.Parameters.Add("p", new Variable { Name = "p", Type = "Integer" });
+        integer.Constructors.Add("(Integer)", intConstructor);
+
+        var realConstructor = new Constructor { Name = "Integer(Real)", Type = "Integer" };
+        realConstructor.Parameters.Add("p", new Variable { Name = "p", Type = "Real" });
+        integer.Constructors.Add("(Real)", realConstructor);
+
         // adding variables
         integer.Variables.Add("Min", new Variable { Name = "Min", Type = "Integer" });
         integer.Variables.Add("Max", new Variable { Name = "Max", Type = "Integer" });
@@ -787,10 +794,15 @@ public class SemanticAnalyzer
         real.Methods.Add("Equal(Real)", equalMethodReal);
 
         // adding constructors to Real
-        real.Constructors.Add("()", new Constructor { Name = "Real()" });
-        real.Constructors.Add("(Integer)", new Constructor { Name = "Real(Integer)", Type = "Real" });
-        real.Constructors.Add("(Real)", new Constructor { Name = "Real(Real)", Type = "Real" });
+        real.Constructors.Add("()", new Constructor { Name = "Real()", Type = "Real" });
 
+        var intConstructor = new Constructor { Name = "Real(Integer)", Type = "Real" };
+        intConstructor.Parameters.Add("p", new Variable { Name = "p", Type = "Integer" });
+        real.Constructors.Add("(Integer)", intConstructor);
+
+        var realConstructor = new Constructor { Name = "Real(Real)", Type = "Real" };
+        realConstructor.Parameters.Add("p", new Variable { Name = "p", Type = "Real" });
+        real.Constructors.Add("(Real)", realConstructor);
         // adding variables to Real
         real.Variables.Add("Min", new Variable { Name = "Min", Type = "Real" });
         real.Variables.Add("Max", new Variable { Name = "Max", Type = "Real" });
@@ -823,8 +835,12 @@ public class SemanticAnalyzer
         boolean.Methods.Add("Not()", notMethod);
 
         // adding constructors to Boolean
-        boolean.Constructors.Add("()", new Constructor { Name = "Boolean()" });
-        boolean.Constructors.Add("(Boolean)", new Constructor { Name = "Boolean(Boolean)", Type = "Boolean" });
+
+        boolean.Constructors.Add("()", new Constructor { Name = "Boolean()", Type = "Boolean" });
+
+        var boolConstructor = new Constructor { Name = "Boolean(Boolean)", Type = "Boolean" };
+        boolConstructor.Parameters.Add("p", new Variable { Name = "p", Type = "Boolean" });
+        boolean.Constructors.Add("(Boolean)", boolConstructor);
 
         _classes.Add("Boolean", boolean);
     }
@@ -848,8 +864,11 @@ public class SemanticAnalyzer
         array.Methods.Add("Set(Integer,T)", setMethod);
 
         // adding constructors to Array
-        array.Constructors.Add("()", new Constructor { Name = "Array()" });
-        array.Constructors.Add("(Integer)", new Constructor { Name = "Array(Integer)", Type = "Array" });
+        array.Constructors.Add("()", new Constructor { Name = "Array()", Type = "Array" });
+
+        var intConstructor = new Constructor { Name = "Array(Integer)", Type = "Array" };
+        intConstructor.Parameters.Add("p", new Variable { Name = "p", Type = "Integer" });
+        array.Constructors.Add("(Integer)", intConstructor);
 
         _classes.Add("Array", array);
     }
@@ -871,9 +890,12 @@ public class SemanticAnalyzer
         list.Methods.Add("Tail()", tailMethod);
 
         // adding constructors to List
-        list.Constructors.Add("()", new Constructor { Name = "List()" });
-        // The empty parameter constructor is the same as the default, so it may not need to be added again.
-        list.Constructors.Add("(T)", new Constructor { Name = "(T)", Type = "List" });
+        list.Constructors.Add("()", new Constructor { Name = "()", Type = "List" });
+
+        var tConstructor = new Constructor { Name = "(T)", Type = "List" };
+        tConstructor.Parameters.Add("p", new Variable { Name = "p", Type = "T" });
+        list.Constructors.Add("(T)", tConstructor);
+
         var constructorWithCount = new Constructor { Name = "(T,Integer)", Type = "List" };
         constructorWithCount.Parameters.Add("p", new Variable { Name = "p", Type = "T" });
         constructorWithCount.Parameters.Add("count", new Variable { Name = "count", Type = "Integer" });
@@ -881,13 +903,34 @@ public class SemanticAnalyzer
 
         _classes.Add("List", list);
     }
+
+    private void AddConsole()
+    {
+        // create Console class
+        var console = new CurrentClass { Name = "Console", BaseClass = "AnyRef" };
+
+        // adding constructors to Console
+        var intConstructor = new Constructor { Name = "(Integer)", Type = "Console" };
+        intConstructor.Parameters.Add("p", new Variable { Name = "p", Type = "Integer" });
+        console.Constructors.Add("(Integer)", intConstructor);
+
+        var realConstructor = new Constructor { Name = "(Real)", Type = "Console" };
+        realConstructor.Parameters.Add("p", new Variable { Name = "p", Type = "Real" });
+        console.Constructors.Add("(Real)", realConstructor);
+
+        var boolConstructor = new Constructor { Name = "(Boolean)", Type = "Console" };
+        boolConstructor.Parameters.Add("p", new Variable { Name = "p", Type = "Boolean" });
+        console.Constructors.Add("(Boolean)", boolConstructor);
+
+        _classes.Add("Console", console);
+    }
 }
 
 internal class AnalyzerException : Exception
 {
 }
 
-class CurrentClass
+internal class CurrentClass
 {
     public string Name { get; init; } = "";
     public string? Generic { get; init; }
@@ -984,7 +1027,7 @@ class CurrentClass
     }
 }
 
-class Variable
+internal class Variable
 {
     public string Name { get; init; } = "";
     public string Type { get; set; } = "";
@@ -998,7 +1041,7 @@ class Method
     public Dictionary<string, Variable> Parameters { get; } = new();
 }
 
-class Constructor
+internal class Constructor
 {
     public string Name { get; init; } = "";
     public string Type { get; init; } = "";
