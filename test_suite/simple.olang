@@ -15,18 +15,10 @@ class Program is
     method pupa(x: Integer, y: Real, z: Boolean) is
         return
     end
-    this() is
-        var x: 5
-        var y: 7
-
+    this(x: Integer, y: Real, z: Boolean) is
         Console(x)
         Console(y)
-
-        y := x
-        x := 100
-
-        Console(x)
-        Console(y)
+        Console(z)
         return
     end
     this(x: Integer, y: Real, z: Boolean) is

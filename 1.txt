@@ -1,5 +1,6 @@
 Syntax analyzing finished successfully!
 
 Semantics Report:
-FATAL: Class Console is not defined!
-Semantic Analyzer found errors!
+FATAL: The constructor (Integer,Real,Boolean) is already defined in class Program!
+Exception of type 'OCompiler.AnalyzerException' was thrown.
+Semantic Analyzing finished with uncaught errors!

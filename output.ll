@@ -1,9 +1,6 @@
 ; ModuleID = 'ProjectO module'
 source_filename = "ProjectO module"
 
-%Program = type { %Huy, %Huy, i1, i1 }
-%Huy = type { i32, i32 }
-
 define i32 @"Integer.Plus%Integer%"(ptr %0, i32 %1) {
 entry:
   %thisInt = load i32, ptr %0, align 4
@@ -426,30 +423,21 @@ entry:
   ret void
 }
 
-define void @"Program%%"(ptr %0) {
+define void @"Program%Integer,Real,Boolean%"(ptr %0, i32 %1, double %2, i1 %3) {
 entry:
-  %1 = alloca i32, align 4
-  call void @"Console%Integer%"(ptr %1, i32 5)
-  %2 = load i32, ptr %1, align 4
-  %3 = alloca i32, align 4
-  call void @"Console%Integer%"(ptr %3, i32 7)
-  %4 = load i32, ptr %3, align 4
-  %5 = alloca i32, align 4
-  store i32 5, ptr %5, align 4
-  %6 = load i32, ptr %5, align 4
-  %7 = alloca i32, align 4
-  store i32 100, ptr %7, align 4
-  %8 = load i32, ptr %7, align 4
-  %9 = alloca i32, align 4
-  call void @"Console%Integer%"(ptr %9, i32 %8)
-  %10 = load i32, ptr %9, align 4
-  %11 = alloca i32, align 4
-  call void @"Console%Integer%"(ptr %11, i32 %6)
-  %12 = load i32, ptr %11, align 4
+  %4 = alloca i32, align 4
+  call void @"Console%Integer%"(ptr %4, i32 %1)
+  %5 = load i32, ptr %4, align 4
+  %6 = alloca i32, align 4
+  call void @"Console%Real%"(ptr %6, double %2)
+  %7 = load i32, ptr %6, align 4
+  %8 = alloca i32, align 4
+  call void @"Console%Boolean%"(ptr %8, i1 %3)
+  %9 = load i32, ptr %8, align 4
   ret void
 }
 
-define void @"Program%Integer,Real,Boolean%"(ptr %0, i32 %1, double %2, i1 %3) {
+define void @"Program%Integer,Real,Boolean%.1"(ptr %0, i32 %1, double %2, i1 %3) {
 entry:
   ret void
 }
@@ -457,11 +445,4 @@ entry:
 define void @"Program.pupa%Integer,Real,Boolean%"(ptr %0, i32 %1, double %2, i1 %3) {
 entry:
   ret void
-}
-
-define i32 @main() {
-entry:
-  %0 = alloca %Program, align 8
-  call void @"Program%%"(ptr %0)
-  ret i32 0
 }

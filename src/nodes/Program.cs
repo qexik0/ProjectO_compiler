@@ -35,7 +35,7 @@ public class Program : AstNode
         {
             classDecl.CodeGen(module);
         }
-        Codegen.MainFunction.AddMainFunction(module, new());
+        // Codegen.MainFunction.AddMainFunction(module, new());
         if (module.TryVerify(LLVMVerifierFailureAction.LLVMPrintMessageAction, out string message))
         {
             Console.WriteLine(message);
