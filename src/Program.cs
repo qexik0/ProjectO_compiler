@@ -1,6 +1,7 @@
 ﻿using System.CommandLine;
 using System.Globalization;
 using System.Text;
+using OCompiler.nodes;
 
 namespace OCompiler;
 
@@ -129,6 +130,8 @@ public class CLIFrontent
                 report.WriteLine($"Syntax Analyzing failed with the following error:\n{ex.Message}");
                 return;
             }
+            
+            ((Program) program).CodeGen();
 
             report.WriteLine("Syntax analyzing finished successfully!\n");
             report.WriteLine("Semantics Report:");

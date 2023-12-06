@@ -341,8 +341,7 @@ public class SemanticAnalyzer
                             var ret1 = AnalyzeBody(ifStatement.IfBody, currentClass, curMethod, newDict, returnType,
                                 false);
                             var ret2 = ifStatement.ElseBody != null && AnalyzeBody(ifStatement.ElseBody, currentClass,
-                                curMethod, newDict, returnType,
-                                false);
+                                curMethod, newDict, returnType, false);
                             hasReturn = ret1 && ret2;
                             break;
                         case ReturnStatement returnStatement:
@@ -804,7 +803,6 @@ public class SemanticAnalyzer
         var realConstructor = new Constructor { Name = "Real(Real)", Type = "Real" };
         realConstructor.Parameters.Add("p", new Variable { Name = "p", Type = "Real" });
         real.Constructors.Add("(Real)", realConstructor);
-
         // adding variables to Real
         real.Variables.Add("Min", new Variable { Name = "Min", Type = "Real" });
         real.Variables.Add("Max", new Variable { Name = "Max", Type = "Real" });
@@ -837,6 +835,7 @@ public class SemanticAnalyzer
         boolean.Methods.Add("Not()", notMethod);
 
         // adding constructors to Boolean
+
         boolean.Constructors.Add("()", new Constructor { Name = "Boolean()", Type = "Boolean" });
 
         var boolConstructor = new Constructor { Name = "Boolean(Boolean)", Type = "Boolean" };
