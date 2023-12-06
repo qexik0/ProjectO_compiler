@@ -12,7 +12,7 @@ public class Assignment : AstNode
     {
         var symbol = symbolTable.FindSymbol(AssignmentIdentifier.Name);
         var newPtr = builder.BuildAlloca(symbol.TypeRef);
-        builder.BuildStore(AssignmentExpression.CodeGen(module, builder, symbolTable), newPtr);
+        builder.BuildStore(AssignmentExpression.CodeGen(module, builder, symbolTable, curClass), newPtr);
         symbol.ValueRef = builder.BuildLoad2(symbol.TypeRef, newPtr);
     }
 

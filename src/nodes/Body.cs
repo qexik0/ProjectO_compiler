@@ -14,13 +14,13 @@ public class Body : AstNode
         {
             if (line is Statement stmnt && stmnt.StatementNode is Expression expr)
             {
-                expr.CodeGen(module, builder, symbolTable);
+                expr.CodeGen(module, builder, symbolTable, curClass);
             }
             else if (line is Statement statement && statement.StatementNode is ReturnStatement returnStatement)
             {
                 if (returnStatement.ReturnExpression != null)
                 {
-                    builder.BuildRet(returnStatement.ReturnExpression.CodeGen(module, builder, symbolTable));
+                    builder.BuildRet(returnStatement.ReturnExpression.CodeGen(module, builder, symbolTable, curClass));
                 }
                 else
                 {

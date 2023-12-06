@@ -11,7 +11,7 @@ public class VariableDeclaration : AstNode
     public void CodeGen(in LLVMModuleRef module, in LLVMBuilderRef builder, string curClass, SymbolTable<OLangSymbol> symbolTable)
     {
         var type = OLangTypeRegistry.BodyExpressionType(curClass, VariableExpression, symbolTable);
-        symbolTable.DefineSymbol(VariableIdentifier.Name, new () {Class = type, TypeRef = OLangTypeRegistry.GetClass(type).ClassType, ValueRef = VariableExpression.CodeGen(module, builder, symbolTable)});
+        symbolTable.DefineSymbol(VariableIdentifier.Name, new () {Class = type, TypeRef = OLangTypeRegistry.GetClass(type).ClassType, ValueRef = VariableExpression.CodeGen(module, builder, symbolTable, curClass)});
     }
 
     public override string ToString()

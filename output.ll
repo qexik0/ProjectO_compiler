@@ -409,7 +409,7 @@ entry:
   ret void
 }
 
-define void @"Huy%%"(ptr %0) {
+define void @"SomeClass%%"(ptr %0) {
 entry:
   %1 = alloca i32, align 4
   call void @"Integer%Integer%"(ptr %1, i32 10)
@@ -423,26 +423,59 @@ entry:
   ret void
 }
 
-define void @"Program%Integer,Real,Boolean%"(ptr %0, i32 %1, double %2, i1 %3) {
+define void @"Program%Real,Real,Real%"(ptr %0, double %1, double %2, double %3) {
 entry:
   %4 = alloca i32, align 4
-  call void @"Console%Integer%"(ptr %4, i32 %1)
+  call void @"Console%Real%"(ptr %4, double %1)
   %5 = load i32, ptr %4, align 4
   %6 = alloca i32, align 4
   call void @"Console%Real%"(ptr %6, double %2)
   %7 = load i32, ptr %6, align 4
   %8 = alloca i32, align 4
-  call void @"Console%Boolean%"(ptr %8, i1 %3)
+  call void @"Console%Real%"(ptr %8, double %3)
   %9 = load i32, ptr %8, align 4
+  %10 = alloca i32, align 4
+  call void @"Integer%Integer%"(ptr %10, i32 10)
+  %11 = load i32, ptr %10, align 4
+  %12 = alloca i32, align 4
+  store i32 %11, ptr %12, align 4
+  %13 = call i32 @"Integer.Plus%Integer%"(ptr %12, i32 5)
+  %14 = alloca i32, align 4
+  store i32 %13, ptr %14, align 4
+  %15 = call i1 @"Integer.Less%Integer%"(ptr %14, i32 10)
+  br i1 %15, label %then, label %else
+
+then:                                             ; preds = %entry
+  %16 = alloca i32, align 4
+  call void @"Console%Integer%"(ptr %16, i32 10)
+  %17 = load i32, ptr %16, align 4
+  br label %ifcont
+
+else:                                             ; preds = %entry
+  %18 = alloca i32, align 4
+  call void @"Console%Integer%"(ptr %18, i32 15)
+  %19 = load i32, ptr %18, align 4
+  br label %ifcont
+
+ifcont:                                           ; preds = %else, %then
+  %20 = alloca i32, align 4
+  call void @"Integer%Integer%"(ptr %20, i32 10)
+  %21 = load i32, ptr %20, align 4
+  %22 = alloca i32, align 4
+  call void @"Console%Integer%"(ptr %22, i32 %21)
+  %23 = load i32, ptr %22, align 4
+  %24 = alloca i32, align 4
+  call void @"Console%Boolean%"(ptr %24, i1 false)
+  %25 = load i32, ptr %24, align 4
   ret void
 }
 
-define void @"Program%Integer,Real,Boolean%.1"(ptr %0, i32 %1, double %2, i1 %3) {
+define void @"Program%Integer,Real,Boolean%"(ptr %0, i32 %1, double %2, i1 %3) {
 entry:
   ret void
 }
 
-define void @"Program.pupa%Integer,Real,Boolean%"(ptr %0, i32 %1, double %2, i1 %3) {
+define void @"Program.met%Integer,Real,Boolean%"(ptr %0, i32 %1, double %2, i1 %3) {
 entry:
   ret void
 }

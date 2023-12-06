@@ -1,4 +1,4 @@
-class Huy is
+class SomeClass is
     var z : Integer(6)
     var y : z
     this() is
@@ -8,17 +8,26 @@ class Huy is
 end
 
 class Program is
-    var x : Huy()
+    var x : SomeClass()
     var y : x
     var z : true
     var a : z
-    method pupa(x: Integer, y: Real, z: Boolean) is
+    method met(x: Integer, y: Real, z: Boolean) is
         return
     end
-    this(x: Integer, y: Real, z: Boolean) is
+    this(x: Real, y: Real, z: Real) is
         Console(x)
         Console(y)
         Console(z)
+        if Integer(10).Plus(5).Less(10) then
+            Console(10)
+        else
+            Console(15)
+        end
+        var t : Integer(10)
+        Console(t)
+
+        Console(false)
         return
     end
     this(x: Integer, y: Real, z: Boolean) is

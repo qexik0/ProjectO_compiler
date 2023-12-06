@@ -9,7 +9,7 @@ public class Expression : AstNode
     public required AstNode PrimaryOrConstructorCall { get; set; }
     public List<(Identifier, Arguments?)> Calls { get; } = new List<(Identifier, Arguments?)>();
 
-    public unsafe LLVMValueRef CodeGen(in LLVMModuleRef module, in LLVMBuilderRef builder, SymbolTable<OLangSymbol> symbolTable)
+    public unsafe LLVMValueRef CodeGen(in LLVMModuleRef module, in LLVMBuilderRef builder, SymbolTable<OLangSymbol> symbolTable, string? curClass = null)
     {
         LLVMValueRef currentVal = PrimaryOrConstructorCall switch
         {
@@ -32,7 +32,7 @@ public class Expression : AstNode
                 IntegerLiteral => "Integer",
                 RealLiteral => "Real",
                 BooleanLiteral => "Boolean",
-                ClassName className => className.ClassIdentifier.Name,
+                ClassName className => symbolTable.FindSymbol(className.ClassIdentifier.Name).Class,
                 This thisVar => symbolTable.FindSymbol("this").Class,
                 _ => throw new ApplicationException($"Could not derive type for the expression {this}")
             },
@@ -49,7 +49,7 @@ public class Expression : AstNode
             {
                 foreach (var arg in call.Expressions)
                 {
-                    argTypes.Add(OLangTypeRegistry.BodyExpressionType(currentType, arg, symbolTable));
+                    argTypes.Add(OLangTypeRegistry.BodyExpressionType(curClass, arg, symbolTable));
                     args.Add(arg.CodeGen(module, builder, symbolTable));
                 }
             }

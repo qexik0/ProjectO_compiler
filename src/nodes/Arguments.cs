@@ -8,7 +8,7 @@ public class Arguments : AstNode
 {
     public List<Expression> Expressions { get; } = new List<Expression>();
 
-    public unsafe List<LLVMValueRef> CodeGen(in LLVMModuleRef module, in LLVMBuilderRef builder, in SymbolTable<OLangSymbol> symbolTable)
+    public unsafe List<LLVMValueRef> CodeGen(in LLVMModuleRef module, in LLVMBuilderRef builder, SymbolTable<OLangSymbol> symbolTable)
     {
         var args = new List<LLVMValueRef>();
         foreach (var expr in Expressions)
